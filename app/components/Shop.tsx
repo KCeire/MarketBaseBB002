@@ -1,4 +1,4 @@
-// components/Shop.tsx
+// app/components/Shop.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { MarketplaceProduct } from '@/types/shopify';
 import { Button } from './ui/Button';
 import { Icon } from './ui/Icon';
+import { BasePayCheckout } from './BasePayCheckout';
 import Image from 'next/image';
 
 interface ShopProps {
@@ -124,6 +125,18 @@ export function Shop({ setActiveTab }: ShopProps) {
     return cart.reduce((count, item) => count + item.quantity, 0);
   };
 
+  const handleCheckoutSuccess = (orderReference: string) => {
+    alert(`Order successful! Reference: ${orderReference}`);
+    // Clear cart on successful order
+    setCart([]);
+    saveCartToStorage([]);
+    setShowCart(false);
+  };
+
+  const handleCheckoutError = (error: string) => {
+    alert(`Checkout failed: ${error}`);
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -179,6 +192,16 @@ export function Shop({ setActiveTab }: ShopProps) {
           </div>
         ) : (
           <div className="space-y-4">
+            {/* Demo Warning Banner */}
+            <div className="bg-yellow-100 border-l-4 border-yellow-500 p-3 rounded">
+              <p className="text-yellow-800 text-sm font-semibold text-center">
+                ⚠️ DEMO VERSION - DO NOT PURCHASE ⚠️
+              </p>
+              <p className="text-yellow-700 text-xs text-center mt-1">
+                This is a development version for testing only
+              </p>
+            </div>
+
             {cart.map((item) => (
               <div key={item.variantId} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg bg-white">
                 <Image 
@@ -208,13 +231,14 @@ export function Shop({ setActiveTab }: ShopProps) {
               <div className="flex justify-between items-center mb-4">
                 <span className="text-lg font-bold text-gray-900">Total: ${getCartTotal()}</span>
               </div>
-              <Button 
-                variant="primary" 
-                size="lg"
-                className="w-full"
-              >
-                Pay with USDC
-              </Button>
+              
+              {/* Use BasePayCheckout component instead of simple button */}
+              <BasePayCheckout 
+                cart={cart}
+                total={getCartTotal()}
+                onSuccess={handleCheckoutSuccess}
+                onError={handleCheckoutError}
+              />
             </div>
           </div>
         )}

@@ -1,3 +1,4 @@
+// layout.tsx
 import "./onchainkit-fix.css";
 import "./theme.css";
 import "@coinbase/onchainkit/styles.css";  // Re-enable this
