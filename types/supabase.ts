@@ -17,6 +17,13 @@ export interface Database {
           created_at: string;
           updated_at: string;
           expires_at: string;
+          // Additional fields for admin system
+          order_status?: 'confirmed' | 'processing' | 'shipped' | 'delivered';
+          transaction_hash?: string;
+          payment_completed_at?: string;
+          tracking_number?: string;
+          tracking_url?: string;
+          notes?: string;
         };
         Insert: {
           id?: string;
@@ -32,6 +39,13 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           expires_at: string;
+          // Additional fields for admin system
+          order_status?: 'confirmed' | 'processing' | 'shipped' | 'delivered';
+          transaction_hash?: string;
+          payment_completed_at?: string;
+          tracking_number?: string;
+          tracking_url?: string;
+          notes?: string;
         };
         Update: {
           id?: string;
@@ -47,6 +61,13 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           expires_at?: string;
+          // Additional fields for admin system
+          order_status?: 'confirmed' | 'processing' | 'shipped' | 'delivered';
+          transaction_hash?: string;
+          payment_completed_at?: string;
+          tracking_number?: string;
+          tracking_url?: string;
+          notes?: string;
         };
       };
       audit_logs: {
@@ -108,6 +129,7 @@ export interface CustomerData {
     state: string;
     country: string;
     zipCode: string;
+    phone?: string; // Added for admin system
   };
   billingAddress?: {
     name: string;
@@ -136,4 +158,25 @@ export interface PaymentVerificationData {
   amount: string;
   currency: string;
   customer_wallet: string;
+}
+
+// Admin system interfaces
+export interface DatabaseOrder {
+  id: string;
+  order_reference: string;
+  customer_wallet: string;
+  encrypted_customer_data: string;
+  order_items: OrderItem[];
+  total_amount: number;
+  currency: string;
+  payment_status: 'pending' | 'confirmed' | 'failed' | 'refunded';
+  order_status?: 'confirmed' | 'processing' | 'shipped' | 'delivered';
+  transaction_hash?: string;
+  payment_completed_at?: string;
+  tracking_number?: string;
+  tracking_url?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  expires_at: string;
 }
