@@ -9,6 +9,14 @@ import {
   sanitizeForLogging 
 } from '@/lib/encryption';
 
+// Temporary debug - remove after fixing
+console.log('Environment check:', {
+  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'LOADED' : 'MISSING',
+  anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'LOADED' : 'MISSING', 
+  serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'LOADED' : 'MISSING',
+  serviceKeyStart: process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 10) || 'UNDEFINED'
+});
+
 interface CreateOrderRequest {
   customerData: CustomerData;
   orderItems: OrderItem[];

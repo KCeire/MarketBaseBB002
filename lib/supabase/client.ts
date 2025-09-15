@@ -1,13 +1,16 @@
 // lib/supabase/client.ts
 import { createClient } from '@supabase/supabase-js';
 
-// Use a simpler approach without complex typing for now
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
+}
+
+if (!supabaseServiceKey) {
+  throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable');
 }
 
 // Public client for client-side operations (with RLS)
@@ -20,8 +23,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 
 // Admin client for server-side operations (bypasses RLS)
 export const supabaseAdmin = createClient(
-  supabaseUrl, 
-  supabaseServiceKey || '',
+  supabaseUrl,
+  supabaseServiceKey,
   {
     auth: {
       autoRefreshToken: false,
@@ -37,7 +40,6 @@ export async function testSupabaseConnection(): Promise<boolean> {
       .from('orders')
       .select('count')
       .limit(1);
-    
     return !error;
   } catch (error) {
     console.error('Supabase connection test failed:', error);
