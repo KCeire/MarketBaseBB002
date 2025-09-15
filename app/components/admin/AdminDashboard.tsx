@@ -1,11 +1,97 @@
-// app/components/admin/AdminDashboard.tsx - FIXED VERSION
+// app/components/admin/AdminDashboard.tsx - SECURE VERSION
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
-import { DecryptedOrder, OrderFilters, formatDate, formatWalletAddress, getStatusColor } from '@/lib/admin/utils';
+
+// Client-side interfaces (no encryption utilities needed)
+interface CustomerData {
+  email: string;
+  shippingAddress: {
+    name: string;
+    address1: string;
+    address2?: string;
+    city: string;
+    state: string;
+    country: string;
+    zipCode: string;
+    phone?: string;
+  };
+}
+
+interface OrderItem {
+  productId: number;
+  variantId: number;
+  title: string;
+  variant: string;
+  price: string;
+  quantity: number;
+  image: string;
+}
+
+interface DecryptedOrder {
+  id: string;
+  order_reference: string;
+  customer_wallet: string;
+  customerData: CustomerData;
+  order_items: OrderItem[];
+  total_amount: number;
+  currency: string;
+  payment_status: 'pending' | 'confirmed' | 'failed' | 'refunded';
+  payment_hash?: string | null;
+  order_status?: 'confirmed' | 'processing' | 'shipped' | 'delivered';
+  transaction_hash?: string;
+  payment_completed_at?: string;
+  tracking_number?: string;
+  tracking_url?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  expires_at: string;
+}
+
+interface OrderFilters {
+  status?: 'pending' | 'confirmed' | 'failed' | 'refunded' | '';
+  orderStatus?: 'confirmed' | 'processing' | 'shipped' | 'delivered' | '';
+  dateFrom?: string;
+  dateTo?: string;
+  search?: string;
+}
+
+// Utility functions (client-side only)
+function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function formatWalletAddress(address: string): string {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+function getStatusColor(status: string): string {
+  switch (status) {
+    case 'confirmed':
+    case 'delivered':
+      return 'text-green-600 bg-green-100';
+    case 'processing':
+    case 'shipped':
+      return 'text-blue-600 bg-blue-100';
+    case 'pending':
+      return 'text-yellow-600 bg-yellow-100';
+    case 'failed':
+    case 'refunded':
+      return 'text-red-600 bg-red-100';
+    default:
+      return 'text-gray-600 bg-gray-100';
+  }
+}
 
 interface AdminDashboardProps {
   initialOrders?: DecryptedOrder[];
@@ -143,7 +229,7 @@ export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
           <div className="flex justify-between items-center mb-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Base Shop Admin</h1>
-              <p className="text-gray-600">Order Management & CJ Export</p>
+              <p className="text-gray-600">Order Management & CJ Export (Secure)</p>
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-500">

@@ -1,7 +1,8 @@
-// app/api/admin/orders/route.ts
+// app/api/admin/orders/route.ts - SECURE VERSION
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/client';
-import { decryptOrderForAdmin, filterOrders, OrderFilters, DecryptedOrder } from '@/lib/admin/utils';
+import { decryptCustomerData } from '@/lib/encryption';
+import { CustomerData } from '@/types/supabase';
 
 // Admin wallet addresses for validation
 const ADMIN_ADDRESSES = [
@@ -10,6 +11,45 @@ const ADMIN_ADDRESSES = [
   '0xe72421aE2B79b21AF3550d8f6adF19b67ccCBc8B',
   '0xE40b9f2A321715DF69EF67AD30BA7453A289BCeB'
 ];
+
+interface OrderItem {
+  productId: number;
+  variantId: number;
+  title: string;
+  variant: string;
+  price: string;
+  quantity: number;
+  image: string;
+}
+
+interface DecryptedOrderForClient {
+  id: string;
+  order_reference: string;
+  customer_wallet: string;
+  customerData: CustomerData;
+  order_items: OrderItem[];
+  total_amount: number;
+  currency: string;
+  payment_status: 'pending' | 'confirmed' | 'failed' | 'refunded';
+  payment_hash?: string | null;
+  order_status?: 'confirmed' | 'processing' | 'shipped' | 'delivered';
+  transaction_hash?: string;
+  payment_completed_at?: string;
+  tracking_number?: string;
+  tracking_url?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  expires_at: string;
+}
+
+interface OrderFilters {
+  status?: 'pending' | 'confirmed' | 'failed' | 'refunded' | '';
+  orderStatus?: 'confirmed' | 'processing' | 'shipped' | 'delivered' | '';
+  dateFrom?: string;
+  dateTo?: string;
+  search?: string;
+}
 
 interface AdminOrdersRequest {
   adminWallet: string;
@@ -20,7 +60,7 @@ interface AdminOrdersRequest {
 
 interface AdminOrdersResponse {
   success: boolean;
-  orders?: DecryptedOrder[];
+  orders?: DecryptedOrderForClient[];
   total?: number;
   filtered?: number;
   error?: string;
@@ -30,6 +70,98 @@ function validateAdminAccess(walletAddress: string): boolean {
   return ADMIN_ADDRESSES.some(
     adminAddr => adminAddr.toLowerCase() === walletAddress.toLowerCase()
   );
+}
+
+function decryptOrderForAdmin(encryptedOrder: {
+  id: string;
+  order_reference: string;
+  customer_wallet: string;
+  encrypted_customer_data: string;
+  order_items: OrderItem[];
+  total_amount: number;
+  currency: string;
+  payment_status: 'pending' | 'confirmed' | 'failed' | 'refunded';
+  payment_hash?: string | null;
+  order_status?: 'confirmed' | 'processing' | 'shipped' | 'delivered';
+  transaction_hash?: string;
+  payment_completed_at?: string;
+  tracking_number?: string;
+  tracking_url?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  expires_at: string;
+}): DecryptedOrderForClient {
+  try {
+    const customerData = decryptCustomerData(encryptedOrder.encrypted_customer_data);
+    
+    return {
+      id: encryptedOrder.id,
+      order_reference: encryptedOrder.order_reference,
+      customer_wallet: encryptedOrder.customer_wallet,
+      customerData,
+      order_items: encryptedOrder.order_items,
+      total_amount: encryptedOrder.total_amount,
+      currency: encryptedOrder.currency,
+      payment_status: encryptedOrder.payment_status,
+      payment_hash: encryptedOrder.payment_hash,
+      order_status: encryptedOrder.order_status || 'confirmed',
+      transaction_hash: encryptedOrder.transaction_hash,
+      payment_completed_at: encryptedOrder.payment_completed_at,
+      tracking_number: encryptedOrder.tracking_number,
+      tracking_url: encryptedOrder.tracking_url,
+      notes: encryptedOrder.notes,
+      created_at: encryptedOrder.created_at,
+      updated_at: encryptedOrder.updated_at,
+      expires_at: encryptedOrder.expires_at,
+    };
+  } catch (error) {
+    throw new Error(`Failed to decrypt order ${encryptedOrder.order_reference}: ${error}`);
+  }
+}
+
+function filterOrders(orders: DecryptedOrderForClient[], filters: OrderFilters): DecryptedOrderForClient[] {
+  return orders.filter(order => {
+    // Payment status filter
+    if (filters.status && filters.status.length > 0 && order.payment_status !== filters.status) {
+      return false;
+    }
+
+    // Order status filter
+    if (filters.orderStatus && filters.orderStatus.length > 0 && order.order_status !== filters.orderStatus) {
+      return false;
+    }
+
+    if (filters.dateFrom) {
+      const orderDate = new Date(order.created_at);
+      const fromDate = new Date(filters.dateFrom);
+      if (orderDate < fromDate) {
+        return false;
+      }
+    }
+
+    if (filters.dateTo) {
+      const orderDate = new Date(order.created_at);
+      const toDate = new Date(filters.dateTo);
+      toDate.setDate(toDate.getDate() + 1);
+      if (orderDate >= toDate) {
+        return false;
+      }
+    }
+
+    if (filters.search && filters.search.trim() !== '') {
+      const searchTerm = filters.search.toLowerCase();
+      const matchesOrderRef = order.order_reference.toLowerCase().includes(searchTerm);
+      const matchesCustomerName = order.customerData.shippingAddress.name.toLowerCase().includes(searchTerm);
+      const matchesEmail = order.customerData.email.toLowerCase().includes(searchTerm);
+      
+      if (!matchesOrderRef && !matchesCustomerName && !matchesEmail) {
+        return false;
+      }
+    }
+
+    return true;
+  });
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse<AdminOrdersResponse>> {
@@ -46,7 +178,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<AdminOrde
     }
 
     // Validate pagination parameters
-    const validLimit = Math.min(Math.max(1, limit), 1000); // Max 1000 orders at once
+    const validLimit = Math.min(Math.max(1, limit), 1000);
     const validOffset = Math.max(0, offset);
 
     console.log('Admin orders request:', {
@@ -80,8 +212,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<AdminOrde
       });
     }
 
-    // Decrypt all orders
-    const decryptedOrders: DecryptedOrder[] = [];
+    // Decrypt all orders SERVER-SIDE
+    const decryptedOrders: DecryptedOrderForClient[] = [];
     const decryptionErrors: string[] = [];
 
     for (const encryptedOrder of encryptedOrders) {
