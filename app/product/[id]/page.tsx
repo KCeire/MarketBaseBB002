@@ -7,6 +7,7 @@ import { MarketplaceProduct } from '@/types/shopify';
 import { Button } from '@/app/components/ui/Button';
 import { Icon } from '@/app/components/ui/Icon';
 import { toast } from '@/app/components/ui/Toast';
+import { QuantitySelector } from '@/app/components/product/QuantitySelector';
 import Image from 'next/image';
 
 interface CartItem {
@@ -28,6 +29,7 @@ export default function ProductDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
   const productId = params.id as string;
 
@@ -71,7 +73,7 @@ export default function ProductDetailPage() {
         variant: variant.title,
         price: variant.price,
         image: product.image,
-        quantity: 1,
+        quantity,
         sku: `BS-${product.id}-${variant.id}`,
       };
 
@@ -82,7 +84,7 @@ export default function ProductDetailPage() {
       const existingIndex = existingCart.findIndex((item: CartItem) => item.variantId === variant.id);
       
       if (existingIndex >= 0) {
-        existingCart[existingIndex].quantity += 1;
+        existingCart[existingIndex].quantity += quantity;
       } else {
         existingCart.push(cartItem);
       }
@@ -94,7 +96,9 @@ export default function ProductDetailPage() {
         window.dispatchEvent(new CustomEvent('cartUpdated'));
 
         // Show success feedback
-        toast.addedToCart(product.title);
+        toast.addedToCart(`${quantity}x ${product.title}`);
+        // Reset quantity to 1 after adding
+        setQuantity(1);
         } catch (err) {
         console.error('Failed to add item to cart:', err);
         toast.error('Add to Cart Failed', 'Please try again');
@@ -211,6 +215,19 @@ export default function ProductDetailPage() {
                 </div>
               </div>
             )}
+
+            {/* Quantity Selection */}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-gray-900">Quantity:</h3>
+              <QuantitySelector
+                value={quantity}
+                onChange={setQuantity}
+                min={1}
+                max={product.variants[selectedVariant]?.inventory || 99}
+                disabled={!product.variants[selectedVariant]?.available}
+                size="md"
+              />
+            </div>
 
             {/* Description */}
             <div className="space-y-3">

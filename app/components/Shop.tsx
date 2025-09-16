@@ -8,6 +8,7 @@ import { Button } from './ui/Button';
 import { Icon } from './ui/Icon';
 import { BasePayCheckout } from './BasePayCheckout';
 import { toast } from './ui/Toast';
+import { QuantitySelector } from './product/QuantitySelector';
 import Image from 'next/image';
 
 interface ShopProps {
@@ -38,6 +39,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop }: ShopProps
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [quantities, setQuantities] = useState<Record<number, number>>({});
 
   // Suppress unused variable warning
   void setActiveTab;
@@ -90,7 +92,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop }: ShopProps
     }
   };
 
-const addToCart = (product: MarketplaceProduct) => {
+  const addToCart = (product: MarketplaceProduct, quantity: number = 1) => {
   const variant = product.variants[0]; // Use first variant for simplicity
   const cartItem: CartItem = {
     productId: product.id,
@@ -99,7 +101,7 @@ const addToCart = (product: MarketplaceProduct) => {
     variant: variant.title,
     price: variant.price,
     image: product.image,
-    quantity: 1,
+    quantity,
     sku: variant.sku || `${product.id}-${variant.id}`,
   };
 
@@ -108,25 +110,28 @@ const addToCart = (product: MarketplaceProduct) => {
 
     setCart(prev => {
       let newCart;
-      if (existing) {
-        newCart = prev.map(item => 
-          item.variantId === variant.id 
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
+     if (existing) {
+      newCart = prev.map(item => 
+        item.variantId === variant.id 
+          ? { ...item, quantity: item.quantity + quantity }
+          : item
+      );
       } else {
         newCart = [...prev, cartItem];
       }
       saveCartToStorage(newCart);
       return newCart;
-    });
+      });
+
+      // Reset quantity selector to 1 after adding
+      setQuantities(prev => ({ ...prev, [product.id]: 1 }));
 
     // Show toast after state update
     setTimeout(() => {
       if (existing) {
-        toast.success('Updated Cart', `${product.title} quantity increased`);
+        toast.success('Updated Cart', `Added ${quantity} more ${product.title}`);
       } else {
-        toast.addedToCart(product.title);
+        toast.addedToCart(`${quantity}x ${product.title}`);
       }
     }, 0);
   };
@@ -321,46 +326,59 @@ const addToCart = (product: MarketplaceProduct) => {
               width={400}
               height={192}
               className="w-full h-48 object-cover rounded"
+              priority={products.indexOf(product) === 0} // Only first product gets priority
             />
             <div>
               <h3 className="font-semibold text-sm mb-1 text-gray-900">{product.title}</h3>
               <p className="text-xs text-gray-500 mb-2 line-clamp-2">
                 {product.description.replace(/<[^>]*>/g, '').substring(0, 100)}...
               </p>
-              <div className="flex justify-between items-center">
-                <div>
-                  <span className="text-lg font-bold text-gray-900">${product.price}</span>
-                  {product.compareAtPrice && (
-                    <span className="text-sm text-gray-400 line-through ml-2">
-                      ${product.compareAtPrice}
-                    </span>
-                  )}
-                </div>
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigateToProduct(product.id);
-                    }}
-                    icon={<Icon name="eye" size="sm" />}
-                  >
-                    View
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      addToCart(product);
-                    }}
-                    disabled={!product.variants[0]?.available}
-                  >
-                    {product.variants[0]?.available ? 'Add to Cart' : 'Out of Stock'}
-                  </Button>
-                </div>
+              <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <div>
+                <span className="text-lg font-bold text-gray-900">${product.price}</span>
+                {product.compareAtPrice && (
+                  <span className="text-sm text-gray-400 line-through ml-2">
+                    ${product.compareAtPrice}
+                  </span>
+                )}
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigateToProduct(product.id);
+                }}
+                icon={<Icon name="eye" size="sm" />}
+              >
+                View
+              </Button>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <QuantitySelector
+                value={quantities[product.id] || 1}
+                onChange={(qty) => setQuantities(prev => ({ ...prev, [product.id]: qty }))}
+                min={1}
+                max={product.variants[0]?.inventory || 99}
+                disabled={!product.variants[0]?.available}
+                size="sm"
+              />
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addToCart(product, quantities[product.id] || 1);
+                }}
+                disabled={!product.variants[0]?.available}
+                className="flex-1"
+              >
+                {product.variants[0]?.available ? 'Add to Cart' : 'Out of Stock'}
+              </Button>
+            </div>
+          </div>
             </div>
           </div>
         ))}
