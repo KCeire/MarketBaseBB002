@@ -17,23 +17,21 @@ interface MenuItem {
   path?: string;
   action?: () => void;
   badge?: string;
+  disabled?: boolean;
 }
 
 export function MoreMenu({ onClose }: MoreMenuProps) {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
 
-  // Use useCallback to memoize handleClose and include it in dependency array
   const handleClose = useCallback(() => {
     setIsVisible(false);
     setTimeout(onClose, 200);
   }, [onClose]);
 
-  // Animation effect
   useEffect(() => {
     setIsVisible(true);
     
-    // Close on escape key
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         handleClose();
@@ -42,7 +40,7 @@ export function MoreMenu({ onClose }: MoreMenuProps) {
     
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [handleClose]); // ✅ FIXED: Now includes handleClose in dependency array
+  }, [handleClose]);
 
   const menuItems: MenuItem[] = [
     {
@@ -62,19 +60,20 @@ export function MoreMenu({ onClose }: MoreMenuProps) {
     {
       id: 'admin',
       label: 'Admin Panel',
-      description: 'Management dashboard',
+      description: 'Coming soon',
       icon: 'eye',
-      path: '/management-hub',
-      badge: 'Admin'
+      badge: 'Coming Soon',
+      disabled: true,
+      action: () => {
+        alert('Admin panel coming soon! Stay tuned for updates.');
+      }
     },
     {
       id: 'support',
       label: 'Help & Support',
       description: 'Get help or contact us',
       icon: 'star',
-      action: () => {
-        window.open('mailto:support@baseshop.com', '_blank');
-      }
+      path: '/support'
     },
     {
       id: 'about',
@@ -86,7 +85,9 @@ export function MoreMenu({ onClose }: MoreMenuProps) {
   ];
 
   const handleMenuClick = (item: MenuItem) => {
-    if (item.action) {
+    if (item.disabled && item.action) {
+      item.action();
+    } else if (item.action) {
       item.action();
     } else if (item.path) {
       router.push(item.path);
@@ -130,28 +131,42 @@ export function MoreMenu({ onClose }: MoreMenuProps) {
             <button
               key={item.id}
               onClick={() => handleMenuClick(item)}
-              className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left"
+              className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors text-left ${
+                item.disabled 
+                  ? 'opacity-60 cursor-default hover:bg-gray-25' 
+                  : 'hover:bg-gray-50'
+              }`}
             >
-              <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                item.disabled ? 'bg-gray-50' : 'bg-gray-100'
+              }`}>
                 <Icon 
                   name={item.icon} 
                   size="sm" 
-                  className="text-gray-600" 
+                  className={item.disabled ? 'text-gray-400' : 'text-gray-600'} 
                 />
               </div>
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <p className="font-medium text-gray-900 text-sm">
+                  <p className={`font-medium text-sm ${
+                    item.disabled ? 'text-gray-500' : 'text-gray-900'
+                  }`}>
                     {item.label}
                   </p>
                   {item.badge && (
-                    <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      item.disabled 
+                        ? 'bg-gray-100 text-gray-500' 
+                        : 'bg-blue-100 text-blue-700'
+                    }`}>
                       {item.badge}
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className={`text-xs mt-0.5 ${
+                  item.disabled ? 'text-gray-400' : 'text-gray-500'
+                }`}>
                   {item.description}
                 </p>
               </div>
@@ -159,7 +174,7 @@ export function MoreMenu({ onClose }: MoreMenuProps) {
               <Icon 
                 name="arrow-right" 
                 size="sm" 
-                className="text-gray-400" 
+                className={item.disabled ? 'text-gray-300' : 'text-gray-400'} 
               />
             </button>
           ))}
