@@ -132,13 +132,13 @@ export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
 
       const data = await response.json();
       
-      if (data.success) {
+        if (data.success) {
         setOrders(data.orders || []);
         toast.success('Orders Loaded', `Found ${data.orders?.length || 0} orders`);
-      } else {
+        } else {
         console.error('Failed to fetch orders:', data.error);
         toast.error('Load Failed', data.error || 'Unable to fetch orders');
-      }
+        }
     } catch (error) {
       console.error('Error fetching orders:', error);
       toast.error('Network Error', 'Failed to connect to server');
@@ -176,8 +176,8 @@ export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
 
   const handleExportToCJ = async () => {
     if (selectedOrders.size === 0) {
-      toast.warning('No Orders Selected', 'Please select orders to export');
-      return;
+    toast.warning('No Orders Selected', 'Please select orders to export');
+    return;
     }
 
     setExporting(true);
