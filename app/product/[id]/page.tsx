@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { MarketplaceProduct } from '@/types/shopify';
 import { Button } from '@/app/components/ui/Button';
 import { Icon } from '@/app/components/ui/Icon';
+import { toast } from '@/app/components/ui/Toast';
 import Image from 'next/image';
 
 interface CartItem {
@@ -16,6 +17,7 @@ interface CartItem {
   price: string;
   image: string;
   quantity: number;
+  sku: string;
 }
 
 export default function ProductDetailPage() {
@@ -70,6 +72,7 @@ export default function ProductDetailPage() {
         price: variant.price,
         image: product.image,
         quantity: 1,
+        sku: `BS-${product.id}-${variant.id}`,
       };
 
       // Get existing cart from localStorage
@@ -85,16 +88,17 @@ export default function ProductDetailPage() {
       }
       
       // Save back to localStorage
-      localStorage.setItem('cart', JSON.stringify(existingCart));
-      
-      // Show success feedback
-      alert('Added to cart successfully!');
-    } catch (err) {
-      console.error('Failed to add item to cart:', err);
-      alert('Failed to add item to cart. Please try again.');
-    } finally {
-      setAddingToCart(false);
-    }
+        localStorage.setItem('cart', JSON.stringify(existingCart));
+
+        // Dispatch cart update event for layout
+        window.dispatchEvent(new CustomEvent('cartUpdated'));
+
+        // Show success feedback
+        toast.addedToCart(product.title);
+        } catch (err) {
+        console.error('Failed to add item to cart:', err);
+        toast.error('Add to Cart Failed', 'Please try again');
+        }
   };
 
   const goBack = () => {

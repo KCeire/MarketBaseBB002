@@ -132,17 +132,21 @@ const addToCart = (product: MarketplaceProduct) => {
   };
 
   const removeFromCart = (variantId: number) => {
+    // Find item to remove BEFORE updating state
+    const itemToRemove = cart.find(item => item.variantId === variantId);
+    
     setCart(prev => {
-      const itemToRemove = prev.find(item => item.variantId === variantId);
       const newCart = prev.filter(item => item.variantId !== variantId);
-      
-      if (itemToRemove) {
-        toast.removedFromCart(itemToRemove.title);
-      }
-      
       saveCartToStorage(newCart);
       return newCart;
     });
+
+    // Show toast after state update
+    setTimeout(() => {
+      if (itemToRemove) {
+        toast.removedFromCart(itemToRemove.title);
+      }
+    }, 0);
   };
 
   const navigateToProduct = (productId: number) => {
