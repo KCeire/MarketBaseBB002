@@ -6,10 +6,6 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Icon } from '../ui/Icon';
 import { cn } from '@/lib/utils';
 
-interface BottomNavProps {
-  cartItemCount?: number;
-  onCartClick?: () => void;
-}
 
 interface NavItem {
   id: string;
@@ -19,52 +15,47 @@ interface NavItem {
   badge?: number;
 }
 
-export function BottomNav({ cartItemCount = 0, onCartClick }: BottomNavProps) {
+export function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
   const [isMinimized, setIsMinimized] = useState(false);
   
   const navItems: NavItem[] = [
-    {
-      id: 'home',
-      label: 'Home',
-      icon: 'home',
-      path: '/'
-    },
-    {
-      id: 'categories',
-      label: 'Categories',
-      icon: 'grid',
-      path: '/categories'
-    },
-    {
-      id: 'cart',
-      label: 'Cart',
-      icon: 'shopping-cart',
-      path: '/cart',
-      badge: cartItemCount
-    },
-    {
-      id: 'orders',
-      label: 'Orders',
-      icon: 'package',
-      path: '/orders'
-    },
-    {
-      id: 'more',
-      label: 'More',
-      icon: 'menu',
-      path: '/more'
-    }
-  ];
+  {
+    id: 'home',
+    label: 'Home',
+    icon: 'home',
+    path: '/'
+  },
+  {
+    id: 'categories',
+    label: 'Categories',
+    icon: 'grid',
+    path: '/categories'
+  },
+  {
+    id: 'earn',
+    label: 'Earn',
+    icon: 'star', // We can add a money/dollar icon later
+    path: '/earn'
+  },
+  {
+    id: 'sell',
+    label: 'Sell',
+    icon: 'store',
+    path: '/sell'
+  },
+  {
+    id: 'more',
+    label: 'More',
+    icon: 'menu',
+    path: '/more'
+  }
+];
 
   const handleNavClick = (item: NavItem) => {
-    if (item.id === 'cart' && onCartClick) {
-      onCartClick();
-    } else {
-      router.push(item.path);
-    }
-  };
+    router.push(item.path);
+    };
 
   const isActive = (path: string) => {
     if (path === '/') {
