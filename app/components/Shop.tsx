@@ -49,8 +49,11 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
   void setActiveTab;
 
   useEffect(() => {
-    fetchProducts();
-    loadCartFromStorage();
+    const initializeShop = async () => {
+      await fetchProducts();
+      loadCartFromStorage();
+    };
+    initializeShop();
   }, []);
 
   const fetchProducts = async () => {
@@ -61,8 +64,10 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
         throw new Error('Failed to fetch products');
       }
       const data = await response.json();
-      setProducts(data.products || []);
-      setFilteredProducts(data.products || []);
+      const productList = data.products || [];
+      setProducts(productList);
+      setFilteredProducts(productList);
+     // calculateProductCounts(productList);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load products';
       setError(errorMessage);
@@ -71,6 +76,49 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
       setLoading(false);
     }
   };
+
+  // Calculate product counts for each category
+  // const calculateProductCounts = (productList: MarketplaceProduct[]) => {
+  //   const counts: Record<string, number> = {
+  //     'all-products': productList.length,
+  //     'electronics': 0,
+  //     'home-garden': 0,
+  //     'pet-products': 0,
+  //     'health-beauty': 0,
+  //     'sports-outdoors': 0,
+  //   };
+
+  //   productList.forEach(product => {
+  //     const title = product.title.toLowerCase();
+  //     const tags = product.tags.join(' ').toLowerCase();
+  //     const productType = product.productType.toLowerCase();
+      
+  //     // Remove phone/tablet detection since you're not selling those yet
+  //     if (title.includes('computer') || title.includes('tech') || 
+  //         tags.includes('electronics') || productType.includes('electronics')) {
+  //       counts['electronics']++;
+  //     }
+  //     if (title.includes('home') || title.includes('garden') || title.includes('furniture') ||
+  //         tags.includes('home') || tags.includes('garden') || productType.includes('home')) {
+  //       counts['home-garden']++;
+  //     }
+  //     if (title.includes('pet') || title.includes('dog') || title.includes('cat') ||
+  //         tags.includes('pets') || productType.includes('pet')) {
+  //       counts['pet-products']++;
+  //     }
+  //     if (title.includes('health') || title.includes('beauty') || title.includes('skincare') ||
+  //         tags.includes('health') || tags.includes('beauty') || productType.includes('beauty')) {
+  //       counts['health-beauty']++;
+  //     }
+  //     if (title.includes('sport') || title.includes('outdoor') || title.includes('fitness') ||
+  //         tags.includes('sports') || tags.includes('outdoor') || productType.includes('sports')) {
+  //       counts['sports-outdoors']++;
+  //     }
+  //   });
+
+  //   setProductCounts(counts);
+  // };
+
 
   // Filter products by category
   const filterProductsByCategory = (categorySlug: string) => {
@@ -111,7 +159,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
 
   const handleCategorySelect = (categorySlug: string) => {
     filterProductsByCategory(categorySlug);
-    toast.info('Category Selected', `Showing ${categorySlug.replace('-', ' ')} products`);
+    
   };
 
   const loadCartFromStorage = () => {
@@ -422,7 +470,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
               width={400}
               height={192}
               className="w-full h-48 object-cover rounded"
-              priority={products.indexOf(product) === 0} // Only first product gets priority
+              priority={filteredProducts.indexOf(product) === 0} // Only first product gets priority
             />
             <div>
               <h3 className="font-semibold text-sm mb-1 text-gray-900">{product.title}</h3>
