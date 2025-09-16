@@ -17,13 +17,13 @@ import {
   WalletDropdown,
   WalletDropdownDisconnect,
 } from "@coinbase/onchainkit/wallet";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from '@/app/components/ui/Button';
 import { Icon } from './components/ui/Icon';
 import { Shop } from "./components/Shop";
 
-export default function App() {
+function AppContent() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
   const [frameAdded, setFrameAdded] = useState(false);
   const searchParams = useSearchParams();
@@ -106,5 +106,13 @@ export default function App() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AppContent />
+    </Suspense>
   );
 }
