@@ -32,7 +32,7 @@ export function BottomNav() {
       id: 'categories',
       label: 'Categories',
       icon: 'grid',
-      path: '/categories'
+      path: '/categories-page'
     },
     {
       id: 'earn',
