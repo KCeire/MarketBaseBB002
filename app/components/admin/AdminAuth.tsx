@@ -6,13 +6,20 @@ import { useAccount } from 'wagmi';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 
-// Admin wallet addresses
-const ADMIN_ADDRESSES = [
-  '0xdE2bDb0F443CAda8102A73940CC8E27079c513D4',
-  '0xE3E64A95AF29827125D43f4091A3b1e76611aF9A',
-  '0xe72421aE2B79b21AF3550d8f6adF19b67ccCBc8B',
-  '0xE40b9f2A321715DF69EF67AD30BA7453A289BCeB'
-];
+// For client-side, we'll validate admin access through an API call
+const validateAdminAccess = async (walletAddress: string): Promise<boolean> => {
+  try {
+    const response = await fetch('/api/admin/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ walletAddress })
+    });
+    const data = await response.json();
+    return data.isAdmin || false;
+  } catch {
+    return false;
+  }
+};
 
 interface AdminAuthProps {
   children: React.ReactNode;
@@ -24,16 +31,17 @@ export function AdminAuth({ children }: AdminAuthProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isConnected && address) {
-      // Check if connected address is in admin list (case-insensitive)
-      const isAdminWallet = ADMIN_ADDRESSES.some(
-        adminAddr => adminAddr.toLowerCase() === address.toLowerCase()
-      );
-      setIsAdmin(isAdminWallet);
-    } else {
-      setIsAdmin(false);
-    }
-    setLoading(false);
+    const checkAdminAccess = async () => {
+      if (isConnected && address) {
+        const isAdminResult = await validateAdminAccess(address);
+        setIsAdmin(isAdminResult);
+      } else {
+        setIsAdmin(false);
+      }
+      setLoading(false);
+    };
+
+    checkAdminAccess();
   }, [address, isConnected]);
 
   if (loading) {

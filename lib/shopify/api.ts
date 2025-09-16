@@ -126,6 +126,7 @@ function transformShopifyProduct(product: ShopifyProduct): MarketplaceProduct {
       compareAtPrice: variant.compare_at_price,
       available: variant.inventory_quantity > 0,
       inventory: variant.inventory_quantity,
+      sku: variant.sku,
     })),
   };
 }

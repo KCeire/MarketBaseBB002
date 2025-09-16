@@ -21,6 +21,7 @@ interface CartItem {
   price: string;
   image: string;
   quantity: number;
+  sku: string;
 }
 
 export function Shop({ setActiveTab }: ShopProps) {
@@ -84,6 +85,7 @@ export function Shop({ setActiveTab }: ShopProps) {
       price: variant.price,
       image: product.image,
       quantity: 1,
+      sku: variant.sku || `${product.id}-${variant.id}`, // Handle null SKU with fallback
     };
 
     setCart(prev => {

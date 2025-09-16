@@ -16,6 +16,7 @@ interface CartItem {
   price: string;
   image: string;
   quantity: number;
+  sku: string;
 }
 
 interface CustomerFormData {
@@ -118,7 +119,8 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       variant: item.variant,
       price: item.price,
       quantity: item.quantity,
-      image: item.image
+      image: item.image,
+      sku: item.sku // MISSING - This was not being passed to orders!
     }));
 
     const requestBody = {
@@ -182,6 +184,12 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       });
 
       if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Update payment API error:', errorData);
+        throw new Error(`API Error: ${errorData.error || response.statusText}`);
+      }
+
+      if (!response.ok) {
         console.error('Failed to update order with payment status');
       }
     } catch (err) {
@@ -205,7 +213,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
         console.log(`Payment status check ${attempts}:`, status.status);
 
         if (status.status === 'completed') {
-          await updateOrderWithPaymentStatus(orderRef, paymentId, 'completed');
+          await updateOrderWithPaymentStatus(orderRef, paymentId, 'confirmed');
           setPaymentStep('success');
           
           if (onSuccess) {

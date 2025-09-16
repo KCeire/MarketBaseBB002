@@ -92,6 +92,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       expires_at: expiresAt,
     };
 
+    // Debug: Check if SKUs are present in order items
+    console.log('Order items with SKUs:', orderItems.map(item => ({
+      title: item.title,
+      sku: item.sku,
+      productId: item.productId,
+      variantId: item.variantId
+    })));
+
     console.log('Attempting to insert order:', sanitizeForLogging(orderData as Record<string, unknown>));
 
     // Insert order into database with explicit type casting to bypass Supabase type inference

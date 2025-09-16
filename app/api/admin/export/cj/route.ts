@@ -4,13 +4,21 @@ import ExcelJS from 'exceljs';
 import { supabaseAdmin } from '@/lib/supabase/client';
 import { decryptOrderForAdmin, convertOrdersToCJFormat, validateOrdersForExport, DecryptedOrder } from '@/lib/admin/utils';
 
-// Admin wallet addresses for validation
-const ADMIN_ADDRESSES = [
-  '0xdE2bDb0F443CAda8102A73940CC8E27079c513D4',
-  '0xE3E64A95AF29827125D43f4091A3b1e76611aF9A',
-  '0xe72421aE2B79b21AF3550d8f6adF19b67ccCBc8B',
-  '0xE40b9f2A321715DF69EF67AD30BA7453A289BCeB'
-];
+// Admin wallet addresses from environment variables
+const ADMIN_ADDRESSES = process.env.ADMIN_WALLET_ADDRESSES?.split(',').map(addr => addr.trim()) || [];
+
+if (!ADMIN_ADDRESSES.length) {
+  throw new Error('Admin wallet addresses not configured');
+}
+
+// Validate address format
+const WALLET_REGEX = /^0x[a-fA-F0-9]{40}$/;
+ADMIN_ADDRESSES.forEach(addr => {
+  if (!WALLET_REGEX.test(addr)) {
+    throw new Error(`Invalid admin wallet format: ${addr}`);
+  }
+});
+
 
 interface CJExportRequest {
   adminWallet: string;

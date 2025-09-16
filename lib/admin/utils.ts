@@ -1,4 +1,4 @@
-// lib/admin/utils.ts - COMPLETE FIXED VERSION
+// lib/admin/utils.ts - COMPLETE FIXED VERSION WITH REAL SKUS
 import { decryptCustomerData } from '@/lib/encryption';
 import { CustomerData } from '@/types/supabase';
 
@@ -31,6 +31,7 @@ export interface OrderItem {
   price: string;
   quantity: number;
   image: string;
+  sku: string; // ADDED SKU FIELD - This was missing!
 }
 
 export interface CJExportData {
@@ -105,14 +106,17 @@ export function decryptOrderForAdmin(encryptedOrder: {
   }
 }
 
-export function convertOrdersToCJFormat(orders: DecryptedOrder[]): CJExportData[] {
-  const cjData: CJExportData[] = [];
+    export function convertOrdersToCJFormat(orders: DecryptedOrder[]): CJExportData[] {
+        const cjData: CJExportData[] = [];
 
-  orders.forEach(order => {
-    order.order_items.forEach(item => {
+        orders.forEach(order => {
+        console.log('Processing order:', order.order_reference);
+        order.order_items.forEach(item => {
+        console.log('Item SKU:', item.sku, 'Product:', item.title);
+        
       cjData.push({
         'Order Number': order.order_reference,
-        'SKU': `${item.productId}-${item.variantId}`,
+        'SKU': item.sku, // ✅ FIXED - Use real SKU from order item instead of generating fake one
         'Quantity': item.quantity,
         'Product Title': item.title,
         'Customer Name': order.customerData.shippingAddress.name,
@@ -131,49 +135,49 @@ export function convertOrdersToCJFormat(orders: DecryptedOrder[]): CJExportData[
   return cjData;
 }
 
-    export function filterOrders(orders: DecryptedOrder[], filters: OrderFilters): DecryptedOrder[] {
-    return orders.filter(order => {
-        // Payment status filter - Check if filter is set and not empty
-        if (filters.status && filters.status.length > 0 && order.payment_status !== filters.status) {
-        return false;
-        }
-
-        // Order status filter - Check if filter is set and not empty
-        if (filters.orderStatus && filters.orderStatus.length > 0 && order.order_status !== filters.orderStatus) {
-        return false;
-        }
-
-        if (filters.dateFrom) {
-        const orderDate = new Date(order.created_at);
-        const fromDate = new Date(filters.dateFrom);
-        if (orderDate < fromDate) {
-            return false;
-        }
-        }
-
-        if (filters.dateTo) {
-        const orderDate = new Date(order.created_at);
-        const toDate = new Date(filters.dateTo);
-        toDate.setDate(toDate.getDate() + 1);
-        if (orderDate >= toDate) {
-            return false;
-        }
-        }
-
-        if (filters.search && filters.search.trim() !== '') {
-        const searchTerm = filters.search.toLowerCase();
-        const matchesOrderRef = order.order_reference.toLowerCase().includes(searchTerm);
-        const matchesCustomerName = order.customerData.shippingAddress.name.toLowerCase().includes(searchTerm);
-        const matchesEmail = order.customerData.email.toLowerCase().includes(searchTerm);
-        
-        if (!matchesOrderRef && !matchesCustomerName && !matchesEmail) {
-            return false;
-        }
-        }
-
-        return true;
-    });
+export function filterOrders(orders: DecryptedOrder[], filters: OrderFilters): DecryptedOrder[] {
+  return orders.filter(order => {
+    // Payment status filter - Check if filter is set and not empty
+    if (filters.status && filters.status.length > 0 && order.payment_status !== filters.status) {
+      return false;
     }
+
+    // Order status filter - Check if filter is set and not empty
+    if (filters.orderStatus && filters.orderStatus.length > 0 && order.order_status !== filters.orderStatus) {
+      return false;
+    }
+
+    if (filters.dateFrom) {
+      const orderDate = new Date(order.created_at);
+      const fromDate = new Date(filters.dateFrom);
+      if (orderDate < fromDate) {
+        return false;
+      }
+    }
+
+    if (filters.dateTo) {
+      const orderDate = new Date(order.created_at);
+      const toDate = new Date(filters.dateTo);
+      toDate.setDate(toDate.getDate() + 1);
+      if (orderDate >= toDate) {
+        return false;
+      }
+    }
+
+    if (filters.search && filters.search.trim() !== '') {
+      const searchTerm = filters.search.toLowerCase();
+      const matchesOrderRef = order.order_reference.toLowerCase().includes(searchTerm);
+      const matchesCustomerName = order.customerData.shippingAddress.name.toLowerCase().includes(searchTerm);
+      const matchesEmail = order.customerData.email.toLowerCase().includes(searchTerm);
+      
+      if (!matchesOrderRef && !matchesCustomerName && !matchesEmail) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+}
 
 export function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-US', {

@@ -117,6 +117,7 @@ export interface OrderItem {
   price: string;
   quantity: number;
   image: string;
+  sku: string; 
 }
 
 export interface CustomerData {

@@ -1,11 +1,11 @@
 // app/api/orders/update-payment/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { supabaseAdmin } from '@/lib/supabase/client';
 
 interface UpdatePaymentRequest {
   orderReference: string;
   transactionHash: string;
-  paymentStatus: 'pending' | 'completed' | 'failed';
+  paymentStatus: 'pending' | 'confirmed' | 'failed';
 }
 
 export async function POST(request: NextRequest) {
@@ -24,16 +24,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate orderReference format (should be UUID)
+    // Validate orderReference format (accepts both UUID and ORD-XXXXX-XXXXX format)
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(orderReference)) {
-      return NextResponse.json(
+    const ordRefRegex = /^ORD-[A-Z0-9]{8}-[A-Z0-9]{6}$/;
+    if (!uuidRegex.test(orderReference) && !ordRefRegex.test(orderReference)) {
+    return NextResponse.json(
         { 
-          success: false, 
-          error: 'Invalid order reference format' 
+        success: false, 
+        error: 'Invalid order reference format' 
         },
         { status: 400 }
-      );
+    );
     }
 
     // Validate transaction hash format (should be 0x followed by 64 hex characters)
@@ -49,12 +50,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Update the order with payment information
-    const { data, error } = await supabase
-      .from('orders')
+    const { data, error } = await supabaseAdmin
+    .from('orders')
       .update({
         payment_status: paymentStatus,
         transaction_hash: transactionHash,
-        payment_completed_at: paymentStatus === 'completed' ? new Date().toISOString() : null,
+        payment_completed_at: paymentStatus === 'confirmed' ? new Date().toISOString() : null,
         updated_at: new Date().toISOString()
       })
       .eq('order_reference', orderReference)
@@ -82,9 +83,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Log the payment update for audit trail
-    await supabase
-      .from('audit_logs')
-      .insert({
+     await supabaseAdmin
+        .from('audit_logs')
+        .insert({
         table_name: 'orders',
         record_id: data[0].id,
         action: 'payment_updated',

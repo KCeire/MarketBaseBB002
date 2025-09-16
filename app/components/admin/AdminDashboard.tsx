@@ -29,6 +29,7 @@ interface OrderItem {
   price: string;
   quantity: number;
   image: string;
+  sku: string;
 }
 
 interface DecryptedOrder {
@@ -499,14 +500,27 @@ export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
                           {order.customerData.shippingAddress.city}, {order.customerData.shippingAddress.state}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {order.order_items.length} item{order.order_items.length !== 1 ? 's' : ''}
+                    <td className="px-6 py-4">
+                        <div className="space-y-1">
+                            {order.order_items.map((item, idx) => (
+                            <div key={idx} className="text-xs border-b border-gray-100 pb-1 last:border-b-0">
+                                <div className="font-medium text-gray-900 truncate" title={item.title}>
+                                {item.title.length > 30 ? item.title.substring(0, 30) + '...' : item.title}
+                                </div>
+                                <div className="text-gray-500">
+                                SKU: {item.sku} • Qty: {item.quantity}
+                                </div>
+                                <a 
+                                href={`/product/${item.productId}`} 
+                                target="_blank"
+                                className="text-blue-600 hover:underline"
+                                >
+                                View Product →
+                                </a>
+                            </div>
+                            ))}
                         </div>
-                        <div className="text-xs text-gray-500">
-                          {order.order_items.reduce((sum, item) => sum + item.quantity, 0)} total qty
-                        </div>
-                      </td>
+                     </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
                           ${order.total_amount} {order.currency}

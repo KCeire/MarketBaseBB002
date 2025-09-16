@@ -101,6 +101,7 @@ export interface MarketplaceProduct {
     compareAtPrice: string | null;
     available: boolean;
     inventory: number;
+    sku: string | null; // ADDED SKU FIELD
   }[];
 }
 
@@ -113,6 +114,7 @@ export interface CartItem {
   price: string;
   image: string;
   quantity: number;
+  sku: string; // ADDED SKU FIELD
 }
 
 export interface Cart {
