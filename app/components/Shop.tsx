@@ -9,12 +9,14 @@ import { Icon } from './ui/Icon';
 import { BasePayCheckout } from './BasePayCheckout';
 import { toast } from './ui/Toast';
 import { QuantitySelector } from './product/QuantitySelector';
+import { CategoryGrid } from './categories/CategoryGrid';
 import Image from 'next/image';
 
 interface ShopProps {
   setActiveTab: (tab: string) => void;
   showCart?: boolean;
   onBackToShop?: () => void;
+  showCategories?: boolean;
 }
 
 interface CartItem {
@@ -33,9 +35,11 @@ const dispatchCartUpdate = () => {
   window.dispatchEvent(new CustomEvent('cartUpdated'));
 };
 
-export function Shop({ setActiveTab, showCart = false, onBackToShop }: ShopProps) {
+export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategories = false }: ShopProps) {
   const router = useRouter();
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<MarketplaceProduct[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all-products');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -58,6 +62,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop }: ShopProps
       }
       const data = await response.json();
       setProducts(data.products || []);
+      setFilteredProducts(data.products || []);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load products';
       setError(errorMessage);
@@ -65,6 +70,48 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop }: ShopProps
     } finally {
       setLoading(false);
     }
+  };
+
+  // Filter products by category
+  const filterProductsByCategory = (categorySlug: string) => {
+    if (categorySlug === 'all-products') {
+      setFilteredProducts(products);
+    } else {
+      // Basic category filtering based on product title and tags
+      // You can enhance this logic based on your product categorization
+      const filtered = products.filter(product => {
+        const title = product.title.toLowerCase();
+        const tags = product.tags.join(' ').toLowerCase();
+        const productType = product.productType.toLowerCase();
+        
+        switch (categorySlug) {
+          case 'electronics':
+            return title.includes('phone') || title.includes('tablet') || title.includes('computer') ||
+                   tags.includes('electronics') || productType.includes('electronics');
+          case 'home-garden':
+            return title.includes('home') || title.includes('garden') || title.includes('furniture') ||
+                   tags.includes('home') || tags.includes('garden') || productType.includes('home');
+          case 'pet-products':
+            return title.includes('pet') || title.includes('dog') || title.includes('cat') ||
+                   tags.includes('pets') || productType.includes('pet');
+          case 'health-beauty':
+            return title.includes('health') || title.includes('beauty') || title.includes('skincare') ||
+                   tags.includes('health') || tags.includes('beauty') || productType.includes('beauty');
+          case 'sports-outdoors':
+            return title.includes('sport') || title.includes('outdoor') || title.includes('fitness') ||
+                   tags.includes('sports') || tags.includes('outdoor') || productType.includes('sports');
+          default:
+            return true;
+        }
+      });
+      setFilteredProducts(filtered);
+    }
+    setSelectedCategory(categorySlug);
+  };
+
+  const handleCategorySelect = (categorySlug: string) => {
+    filterProductsByCategory(categorySlug);
+    toast.info('Category Selected', `Showing ${categorySlug.replace('-', ' ')} products`);
   };
 
   const loadCartFromStorage = () => {
@@ -292,8 +339,53 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop }: ShopProps
     );
   }
 
+  // Categories view
+  if (showCategories) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold text-gray-900">Categories</h2>
+          {onBackToShop && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onBackToShop}
+              icon={<Icon name="arrow-left" size="sm" />}
+            >
+              Back to Shop
+            </Button>
+          )}
+        </div>
+        <CategoryGrid onCategorySelect={handleCategorySelect} />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
+      {/* Category Filter Bar */}
+      {selectedCategory !== 'all-products' && (
+        <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-center space-x-2">
+            <Icon name="grid" size="sm" className="text-blue-600" />
+            <span className="text-sm font-medium text-blue-800">
+              {selectedCategory.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            </span>
+            <span className="text-xs text-blue-600">
+              ({filteredProducts.length} products)
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleCategorySelect('all-products')}
+            className="text-blue-600 hover:text-blue-700"
+          >
+            Clear Filter
+          </Button>
+        </div>
+      )}
+
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold text-gray-900">Shop</h2>
         {cart.length > 0 && (
@@ -303,8 +395,12 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop }: ShopProps
         )}
       </div>
 
+      {/* Category Grid - Show on main shop view */}
+      <CategoryGrid onCategorySelect={handleCategorySelect} className="mb-6" />
+
       <div className="grid grid-cols-1 gap-4">
-        {products.map((product) => (
+        {filteredProducts.map((product) => (
+        
           <div 
             key={product.id} 
             className="border border-gray-200 rounded-lg p-4 space-y-3 cursor-pointer hover:shadow-md transition-all duration-200 bg-white"
@@ -383,6 +479,20 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop }: ShopProps
           </div>
         ))}
       </div>
+
+      {filteredProducts.length === 0 && products.length > 0 && (
+        <div className="text-center py-8">
+          <p className="text-gray-500">No products found in this category</p>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleCategorySelect('all-products')}
+            className="mt-2"
+          >
+            Show All Products
+          </Button>
+        </div>
+      )}
 
       {products.length === 0 && (
         <div className="text-center py-8">
