@@ -89,7 +89,7 @@ export default function SupportPage() {
             </div>
             <div className="border-b border-gray-100 pb-3">
               <h3 className="text-sm font-medium text-gray-900 mb-1">How does the affiliate program work?</h3>
-              <p className="text-xs text-gray-600">Every user is automatically an affiliate. Share products and earn 5% commission on sales.</p>
+              <p className="text-xs text-gray-600">Every user is automatically an affiliate. Share products and ear commission on sales.</p>
             </div>
             <div className="border-b border-gray-100 pb-3">
               <h3 className="text-sm font-medium text-gray-900 mb-1">Can I become a seller?</h3>

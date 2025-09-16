@@ -98,7 +98,7 @@ export default function SellPage() {
         <div className="bg-gray-50 rounded-xl p-4 space-y-3">
           <h3 className="text-base font-semibold text-gray-900 text-center">Simple, Transparent Pricing</h3>
           <div className="text-center">
-            <p className="text-2xl font-bold text-gray-900">5% + Payment Processing</p>
+            <p className="text-2xl font-bold text-gray-900">**% + Payment Processing</p>
             <p className="text-xs text-gray-600">No monthly fees • No setup costs • No hidden charges</p>
           </div>
         </div>
