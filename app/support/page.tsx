@@ -174,17 +174,6 @@ export default function SupportPage() {
               </div>
             </button>
             <button
-              onClick={() => window.open('https://base.org', '_blank')}
-              className="w-full text-left p-2 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-700">Learn About Base</span>
-                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </div>
-            </button>
-            <button
               onClick={() => window.location.href = '/sell'}
               className="w-full text-left p-2 hover:bg-gray-50 rounded-lg transition-colors"
             >

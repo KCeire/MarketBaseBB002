@@ -159,7 +159,7 @@ export default function SellPage() {
         {/* Contact */}
         <div className="text-center space-y-2">
           <p className="text-xs text-gray-600">Questions about selling?</p>
-          <p className="text-xs text-gray-500">Contact us at sellers@baseshop.com</p>
+          <p className="text-xs text-gray-500">Contact us at lk@lkforge.xyz</p>
         </div>
       </div>
     </div>

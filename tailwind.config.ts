@@ -1,3 +1,4 @@
+// tailwind.config.ts
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -7,6 +8,7 @@ const config: Config = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./node_modules/@coinbase/onchainkit/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class', 
   theme: {
     extend: {
       colors: {

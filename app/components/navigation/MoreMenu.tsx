@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Icon } from '../ui/Icon';
+import { ThemeToggle } from '../theme/ThemeToggle';
 
 interface MoreMenuProps {
   onClose: () => void;
@@ -107,7 +108,7 @@ export function MoreMenu({ onClose }: MoreMenuProps) {
       
       {/* Menu Content */}
       <div className={`
-        relative w-full max-w-md mx-4 bg-white rounded-t-xl shadow-xl 
+        relative w-full max-w-md mx-4 bg-white dark:bg-gray-800 rounded-t-xl shadow-xl 
         transform transition-all duration-200 ease-out mb-16
         ${isVisible 
           ? 'translate-y-0 opacity-100' 
@@ -115,13 +116,13 @@ export function MoreMenu({ onClose }: MoreMenuProps) {
         }
       `}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900">More Options</h3>
+        <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">More Options</h3>
           <button
             onClick={handleClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
-            <Icon name="plus" size="sm" className="text-gray-600 rotate-45" />
+            <Icon name="plus" size="sm" className="text-gray-600 dark:text-gray-400 rotate-45" />
           </button>
         </div>
 
@@ -133,39 +134,39 @@ export function MoreMenu({ onClose }: MoreMenuProps) {
               onClick={() => handleMenuClick(item)}
               className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors text-left ${
                 item.disabled 
-                  ? 'opacity-60 cursor-default hover:bg-gray-25' 
-                  : 'hover:bg-gray-50'
+                  ? 'opacity-60 cursor-default hover:bg-gray-25 dark:hover:bg-gray-800' 
+                  : 'hover:bg-gray-50 dark:hover:bg-gray-700'
               }`}
             >
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                item.disabled ? 'bg-gray-50' : 'bg-gray-100'
+                item.disabled ? 'bg-gray-50 dark:bg-gray-700' : 'bg-gray-100 dark:bg-gray-700'
               }`}>
                 <Icon 
                   name={item.icon} 
                   size="sm" 
-                  className={item.disabled ? 'text-gray-400' : 'text-gray-600'} 
+                  className={item.disabled ? 'text-gray-400 dark:text-gray-500' : 'text-gray-600 dark:text-gray-400'} 
                 />
               </div>
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <p className={`font-medium text-sm ${
-                    item.disabled ? 'text-gray-500' : 'text-gray-900'
+                    item.disabled ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'
                   }`}>
                     {item.label}
                   </p>
                   {item.badge && (
                     <span className={`text-xs px-2 py-0.5 rounded-full ${
                       item.disabled 
-                        ? 'bg-gray-100 text-gray-500' 
-                        : 'bg-blue-100 text-blue-700'
+                        ? 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400' 
+                        : 'bg-blue-100 text-blue-700 dark:bg-blue-800 dark:text-blue-300'
                     }`}>
                       {item.badge}
                     </span>
                   )}
                 </div>
                 <p className={`text-xs mt-0.5 ${
-                  item.disabled ? 'text-gray-400' : 'text-gray-500'
+                  item.disabled ? 'text-gray-400 dark:text-gray-500' : 'text-gray-500 dark:text-gray-400'
                 }`}>
                   {item.description}
                 </p>
@@ -174,17 +175,22 @@ export function MoreMenu({ onClose }: MoreMenuProps) {
               <Icon 
                 name="arrow-right" 
                 size="sm" 
-                className={item.disabled ? 'text-gray-300' : 'text-gray-400'} 
+                className={item.disabled ? 'text-gray-300 dark:text-gray-600' : 'text-gray-400 dark:text-gray-500'} 
               />
             </button>
           ))}
+
+          {/* Theme Toggle Section */}
+          <div className="border-t border-gray-100 dark:border-gray-700 pt-2 mt-2">
+            <ThemeToggle variant="full" />
+          </div>
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-100 bg-gray-50">
+        <div className="p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
           <div className="text-center">
-            <p className="text-xs text-gray-500">Base Shop v1.0</p>
-            <p className="text-xs text-gray-400">Built on Base</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Base Shop v1.0</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Built on Base</p>
           </div>
         </div>
       </div>
