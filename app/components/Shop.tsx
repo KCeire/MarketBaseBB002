@@ -90,21 +90,23 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop }: ShopProps
     }
   };
 
-  const addToCart = (product: MarketplaceProduct) => {
-    const variant = product.variants[0]; // Use first variant for simplicity
-    const cartItem: CartItem = {
-      productId: product.id,
-      variantId: variant.id,
-      title: product.title,
-      variant: variant.title,
-      price: variant.price,
-      image: product.image,
-      quantity: 1,
-      sku: variant.sku || `${product.id}-${variant.id}`,
-    };
+const addToCart = (product: MarketplaceProduct) => {
+  const variant = product.variants[0]; // Use first variant for simplicity
+  const cartItem: CartItem = {
+    productId: product.id,
+    variantId: variant.id,
+    title: product.title,
+    variant: variant.title,
+    price: variant.price,
+    image: product.image,
+    quantity: 1,
+    sku: variant.sku || `${product.id}-${variant.id}`,
+  };
+
+  // Check if item exists BEFORE updating state
+    const existing = cart.find(item => item.variantId === variant.id);
 
     setCart(prev => {
-      const existing = prev.find(item => item.variantId === variant.id);
       let newCart;
       if (existing) {
         newCart = prev.map(item => 
@@ -112,14 +114,21 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop }: ShopProps
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
-        toast.success('Updated Cart', `${product.title} quantity increased`);
       } else {
         newCart = [...prev, cartItem];
-        toast.addedToCart(product.title);
       }
       saveCartToStorage(newCart);
       return newCart;
     });
+
+    // Show toast after state update
+    setTimeout(() => {
+      if (existing) {
+        toast.success('Updated Cart', `${product.title} quantity increased`);
+      } else {
+        toast.addedToCart(product.title);
+      }
+    }, 0);
   };
 
   const removeFromCart = (variantId: number) => {
