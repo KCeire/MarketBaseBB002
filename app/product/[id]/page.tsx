@@ -226,6 +226,8 @@ export default function ProductDetailPage() {
                 max={product.variants[selectedVariant]?.inventory || 99}
                 disabled={!product.variants[selectedVariant]?.available}
                 size="md"
+                product={product}
+                showAddToCart={true}
               />
             </div>
 
