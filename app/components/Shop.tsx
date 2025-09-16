@@ -281,7 +281,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900">Shop</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shop</h2>
         </div>
         <div className="flex justify-center py-8">
           <div className="text-gray-500">Loading products...</div>
@@ -413,10 +413,10 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     <div className="space-y-4">
       {/* Category Filter Bar */}
       {selectedCategory !== 'all-products' && (
-        <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <div className="flex items-center space-x-2">
-            <Icon name="grid" size="sm" className="text-blue-600" />
-            <span className="text-sm font-medium text-blue-800">
+        <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
+            <div className="flex items-center space-x-2">
+              <Icon name="grid" size="sm" className="text-blue-600 dark:text-blue-400" />
+              <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
               {selectedCategory.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
             </span>
             <span className="text-xs text-blue-600">
@@ -437,7 +437,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold text-gray-900">Shop</h2>
         {cart.length > 0 && (
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
             {getCartItemCount()} item{getCartItemCount() !== 1 ? 's' : ''} in cart
           </div>
         )}
@@ -451,15 +451,15 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
         
           <div 
             key={product.id} 
-            className="border border-gray-200 rounded-lg p-4 space-y-3 cursor-pointer hover:shadow-md transition-all duration-200 bg-white"
+            className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3 cursor-pointer hover:shadow-md dark:hover:shadow-lg hover:shadow-gray-200 dark:hover:shadow-black/20 transition-all duration-200 bg-white dark:bg-gray-800"
             onClick={() => navigateToProduct(product.id)}
           >
             {/* Demo Warning Banner */}
-            <div className="bg-yellow-100 border-l-4 border-yellow-500 p-3 rounded">
-              <p className="text-yellow-800 text-sm font-semibold text-center">
+            <div className="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 dark:border-yellow-400 p-3 rounded">
+              <p className="text-yellow-800 dark:text-yellow-200 text-sm font-semibold text-center">
                 ⚠️ DEMO VERSION - DO NOT PURCHASE ⚠️
               </p>
-              <p className="text-yellow-700 text-xs text-center mt-1">
+              <p className="text-yellow-700 dark:text-yellow-300 text-xs text-center mt-1">
                 This is a development version for testing only
               </p>
             </div>
@@ -473,19 +473,19 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
               priority={filteredProducts.indexOf(product) === 0} // Only first product gets priority
             />
             <div>
-              <h3 className="font-semibold text-sm mb-1 text-gray-900">{product.title}</h3>
-              <p className="text-xs text-gray-500 mb-2 line-clamp-2">
+              <h3 className="font-semibold text-sm mb-1 text-gray-900 dark:text-gray-100">{product.title}</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 line-clamp-2">
                 {product.description.replace(/<[^>]*>/g, '').substring(0, 100)}...
               </p>
               <div className="space-y-3">
             <div className="flex justify-between items-center">
               <div>
-                <span className="text-lg font-bold text-gray-900">${product.price}</span>
-                {product.compareAtPrice && (
-                  <span className="text-sm text-gray-400 line-through ml-2">
-                    ${product.compareAtPrice}
-                  </span>
-                )}
+                <span className="text-lg font-bold text-gray-900 dark:text-gray-100">${product.price}</span>
+                  {product.compareAtPrice && (
+                    <span className="text-sm text-gray-400 dark:text-gray-500 line-through ml-2">
+                      ${product.compareAtPrice}
+                    </span>
+                  )}
               </div>
               <Button
                 variant="outline"
