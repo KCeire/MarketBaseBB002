@@ -1,4 +1,6 @@
 // app/sell/page.tsx
+"use client";
+
 export default function SellPage() {
   return (
     <div className="w-full max-w-md mx-auto px-4 py-3 main-content-with-bottom-nav">

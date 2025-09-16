@@ -1,4 +1,6 @@
 // app/earn/page.tsx
+"use client";
+
 export default function EarnPage() {
   return (
     <div className="w-full max-w-md mx-auto px-4 py-3 main-content-with-bottom-nav">
@@ -39,9 +41,9 @@ export default function EarnPage() {
         {/* Commission Info */}
         <div className="bg-green-50 border border-green-200 rounded-xl p-4">
           <div className="text-center">
-            <p className="text-2xl font-bold text-green-600">5%</p>
+            <p className="text-2xl font-bold text-green-600">**%</p>
             <p className="text-sm text-green-700">Commission on every sale</p>
-            <p className="text-xs text-green-600 mt-1">Paid out weekly in USDC</p>
+            <p className="text-xs text-green-600 mt-1">Paid in USDC</p>
           </div>
         </div>
 

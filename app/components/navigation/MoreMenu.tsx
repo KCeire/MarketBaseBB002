@@ -1,7 +1,7 @@
 // app/components/navigation/MoreMenu.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Icon } from '../ui/Icon';
 
@@ -23,25 +23,26 @@ export function MoreMenu({ onClose }: MoreMenuProps) {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
 
-    // Animation effect
-    useEffect(() => {
-        setIsVisible(true);
-        
-        // Close on escape key
-        const handleEscape = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-            handleClose();
-        }
-        };
-        
-        document.addEventListener('keydown', handleEscape);
-        return () => document.removeEventListener('keydown', handleEscape);
-    }, []);
+  // Use useCallback to memoize handleClose and include it in dependency array
+  const handleClose = useCallback(() => {
+    setIsVisible(false);
+    setTimeout(onClose, 200);
+  }, [onClose]);
 
-    const handleClose = () => {
-        setIsVisible(false);
-        setTimeout(onClose, 200);
+  // Animation effect
+  useEffect(() => {
+    setIsVisible(true);
+    
+    // Close on escape key
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleClose();
+      }
     };
+    
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [handleClose]); // ✅ FIXED: Now includes handleClose in dependency array
 
   const menuItems: MenuItem[] = [
     {
