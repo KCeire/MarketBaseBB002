@@ -1,10 +1,11 @@
-// app/components/admin/AdminDashboard.tsx - SECURE VERSION
+// app/components/admin/AdminDashboard.tsx - Updated with Toast notifications
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
+import { toast } from '../ui/Toast';
 
 // Client-side interfaces (no encryption utilities needed)
 interface CustomerData {
@@ -133,13 +134,14 @@ export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
       
       if (data.success) {
         setOrders(data.orders || []);
+        toast.success('Orders Loaded', `Found ${data.orders?.length || 0} orders`);
       } else {
         console.error('Failed to fetch orders:', data.error);
-        alert(`Error fetching orders: ${data.error}`);
+        toast.error('Load Failed', data.error || 'Unable to fetch orders');
       }
     } catch (error) {
       console.error('Error fetching orders:', error);
-      alert('Failed to fetch orders');
+      toast.error('Network Error', 'Failed to connect to server');
     } finally {
       setLoading(false);
     }
@@ -165,14 +167,16 @@ export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
         .filter(order => order.payment_status === 'confirmed')
         .map(order => order.id);
       setSelectedOrders(new Set(confirmedOrderIds));
+      toast.info('Selection Updated', `Selected ${confirmedOrderIds.length} confirmed orders`);
     } else {
       setSelectedOrders(new Set());
+      toast.info('Selection Cleared', 'All orders deselected');
     }
   };
 
   const handleExportToCJ = async () => {
     if (selectedOrders.size === 0) {
-      alert('Please select orders to export');
+      toast.warning('No Orders Selected', 'Please select orders to export');
       return;
     }
 
@@ -204,14 +208,15 @@ export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
         await fetchOrders();
         setSelectedOrders(new Set());
         
-        alert('Export successful! Orders marked as processing.');
+        toast.exportSuccess(a.download);
+        toast.orderUpdated(`${selectedOrders.size} orders marked as processing`);
       } else {
         const errorData = await response.json();
-        alert(`Export failed: ${errorData.error}`);
+        toast.error('Export Failed', errorData.error || 'Unknown error');
       }
     } catch (err) {
       console.error('Export error:', err);
-      alert('Export failed');
+      toast.error('Export Error', 'Failed to export orders');
     } finally {
       setExporting(false);
     }

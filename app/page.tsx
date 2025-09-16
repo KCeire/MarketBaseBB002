@@ -2,7 +2,6 @@
 "use client";
 import {
   useMiniKit,
-  useAddFrame,
 } from "@coinbase/onchainkit/minikit";
 import {
   Name,
@@ -17,60 +16,25 @@ import {
   WalletDropdown,
   WalletDropdownDisconnect,
 } from "@coinbase/onchainkit/wallet";
-import { useEffect, useMemo, useState, useCallback, Suspense } from "react";
+import { useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Button } from '@/app/components/ui/Button';
-import { Icon } from './components/ui/Icon';
 import { Shop } from "./components/Shop";
 
 function AppContent() {
-  const { setFrameReady, isFrameReady, context } = useMiniKit();
-  const [frameAdded, setFrameAdded] = useState(false);
+  const { setFrameReady, isFrameReady } = useMiniKit();
   const searchParams = useSearchParams();
   const showCart = searchParams.get('view') === 'cart';
-  
-  const addFrame = useAddFrame();
-  
+
   useEffect(() => {
     if (!isFrameReady) {
       setFrameReady();
     }
   }, [setFrameReady, isFrameReady]);
 
-  const handleAddFrame = useCallback(async () => {
-    const frameAdded = await addFrame();
-    setFrameAdded(Boolean(frameAdded));
-  }, [addFrame]);
-
   const handleBackToShop = useCallback(() => {
     // Navigate back to home without cart view
     window.history.replaceState({}, '', '/');
   }, []);
-  
-  const saveFrameButton = useMemo(() => {
-    if (context && !context.client.added) {
-      return (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleAddFrame}
-          className="text-[var(--app-accent)] p-4"
-          icon={<Icon name="plus" size="sm" />}
-        >
-          Save Frame
-        </Button>
-      );
-    }
-    if (frameAdded) {
-      return (
-        <div className="flex items-center space-x-1 text-sm font-medium text-[#0052FF] animate-fade-out">
-          <Icon name="check" size="sm" className="text-[#0052FF]" />
-          <span>Saved</span>
-        </div>
-      );
-    }
-    return null;
-  }, [context, frameAdded, handleAddFrame]);
   
   return (
     <div className="flex flex-col min-h-screen font-sans text-[var(--app-foreground)] mini-app-theme from-[var(--app-background)] to-[var(--app-gray)]">
@@ -94,7 +58,6 @@ function AppContent() {
               </Wallet>
             </div>
           </div>
-          <div>{saveFrameButton}</div>
         </header>
         
         <main className="flex-1">

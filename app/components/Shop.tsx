@@ -7,6 +7,7 @@ import { MarketplaceProduct } from '@/types/shopify';
 import { Button } from './ui/Button';
 import { Icon } from './ui/Icon';
 import { BasePayCheckout } from './BasePayCheckout';
+import { toast } from './ui/Toast';
 import Image from 'next/image';
 
 interface ShopProps {
@@ -56,7 +57,9 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop }: ShopProps
       const data = await response.json();
       setProducts(data.products || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load products');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load products';
+      setError(errorMessage);
+      toast.error('Failed to Load Products', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -70,6 +73,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop }: ShopProps
       }
     } catch (error) {
       console.error('Error loading cart from storage:', error);
+      toast.error('Cart Loading Error', 'Unable to restore your saved cart items');
     }
   };
 
@@ -82,6 +86,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop }: ShopProps
       }, 0);
     } catch (error) {
       console.error('Error saving cart to storage:', error);
+      toast.error('Cart Save Error', 'Unable to save cart items');
     }
   };
 
@@ -107,27 +112,25 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop }: ShopProps
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
+        toast.success('Updated Cart', `${product.title} quantity increased`);
       } else {
         newCart = [...prev, cartItem];
+        toast.addedToCart(product.title);
       }
       saveCartToStorage(newCart);
       return newCart;
     });
-
-    // Show a brief success message (you can replace this with toast later)
-    const button = document.activeElement as HTMLButtonElement;
-    if (button) {
-      const originalText = button.textContent;
-      button.textContent = 'Added!';
-      setTimeout(() => {
-        button.textContent = originalText;
-      }, 1000);
-    }
   };
 
   const removeFromCart = (variantId: number) => {
     setCart(prev => {
+      const itemToRemove = prev.find(item => item.variantId === variantId);
       const newCart = prev.filter(item => item.variantId !== variantId);
+      
+      if (itemToRemove) {
+        toast.removedFromCart(itemToRemove.title);
+      }
+      
       saveCartToStorage(newCart);
       return newCart;
     });
@@ -148,7 +151,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop }: ShopProps
   };
 
   const handleCheckoutSuccess = (orderReference: string) => {
-    alert(`Order successful! Reference: ${orderReference}`);
+    toast.paymentSuccess(orderReference);
     // Clear cart on successful order
     setCart([]);
     saveCartToStorage([]);
@@ -158,7 +161,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop }: ShopProps
   };
 
   const handleCheckoutError = (error: string) => {
-    alert(`Checkout failed: ${error}`);
+    toast.paymentFailed(error);
   };
 
   if (loading) {

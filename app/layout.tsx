@@ -7,6 +7,7 @@ import "@coinbase/onchainkit/styles.css";
 import "./globals.css";
 import { Providers } from "./providers";
 import { BottomNav } from "./components/navigation/BottomNav";
+import { ToastContainer } from "./components/ui/Toast";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
@@ -60,6 +61,7 @@ export default function RootLayout({
             cartItemCount={cartItemCount}
             onCartClick={handleCartClick}
           />
+          <ToastContainer />
         </Providers>
       </body>
     </html>

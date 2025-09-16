@@ -7,6 +7,7 @@ import { pay, getPaymentStatus } from '@base-org/account';
 import { BasePayButton } from '@base-org/account-ui/react';
 import { Button } from './ui/Button';
 import { Icon } from './ui/Icon';
+import { toast } from './ui/Toast';
 
 interface CartItem {
   productId: number;
@@ -120,7 +121,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       price: item.price,
       quantity: item.quantity,
       image: item.image,
-      sku: item.sku // MISSING - This was not being passed to orders!
+      sku: item.sku
     }));
 
     const requestBody = {
@@ -189,11 +190,9 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
         throw new Error(`API Error: ${errorData.error || response.statusText}`);
       }
 
-      if (!response.ok) {
-        console.error('Failed to update order with payment status');
-      }
     } catch (err) {
       console.error('Error updating order payment status:', err);
+      toast.error('Payment Update Failed', 'Unable to update payment status');
     }
   };
 
@@ -257,6 +256,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       }
 
       console.log('Initiating Base Pay payment...');
+      toast.info('Processing Payment', 'Please complete payment in Base App');
 
       // Initiate Base Pay payment with customer info collection
       const payment = await pay({
@@ -280,16 +280,16 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       
       // Show form for review/editing
       setPaymentStep('form');
+      toast.success('Payment Authorized', 'Please review shipping details');
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Payment failed';
       console.error('Base Pay initiation error:', err);
       setPaymentStep('ready');
       
+      toast.error('Payment Failed', errorMessage);
       if (onError) {
         onError(errorMessage);
-      } else {
-        alert(`Error: ${errorMessage}`);
       }
     }
   };
@@ -297,11 +297,14 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
   const handleConfirmOrder = async () => {
     try {
       setPaymentStep('confirming');
+      toast.paymentPending();
 
       // Create order with customer data
       const orderRef = await createOrderWithCustomerData();
       setOrderReference(orderRef);
       console.log('Order created:', orderRef);
+
+      toast.info('Order Created', `Order ${orderRef} is being confirmed`);
 
       // Start payment confirmation polling
       if (basePayData) {
@@ -313,10 +316,9 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       console.error('Order creation error:', err);
       setPaymentStep('form');
       
+      toast.error('Order Failed', errorMessage);
       if (onError) {
         onError(errorMessage);
-      } else {
-        alert(`Error: ${errorMessage}`);
       }
     }
   };
