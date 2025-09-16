@@ -75,7 +75,7 @@ export default function AboutPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
           <h2 className="text-lg font-semibold text-gray-900">Built on Base</h2>
           <p className="text-sm text-gray-600 leading-relaxed">
-            Base Shop leverages Base&apos;s low-cost, fast transactions to create a seamless shopping experience. Our smart contracts ensure secure, transparent transactions while keeping fees minimal.
+            Base Shop leverages Base&apos;s low-cost or free, fast transactions to create a seamless shopping experience. Being onchain ensure secure, transparent transactions while keeping fees minimal or free.
           </p>
           <div className="flex flex-wrap gap-2">
             <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Base Blockchain</span>

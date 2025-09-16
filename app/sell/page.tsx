@@ -1,6 +1,8 @@
 // app/sell/page.tsx
 "use client";
 
+import { toast } from '../components/ui/Toast';
+
 export default function SellPage() {
   return (
     <div className="w-full max-w-md mx-auto px-4 py-3 main-content-with-bottom-nav">
@@ -13,7 +15,7 @@ export default function SellPage() {
         {/* Hero Stats */}
         <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-6 text-center space-y-2">
           <p className="text-2xl font-bold text-gray-900">Start Selling Today</p>
-          <p className="text-sm text-gray-600">Join thousands of sellers already on our platform</p>
+          <p className="text-sm text-gray-600">Join our existing sellers to realise the full potential of selling Onchain</p>
         </div>
 
         {/* Why Sell With Us */}
@@ -112,7 +114,7 @@ export default function SellPage() {
                 <span className="text-sm font-semibold text-purple-600">AE</span>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">aesthetic edit</p>
+                <p className="text-sm font-medium text-gray-900">The Aesthetic Edit</p>
                 <p className="text-xs text-gray-600">Curated lifestyle products</p>
               </div>
             </div>
@@ -121,8 +123,8 @@ export default function SellPage() {
                 <span className="text-sm font-semibold text-blue-600">NE</span>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">nft energy</p>
-                <p className="text-xs text-gray-600">Digital collectibles & tech accessories</p>
+                <p className="text-sm font-medium text-gray-900">NFT Energy Drinks</p>
+                <p className="text-xs text-gray-600">Digital collectibles meets the beverage industry</p>
               </div>
             </div>
           </div>
@@ -132,8 +134,7 @@ export default function SellPage() {
         <div className="space-y-3">
           <button 
             onClick={() => {
-              // This will be replaced with actual application flow
-              alert('Seller applications opening soon! Follow us for updates.');
+              toast.info('Seller Applications Opening Soon', 'Contact lk@lkforge.xyz to register your interest');
             }}
             className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
           >
@@ -142,7 +143,9 @@ export default function SellPage() {
           
           <div className="flex space-x-3">
             <button 
-              onClick={() => window.location.href = '/stores'}
+              onClick={() => {
+                toast.info('Stores Coming Soon', 'Individual seller stores are launching soon. Stay tuned!');
+              }}
               className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-medium text-sm hover:bg-gray-200 transition-colors"
             >
               Browse Stores
