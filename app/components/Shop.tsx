@@ -11,6 +11,8 @@ import Image from 'next/image';
 
 interface ShopProps {
   setActiveTab: (tab: string) => void;
+  showCart?: boolean;
+  onBackToShop?: () => void;
 }
 
 interface CartItem {
@@ -24,13 +26,17 @@ interface CartItem {
   sku: string;
 }
 
-export function Shop({ setActiveTab }: ShopProps) {
+// Custom event to notify cart updates
+const dispatchCartUpdate = () => {
+  window.dispatchEvent(new CustomEvent('cartUpdated'));
+};
+
+export function Shop({ setActiveTab, showCart = false, onBackToShop }: ShopProps) {
   const router = useRouter();
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [showCart, setShowCart] = useState(false);
 
   // Suppress unused variable warning
   void setActiveTab;
@@ -70,6 +76,10 @@ export function Shop({ setActiveTab }: ShopProps) {
   const saveCartToStorage = (cartData: CartItem[]) => {
     try {
       localStorage.setItem('cart', JSON.stringify(cartData));
+      // Use setTimeout to defer the event dispatch and avoid state update during render
+      setTimeout(() => {
+        dispatchCartUpdate();
+      }, 0);
     } catch (error) {
       console.error('Error saving cart to storage:', error);
     }
@@ -85,7 +95,7 @@ export function Shop({ setActiveTab }: ShopProps) {
       price: variant.price,
       image: product.image,
       quantity: 1,
-      sku: variant.sku || `${product.id}-${variant.id}`, // Handle null SKU with fallback
+      sku: variant.sku || `${product.id}-${variant.id}`,
     };
 
     setCart(prev => {
@@ -103,6 +113,16 @@ export function Shop({ setActiveTab }: ShopProps) {
       saveCartToStorage(newCart);
       return newCart;
     });
+
+    // Show a brief success message (you can replace this with toast later)
+    const button = document.activeElement as HTMLButtonElement;
+    if (button) {
+      const originalText = button.textContent;
+      button.textContent = 'Added!';
+      setTimeout(() => {
+        button.textContent = originalText;
+      }, 1000);
+    }
   };
 
   const removeFromCart = (variantId: number) => {
@@ -132,7 +152,9 @@ export function Shop({ setActiveTab }: ShopProps) {
     // Clear cart on successful order
     setCart([]);
     saveCartToStorage([]);
-    setShowCart(false);
+    if (onBackToShop) {
+      onBackToShop();
+    }
   };
 
   const handleCheckoutError = (error: string) => {
@@ -178,14 +200,16 @@ export function Shop({ setActiveTab }: ShopProps) {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-bold text-gray-900">Shopping Cart</h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowCart(false)}
-            icon={<Icon name="arrow-right" size="sm" />}
-          >
-            Back to Shop
-          </Button>
+          {onBackToShop && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onBackToShop}
+              icon={<Icon name="arrow-left" size="sm" />}
+            >
+              Back to Shop
+            </Button>
+          )}
         </div>
 
         {cart.length === 0 ? (
@@ -234,7 +258,6 @@ export function Shop({ setActiveTab }: ShopProps) {
                 <span className="text-lg font-bold text-gray-900">Total: ${getCartTotal()}</span>
               </div>
               
-              {/* Use BasePayCheckout component instead of simple button */}
               <BasePayCheckout 
                 cart={cart}
                 total={getCartTotal()}
@@ -253,14 +276,9 @@ export function Shop({ setActiveTab }: ShopProps) {
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold text-gray-900">Shop</h2>
         {cart.length > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowCart(true)}
-            icon={<Icon name="shopping-cart" size="sm" />}
-          >
-            Cart ({getCartItemCount()})
-          </Button>
+          <div className="text-sm text-gray-600">
+            {getCartItemCount()} item{getCartItemCount() !== 1 ? 's' : ''} in cart
+          </div>
         )}
       </div>
 
@@ -306,23 +324,25 @@ export function Shop({ setActiveTab }: ShopProps) {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigateToProduct(product.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigateToProduct(product.id);
+                    }}
                     icon={<Icon name="eye" size="sm" />}
                   >
-                    View Details
+                    View
                   </Button>
-                  <div
-                    onClick={(e) => e.stopPropagation()}
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addToCart(product);
+                    }}
+                    disabled={!product.variants[0]?.available}
                   >
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => addToCart(product)}
-                      disabled={!product.variants[0]?.available}
-                    >
-                      {product.variants[0]?.available ? 'Add to Cart' : 'Out of Stock'}
-                    </Button>
-                  </div>
+                    {product.variants[0]?.available ? 'Add to Cart' : 'Out of Stock'}
+                  </Button>
                 </div>
               </div>
             </div>

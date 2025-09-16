@@ -1,10 +1,8 @@
-// \app\page.tsx
-
+// app/page.tsx
 "use client";
 import {
   useMiniKit,
   useAddFrame,
-  useOpenUrl,
 } from "@coinbase/onchainkit/minikit";
 import {
   Name,
@@ -20,6 +18,7 @@ import {
   WalletDropdownDisconnect,
 } from "@coinbase/onchainkit/wallet";
 import { useEffect, useMemo, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from '@/app/components/ui/Button';
 import { Icon } from './components/ui/Icon';
 import { Shop } from "./components/Shop";
@@ -27,20 +26,26 @@ import { Shop } from "./components/Shop";
 export default function App() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
   const [frameAdded, setFrameAdded] = useState(false);
+  const searchParams = useSearchParams();
+  const showCart = searchParams.get('view') === 'cart';
   
   const addFrame = useAddFrame();
-  const openUrl = useOpenUrl();
   
   useEffect(() => {
     if (!isFrameReady) {
       setFrameReady();
     }
   }, [setFrameReady, isFrameReady]);
-  
+
   const handleAddFrame = useCallback(async () => {
     const frameAdded = await addFrame();
     setFrameAdded(Boolean(frameAdded));
   }, [addFrame]);
+
+  const handleBackToShop = useCallback(() => {
+    // Navigate back to home without cart view
+    window.history.replaceState({}, '', '/');
+  }, []);
   
   const saveFrameButton = useMemo(() => {
     if (context && !context.client.added) {
@@ -69,7 +74,7 @@ export default function App() {
   
   return (
     <div className="flex flex-col min-h-screen font-sans text-[var(--app-foreground)] mini-app-theme from-[var(--app-background)] to-[var(--app-gray)]">
-      <div className="w-full max-w-md mx-auto px-4 py-3">
+      <div className="w-full max-w-md mx-auto px-4 py-3 main-content-with-bottom-nav">
         <header className="flex justify-between items-center mb-3 h-11">
           <div>
             <div className="flex items-center space-x-2">
@@ -91,19 +96,14 @@ export default function App() {
           </div>
           <div>{saveFrameButton}</div>
         </header>
+        
         <main className="flex-1">
-          <Shop setActiveTab={() => {}} />
+          <Shop 
+            setActiveTab={() => {}} 
+            showCart={showCart}
+            onBackToShop={handleBackToShop}
+          />
         </main>
-        <footer className="mt-2 pt-4 flex justify-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-[var(--ock-text-foreground-muted)] text-xs"
-            onClick={() => openUrl("https://base.org/builders/minikit")}
-          >
-            Built on Base with MiniKit
-          </Button>
-        </footer>
       </div>
     </div>
   );
