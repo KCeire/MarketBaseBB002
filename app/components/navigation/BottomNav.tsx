@@ -13,6 +13,8 @@ interface NavItem {
   icon: string;
   path: string;
   badge?: number;
+  disabled?: boolean;
+  comingSoon?: boolean;
 }
 
 export function BottomNav() {
@@ -30,9 +32,11 @@ export function BottomNav() {
     },
     {
       id: 'categories',
-      label: 'Categories',
+      label: 'Stores',
       icon: 'grid',
-      path: '/categories-page'
+      path: '/categories-page',
+      disabled: true,
+      comingSoon: true
     },
     {
       id: 'earn',
@@ -55,6 +59,10 @@ export function BottomNav() {
   ];
 
   const handleNavClick = (item: NavItem) => {
+    if (item.disabled) {
+      return; // Do nothing for disabled items
+    }
+    
     if (item.id === 'more') {
       setShowMoreMenu(true);
     } else {
@@ -91,15 +99,18 @@ export function BottomNav() {
         <div className="max-w-md mx-auto">
           <div className="flex items-center justify-around px-2 py-2">
             {navItems.map((item) => {
-              const active = isActive(item.path);
+              const active = isActive(item.path) && !item.disabled;
               
               return (
                 <button
                   key={item.id}
                   onClick={() => handleNavClick(item)}
+                  disabled={item.disabled}
                   className={cn(
-                    "flex flex-col items-center justify-center min-w-0 flex-1 px-1 py-2 rounded-lg transition-colors",
-                    active
+                    "flex flex-col items-center justify-center min-w-0 flex-1 px-1 py-2 rounded-lg transition-colors relative",
+                    item.disabled
+                      ? "text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-60"
+                      : active
                       ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30"
                       : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                   )}
@@ -110,19 +121,32 @@ export function BottomNav() {
                       size="md" 
                       className={cn(
                         "transition-colors",
-                        active ? "text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-400"
+                        item.disabled
+                          ? "text-gray-400 dark:text-gray-600"
+                          : active 
+                          ? "text-blue-600 dark:text-blue-400" 
+                          : "text-gray-500 dark:text-gray-400"
                       )}
                     />
-                    {item.badge && item.badge > 0 && (
+                    {item.badge && item.badge > 0 && !item.disabled && (
                       <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
                         {item.badge > 99 ? '99+' : item.badge}
+                      </div>
+                    )}
+                    {item.comingSoon && (
+                      <div className="absolute -top-1 -right-1 bg-yellow-500 text-white text-xs rounded-full px-1.5 py-0.5 font-medium leading-none">
+                        Soon
                       </div>
                     )}
                   </div>
                   {!isMinimized && (
                     <span className={cn(
                       "text-xs font-medium mt-1 truncate max-w-full transition-opacity duration-200",
-                      active ? "text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-400"
+                      item.disabled
+                        ? "text-gray-400 dark:text-gray-600"
+                        : active 
+                        ? "text-blue-600 dark:text-blue-400" 
+                        : "text-gray-500 dark:text-gray-400"
                     )}>
                       {item.label}
                     </span>
