@@ -31,12 +31,12 @@ export function BottomNav() {
       path: '/'
     },
     {
-      id: 'categories',
+      id: 'stores',
       label: 'Stores',
       icon: 'grid',
-      path: '/categories-page',
-      disabled: true,
-      comingSoon: true
+      path: '/stores',
+      disabled: false, // Changed from true to false
+      comingSoon: false // Changed from true to false
     },
     {
       id: 'earn',
