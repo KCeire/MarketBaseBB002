@@ -24,7 +24,7 @@ interface Store {
 const stores: Store[] = [
   {
     id: 'nft-energy',
-    name: 'NFT Energy',
+    name: 'NFT Energy Drinks',
     description: 'Where Web3 meets real energy. Official NFT Energy drinks and exclusive merchandise from the community-driven brand.',
     category: 'Food & Beverage',
     image: '/stores/nft-energy-preview.jpg', // You'll add this image
@@ -97,7 +97,11 @@ export default function StoresPage() {
                   className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer group"
                 >
                   {/* Store Image/Preview */}
-                  <div className="aspect-video bg-gradient-to-br from-purple-600 via-purple-700 to-fuchsia-600 relative overflow-hidden">
+                  <div className={`aspect-video relative overflow-hidden ${
+                      store.id === 'nft-energy' 
+                        ? 'bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-900'
+                        : 'bg-gradient-to-br from-purple-600 via-purple-700 to-fuchsia-600'
+                    }`}>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center space-y-2">
                         <div className="w-16 h-16 bg-white/10 rounded-2xl mx-auto flex items-center justify-center">

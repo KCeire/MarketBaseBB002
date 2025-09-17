@@ -4,7 +4,7 @@
 import { useRouter } from 'next/navigation';
 import { Icon } from '../ui/Icon';
 import { cn } from '@/lib/utils';
-import { toast } from '../ui/Toast';
+
 
 interface CategoryGridProps {
   onCategorySelect?: (categorySlug: string) => void;
@@ -150,7 +150,7 @@ export function CategoryGrid({ onCategorySelect, className }: CategoryGridProps)
       <div className="pt-2 text-center">
         <button
           onClick={() => {
-            toast.info('Stores Coming Soon', 'Contact lk@lkforge.xyz to apply as a seller and get early access');
+            router.push('/stores');
           }}
           className="text-sm text-blue-600 hover:text-blue-700 hover:underline font-medium"
         >
