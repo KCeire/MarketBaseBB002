@@ -1,9 +1,10 @@
-// app/stores/page.tsx
+// app/stores/page.tsx - UPDATED WITH NFT ENERGY LOGO
 "use client";
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/app/components/ui/Button';
 import { Icon } from '@/app/components/ui/Icon';
+import Image from 'next/image';
 
 interface Store {
   id: string;
@@ -11,6 +12,7 @@ interface Store {
   description: string;
   category: string;
   image: string;
+  logo?: string; // Added logo field
   path: string;
   status: 'live' | 'coming-soon';
   featured: boolean;
@@ -27,7 +29,8 @@ const stores: Store[] = [
     name: 'NFT Energy Drinks',
     description: 'Where Web3 meets real energy. Official NFT Energy drinks and exclusive merchandise from the community-driven brand.',
     category: 'Food & Beverage',
-    image: '/stores/nft-energy-preview.jpg', // You'll add this image
+    image: '/stores/nft-energy-preview.jpg',
+    logo: '/stores/NFTEnergyDrinks/NFTEnergyDrinksLogo.png', // Added actual logo path
     path: '/store/nft-energy',
     status: 'live',
     featured: true,
@@ -103,12 +106,25 @@ export default function StoresPage() {
                         : 'bg-gradient-to-br from-purple-600 via-purple-700 to-fuchsia-600'
                     }`}>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center space-y-2">
-                        <div className="w-16 h-16 bg-white/10 rounded-2xl mx-auto flex items-center justify-center">
-                          <span className="text-white font-bold text-xl">
-                            {store.name.split(' ').map(word => word[0]).join('').slice(0, 2)}
-                          </span>
-                        </div>
+                      <div className="text-center space-y-4">
+                        {/* Store Logo */}
+                        {store.logo ? (
+                          <div className="w-16 h-16 mx-auto flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-2xl p-2">
+                            <Image 
+                              src={store.logo}
+                              alt={`${store.name} logo`}
+                              width={48}
+                              height={48}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-16 h-16 bg-white/10 rounded-2xl mx-auto flex items-center justify-center">
+                            <span className="text-white font-bold text-xl">
+                              {store.name.split(' ').map(word => word[0]).join('').slice(0, 2)}
+                            </span>
+                          </div>
+                        )}
                         <p className="text-white/80 text-sm font-medium">
                           {store.name}
                         </p>
