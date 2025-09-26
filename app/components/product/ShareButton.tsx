@@ -55,7 +55,8 @@ export function ShareButton({
 
       try {
         // Get the current user's FID from the Farcaster SDK context
-        userFid = sdk.context.user?.fid?.toString();
+        const context = await sdk.context;
+        userFid = context.user?.fid?.toString();
         console.log('Retrieved user FID:', userFid);
       } catch {
         console.log('Could not get user FID from SDK, using fallback');
@@ -80,7 +81,7 @@ export function ShareButton({
       console.error('Share error:', error);
 
       // Fallback: Create manual Farcaster compose URL
-      const fallbackUrl = createFarcasterComposeUrl(product);
+      const fallbackUrl = await createFarcasterComposeUrl(product);
 
       if (fallbackUrl) {
         window.open(fallbackUrl, '_blank');
@@ -93,12 +94,13 @@ export function ShareButton({
     }
   };
 
-  const createFarcasterComposeUrl = (product: Product): string | null => {
+  const createFarcasterComposeUrl = async (product: Product): Promise<string | null> => {
     try {
       // Try to get user's FID, fallback to generic link if not available
       let userFid: string | undefined;
       try {
-        userFid = sdk.context.user?.fid?.toString();
+        const context = await sdk.context;
+        userFid = context.user?.fid?.toString();
       } catch {
         console.log('Could not get user FID for fallback URL');
       }
