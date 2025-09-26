@@ -18,7 +18,7 @@ import {
 } from "@coinbase/onchainkit/wallet";
 import { useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Shop } from "./components/shop";
+import { Shop } from "./components/Shop";
 
 function AppContent() {
   const { setFrameReady, isFrameReady } = useMiniKit();
