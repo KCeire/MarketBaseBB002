@@ -263,10 +263,27 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     }, 0);
   };
 
+  const updateCartQuantity = (variantId: number, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      removeFromCart(variantId);
+      return;
+    }
+
+    setCart(prev => {
+      const newCart = prev.map(item =>
+        item.variantId === variantId
+          ? { ...item, quantity: newQuantity }
+          : item
+      );
+      saveCartToStorage(newCart);
+      return newCart;
+    });
+  };
+
   const removeFromCart = (variantId: number) => {
     // Find item to remove BEFORE updating state
     const itemToRemove = cart.find(item => item.variantId === variantId);
-    
+
     setCart(prev => {
       const newCart = prev.filter(item => item.variantId !== variantId);
       saveCartToStorage(newCart);
@@ -347,7 +364,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900">Shopping Cart</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shopping Cart</h2>
           {onBackToShop && (
             <Button
               variant="ghost"
@@ -362,7 +379,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
 
         {cart.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-500">Your cart is empty</p>
+            <p className="text-gray-500 dark:text-gray-400">Your cart is empty</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -377,33 +394,63 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
             </div>
 
             {cart.map((item) => (
-              <div key={item.variantId} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg bg-white">
-                <Image 
-                  src={item.image} 
+              <div key={item.variantId} className="flex items-center space-x-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                <Image
+                  src={item.image}
                   alt={item.title}
                   width={64}
                   height={64}
                   className="w-16 h-16 object-cover rounded"
                 />
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-sm truncate text-gray-900">{item.title}</h3>
-                  <p className="text-xs text-gray-500">{item.variant}</p>
-                  <p className="text-sm font-bold text-gray-900">${item.price} x {item.quantity}</p>
+                  <h3 className="font-medium text-sm truncate text-gray-900 dark:text-gray-100">{item.title}</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{item.variant}</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-gray-100">${item.price}</p>
+
+                  {/* Quantity Controls */}
+                  <div className="flex items-center space-x-2 mt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => updateCartQuantity(item.variantId, item.quantity - 1)}
+                      disabled={item.quantity <= 1}
+                      className="w-8 h-8 p-0"
+                    >
+                      <Icon name="minus" size="sm" />
+                    </Button>
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100 min-w-[2rem] text-center">
+                      {item.quantity}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => updateCartQuantity(item.variantId, item.quantity + 1)}
+                      className="w-8 h-8 p-0"
+                    >
+                      <Icon name="plus" size="sm" />
+                    </Button>
+                  </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeFromCart(item.variantId)}
-                  icon={<Icon name="trash" size="sm" />}
-                >
-                  Remove
-                </Button>
+                <div className="flex flex-col space-y-2">
+                  <p className="text-sm font-bold text-gray-900 dark:text-gray-100 text-right">
+                    ${(parseFloat(item.price) * item.quantity).toFixed(2)}
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeFromCart(item.variantId)}
+                    icon={<Icon name="trash" size="sm" />}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  >
+                    Remove
+                  </Button>
+                </div>
               </div>
             ))}
             
-            <div className="border-t border-gray-200 pt-4">
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
               <div className="flex justify-between items-center mb-4">
-                <span className="text-lg font-bold text-gray-900">Total: ${getCartTotal()}</span>
+                <span className="text-lg font-bold text-gray-900 dark:text-gray-100">Total: ${getCartTotal()}</span>
               </div>
               
               <BasePayCheckout 

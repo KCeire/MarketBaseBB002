@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Icon } from '../ui/Icon';
 import { cn } from '@/lib/utils';
 import { MoreMenu } from './MoreMenu';
@@ -20,15 +20,16 @@ interface NavItem {
 export function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isMinimized, setIsMinimized] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   
   const navItems: NavItem[] = [
     {
-      id: 'home',
-      label: 'Home',
+      id: 'shop',
+      label: 'Shop',
       icon: 'home',
-      path: '/'
+      path: '/?view=categories'
     },
     {
       id: 'stores',
@@ -71,6 +72,10 @@ export function BottomNav() {
   };
 
   const isActive = (path: string) => {
+    if (path === '/?view=categories') {
+      const view = searchParams.get('view');
+      return pathname === '/' && (view === 'categories' || view === null);
+    }
     if (path === '/') {
       return pathname === '/';
     }

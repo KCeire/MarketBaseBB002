@@ -341,12 +341,12 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
   };
 
   // Common input styles
-  const inputStyles = "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-500 [color-scheme:light]";
+  const inputStyles = "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 [color-scheme:light] dark:[color-scheme:dark]";
 
   if (!isConnected) {
     return (
       <div className="text-center p-4">
-        <p className="text-gray-600 mb-3">Connect your wallet to continue</p>
+        <p className="text-gray-600 dark:text-gray-400 mb-3">Connect your wallet to continue</p>
         <Button variant="primary" size="lg" disabled>
           Connect Wallet Required
         </Button>
@@ -362,11 +362,11 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
           <Icon name="check" size="lg" className="text-green-600" />
         </div>
         <h3 className="text-xl font-bold text-green-600">Payment Successful!</h3>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-400">
           Your order {orderReference} has been confirmed and paid with Base Pay.
         </p>
         {paymentId && (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Payment ID: {paymentId.slice(0, 10)}...{paymentId.slice(-8)}
           </p>
         )}
@@ -388,11 +388,11 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
           <Icon name="credit-card" size="lg" className="text-blue-600" />
         </div>
         <h3 className="text-lg font-semibold">Confirming Payment...</h3>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-400">
           Waiting for blockchain confirmation...
         </p>
         {orderReference && (
-          <p className="text-sm text-gray-500">Order: {orderReference}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Order: {orderReference}</p>
         )}
         <Button
           variant="ghost"
@@ -413,7 +413,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
           <Icon name="credit-card" size="lg" className="text-blue-600" />
         </div>
         <h3 className="text-lg font-semibold">Processing Payment...</h3>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-400">
           Complete the payment in your Base Account
         </p>
         <Button
@@ -432,7 +432,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Confirm Shipping Details</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Confirm Shipping Details</h3>
           <Button
             variant="ghost"
             size="sm"
@@ -452,7 +452,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
 
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Email *
             </label>
             <input
@@ -466,7 +466,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Full Name *
             </label>
             <input
@@ -480,7 +480,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Address *
             </label>
             <input
@@ -494,7 +494,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Address Line 2
             </label>
             <input
@@ -508,7 +508,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 City *
               </label>
               <input
@@ -521,7 +521,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 State *
               </label>
               <input
@@ -537,7 +537,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Country *
               </label>
               <select
@@ -552,7 +552,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 ZIP Code *
               </label>
               <input
@@ -569,8 +569,8 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
 
         <div className="border-t pt-4">
           <div className="flex justify-between items-center mb-4">
-            <span className="text-lg font-bold">Total: ${total} USDC</span>
-            <span className="text-sm text-gray-600">Payment Authorized</span>
+            <span className="text-lg font-bold text-gray-900 dark:text-gray-100">Total: ${total} USDC</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Payment Authorized</span>
           </div>
           
           <Button
@@ -593,8 +593,8 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
     <div className="space-y-4">
       <div className="border-t pt-4">
         <div className="flex justify-between items-center mb-4">
-          <span className="text-lg font-bold">Total: ${total} USDC</span>
-          <span className="text-sm text-gray-600">Connected: {address?.slice(0, 6)}...{address?.slice(-4)}</span>
+          <span className="text-lg font-bold text-gray-900 dark:text-gray-100">Total: ${total} USDC</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">Connected: {address?.slice(0, 6)}...{address?.slice(-4)}</span>
         </div>
         
         <div className="space-y-3">
@@ -603,7 +603,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
             onClick={handleBasePayment}
           />
           
-          <p className="text-sm text-gray-500 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
             Secure USDC payment • Review shipping details after payment
           </p>
         </div>
