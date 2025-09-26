@@ -26,9 +26,15 @@ export function BottomNav() {
   
   const navItems: NavItem[] = [
     {
+      id: 'home',
+      label: 'Home',
+      icon: 'home',
+      path: '/'
+    },
+    {
       id: 'shop',
       label: 'Shop',
-      icon: 'home',
+      icon: 'shopping-cart',
       path: '/?view=categories'
     },
     {
@@ -74,10 +80,11 @@ export function BottomNav() {
   const isActive = (path: string) => {
     if (path === '/?view=categories') {
       const view = searchParams.get('view');
-      return pathname === '/' && (view === 'categories' || view === null);
+      return pathname === '/' && view === 'categories';
     }
     if (path === '/') {
-      return pathname === '/';
+      const view = searchParams.get('view');
+      return pathname === '/' && view === null;
     }
     return pathname.startsWith(path);
   };
