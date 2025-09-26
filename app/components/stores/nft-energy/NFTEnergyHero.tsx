@@ -1,8 +1,6 @@
 // app/components/stores/nft-energy/NFTEnergyHero.tsx
 "use client";
 
-import { Button } from '@/app/components/ui/Button';
-import { Icon } from '@/app/components/ui/Icon';
 import Image from 'next/image';
 
 export function NFTEnergyHero() {

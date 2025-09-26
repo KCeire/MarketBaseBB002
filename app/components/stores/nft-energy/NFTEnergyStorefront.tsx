@@ -219,7 +219,7 @@ export function NFTEnergyStorefront() {
                 Where Web3 meets real energy. Bridging the digital and physical worlds, one can at a time.
               </p>
               <p className="text-lg text-white/70 leading-relaxed">
-                From cutting-edge NFT collections to premium energy drinks, we're building a community-driven brand that champions creativity, collaboration, and innovation.
+                From cutting-edge NFT collections to premium energy drinks, we&apos;re building a community-driven brand that champions creativity, collaboration, and innovation.
               </p>
             </div>
           </div>
