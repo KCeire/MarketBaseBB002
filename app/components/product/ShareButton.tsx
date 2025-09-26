@@ -57,7 +57,7 @@ export function ShareButton({
         // you'd need to get the user's FID from their authenticated session
         // For now, we'll use a placeholder or wallet address as fallback
         userFid = 'demo_user'; // This should be replaced with actual FID retrieval
-      } catch (error) {
+      } catch {
         console.log('Could not get user FID, using fallback');
       }
 
