@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { useMiniKit } from "@coinbase/onchainkit/minikit";
+import { useComposeCast } from "@coinbase/onchainkit/minikit";
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { toast } from '../ui/Toast';
@@ -31,7 +31,7 @@ export function ShareButton({
   showText = true
 }: ShareButtonProps) {
   const [isSharing, setIsSharing] = useState(false);
-  const { shareToFarcaster } = useMiniKit();
+  const { composeCast } = useComposeCast();
 
   const generateReferralUrl = (productId: string | number, userFid?: string): string => {
     const baseUrl = window.location.origin;
@@ -76,10 +76,10 @@ export function ShareButton({
         }
       };
 
-      // Use MiniKit's shareToFarcaster function
-      const result = await shareToFarcaster({
+      // Use MiniKit's composeCast function
+      const result = await composeCast({
         text: castText,
-        embeds: [embedData.url]
+        embeds: [referralUrl]
       });
 
       if (result.success) {
