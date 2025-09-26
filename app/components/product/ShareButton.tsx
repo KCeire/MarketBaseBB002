@@ -66,15 +66,6 @@ export function ShareButton({
       // Create the cast text
       const castText = `Check out this amazing product: ${product.title}\n\nPrice: $${product.price}\n\n${referralUrl}`;
 
-      // Create embed data for rich preview
-      const embedData = {
-        url: referralUrl,
-        metadata: {
-          image: product.image,
-          title: product.title,
-          description: `${product.description || 'Amazing product'} - Only $${product.price}`,
-        }
-      };
 
       // Use MiniKit's composeCast function
       const result = await composeCast({
