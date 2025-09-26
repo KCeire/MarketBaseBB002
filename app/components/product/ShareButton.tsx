@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { useComposeCast } from "@coinbase/onchainkit/minikit";
+import sdk from '@farcaster/miniapp-sdk';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { toast } from '../ui/Toast';
@@ -49,16 +50,15 @@ export function ShareButton({
     try {
       setIsSharing(true);
 
-      // Try to get user's FID from MiniKit
+      // Try to get user's FID from Farcaster Mini App SDK
       let userFid: string | undefined;
 
       try {
-        // This is a simplified approach - in a real implementation,
-        // you'd need to get the user's FID from their authenticated session
-        // For now, we'll use a placeholder or wallet address as fallback
-        userFid = 'demo_user'; // This should be replaced with actual FID retrieval
+        // Get the current user's FID from the Farcaster SDK context
+        userFid = sdk.context.user?.fid?.toString();
+        console.log('Retrieved user FID:', userFid);
       } catch {
-        console.log('Could not get user FID, using fallback');
+        console.log('Could not get user FID from SDK, using fallback');
       }
 
       const referralUrl = generateReferralUrl(product.id, userFid);
@@ -95,8 +95,13 @@ export function ShareButton({
 
   const createFarcasterComposeUrl = (product: Product): string | null => {
     try {
-      // Fallback FID for demo purposes
-      const userFid = 'demo_user';
+      // Try to get user's FID, fallback to generic link if not available
+      let userFid: string | undefined;
+      try {
+        userFid = sdk.context.user?.fid?.toString();
+      } catch {
+        console.log('Could not get user FID for fallback URL');
+      }
       const referralUrl = generateReferralUrl(product.id, userFid);
 
       const castText = `Check out this amazing product: ${product.title}\n\nPrice: $${product.price}\n\nGet it here: ${referralUrl}`;
