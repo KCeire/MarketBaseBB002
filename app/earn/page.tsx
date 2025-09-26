@@ -87,7 +87,7 @@ export default function EarnPage() {
           <p className="text-sm text-gray-600 dark:text-gray-400">Ready to start earning?</p>
           <div className="flex space-x-3">
             <button
-              onClick={() => window.location.href = '/'}
+              onClick={() => window.location.href = '/?view=categories'}
               className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium text-sm hover:bg-blue-700 transition-colors"
             >
               Browse Products
