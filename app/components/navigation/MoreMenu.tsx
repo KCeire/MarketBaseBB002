@@ -4,7 +4,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Icon } from '../ui/Icon';
-import { ThemeToggle } from '../theme/ThemeToggle';
 
 interface MoreMenuProps {
   onClose: () => void;
@@ -180,10 +179,6 @@ export function MoreMenu({ onClose }: MoreMenuProps) {
             </button>
           ))}
 
-          {/* Theme Toggle Section */}
-          <div className="border-t border-gray-100 dark:border-gray-700 pt-2 mt-2">
-            <ThemeToggle variant="full" />
-          </div>
         </div>
 
         {/* Footer */}
