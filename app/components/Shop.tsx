@@ -10,6 +10,8 @@ import { BasePayCheckout } from './BasePayCheckout';
 import { toast } from './ui/Toast';
 import { QuantitySelector } from './product/QuantitySelector';
 import { CategoryGrid } from './categories/CategoryGrid';
+import { getAllStoreProducts } from '@/lib/stores';
+import '@/lib/stores/nft-energy'; // Import to register NFT Energy store
 import Image from 'next/image';
 
 interface ShopProps {
@@ -35,15 +37,23 @@ const dispatchCartUpdate = () => {
   window.dispatchEvent(new CustomEvent('cartUpdated'));
 };
 
+// Union type for all products (Shopify + Store products)
+type UnifiedProduct = MarketplaceProduct & {
+  storeInfo?: { name: string; slug: string; url: string; };
+  isStoreProduct?: boolean;
+};
+
 export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategories = false }: ShopProps) {
   const router = useRouter();
-  const [products, setProducts] = useState<MarketplaceProduct[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<MarketplaceProduct[]>([]);
+  const [products, setProducts] = useState<UnifiedProduct[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<UnifiedProduct[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all-products');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [quantities, setQuantities] = useState<Record<number, number>>({});
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, number>>({});
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Suppress unused variable warning
   void setActiveTab;
@@ -56,17 +66,46 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     initializeShop();
   }, []);
 
+  // Apply filters when products, category, or search query changes
+  useEffect(() => {
+    applyFilters();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products, selectedCategory, searchQuery]);
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/shopify/products');
-      if (!response.ok) {
-        throw new Error('Failed to fetch products');
+
+      // Fetch Shopify products
+      const shopifyProducts: UnifiedProduct[] = [];
+      try {
+        const response = await fetch('/api/shopify/products');
+        if (response.ok) {
+          const data = await response.json();
+          shopifyProducts.push(...(data.products || []));
+        }
+      } catch (err) {
+        console.warn('Failed to fetch Shopify products:', err);
       }
-      const data = await response.json();
-      const productList = data.products || [];
-      setProducts(productList);
-      setFilteredProducts(productList);
+
+      // Get local store products
+      const storeProducts: UnifiedProduct[] = getAllStoreProducts().map((product, productIndex) => ({
+        ...product,
+        id: typeof product.id === 'string' ? parseInt(`9${productIndex}${Date.now().toString().slice(-6)}`) : product.id,
+        compareAtPrice: product.compareAtPrice || null,
+        isStoreProduct: true,
+        variants: product.variants.map((variant, variantIndex) => ({
+          ...variant,
+          id: typeof variant.id === 'string' ? parseInt(`8${productIndex}${variantIndex}${Date.now().toString().slice(-4)}`) : variant.id,
+          compareAtPrice: variant.compareAtPrice || null,
+          sku: variant.sku || null
+        }))
+      }));
+
+      // Combine all products
+      const allProducts = [...shopifyProducts, ...storeProducts];
+      setProducts(allProducts);
+      setFilteredProducts(allProducts);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load products';
       setError(errorMessage);
@@ -76,21 +115,39 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     }
   };
 
-  // Filter products by category
-  const filterProductsByCategory = (categorySlug: string) => {
-    if (categorySlug === 'all-products') {
-      setFilteredProducts(products);
-    } else {
-      // Basic category filtering based on product title and tags
-      const filtered = products.filter(product => {
+  // Apply filters (category + search)
+  const applyFilters = () => {
+    let filtered = products;
+
+    // Apply category filter
+    if (selectedCategory !== 'all-products') {
+      filtered = filtered.filter(product => {
         const title = product.title.toLowerCase();
         const tags = product.tags.join(' ').toLowerCase();
         const productType = product.productType.toLowerCase();
-        
-        switch (categorySlug) {
+
+        switch (selectedCategory) {
+          case 'food-beverage':
+            return title.includes('drink') || title.includes('energy') || title.includes('beverage') ||
+                   title.includes('food') || title.includes('nft energy') ||
+                   tags.includes('drinks') || tags.includes('energy') || tags.includes('beverages') ||
+                   productType.includes('food') || productType.includes('beverage') ||
+                   productType.toLowerCase().includes('food & beverage');
+          case 'apparel':
+            return title.includes('shirt') || title.includes('tee') || title.includes('hoodie') ||
+                   title.includes('sweatshirt') || title.includes('clothing') || title.includes('apparel') ||
+                   tags.includes('apparel') || tags.includes('clothing') || tags.includes('shirt') ||
+                   productType.includes('apparel') || productType.includes('clothing');
+          case 'accessories':
+            return title.includes('hat') || title.includes('cap') || title.includes('case') ||
+                   title.includes('accessory') || title.includes('accessories') ||
+                   tags.includes('accessories') || tags.includes('hat') || tags.includes('cap') ||
+                   productType.includes('accessories') || productType.includes('accessory');
           case 'electronics':
             return title.includes('phone') || title.includes('tablet') || title.includes('computer') ||
-                   tags.includes('electronics') || productType.includes('electronics');
+                   title.includes('iphone') || title.includes('case') || title.includes('tech') ||
+                   tags.includes('electronics') || tags.includes('tech') || tags.includes('phone') ||
+                   productType.includes('electronics') || productType.includes('tech');
           case 'home-garden':
             return title.includes('home') || title.includes('garden') || title.includes('furniture') ||
                    tags.includes('home') || tags.includes('garden') || productType.includes('home');
@@ -107,8 +164,27 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
             return true;
         }
       });
-      setFilteredProducts(filtered);
     }
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(product => {
+        const title = product.title.toLowerCase();
+        const description = product.description.toLowerCase();
+        const tags = product.tags.join(' ').toLowerCase();
+        const vendor = product.vendor.toLowerCase();
+
+        return title.includes(query) || description.includes(query) ||
+               tags.includes(query) || vendor.includes(query);
+      });
+    }
+
+    setFilteredProducts(filtered);
+  };
+
+  // Filter products by category
+  const filterProductsByCategory = (categorySlug: string) => {
     setSelectedCategory(categorySlug);
   };
 
@@ -141,11 +217,13 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     }
   };
 
-  const addToCart = (product: MarketplaceProduct, quantity: number = 1) => {
-    const variant = product.variants[0]; // Use first variant for simplicity
+  const addToCart = (product: UnifiedProduct, quantity: number = 1) => {
+    // Use selected variant or first variant as fallback
+    const selectedVariantIndex = selectedVariants[product.id.toString()] || 0;
+    const variant = product.variants[selectedVariantIndex] || product.variants[0];
     const cartItem: CartItem = {
-      productId: product.id,
-      variantId: variant.id,
+      productId: typeof product.id === 'string' ? parseInt(product.id) || Date.now() : product.id,
+      variantId: typeof variant.id === 'string' ? parseInt(variant.id) || Date.now() : variant.id,
       title: product.title,
       variant: variant.title,
       price: variant.price,
@@ -173,7 +251,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     });
 
     // Reset quantity selector to 1 after adding
-    setQuantities(prev => ({ ...prev, [product.id]: 1 }));
+    setQuantities(prev => ({ ...prev, [product.id.toString()]: 1 }));
 
     // Show toast after state update
     setTimeout(() => {
@@ -341,12 +419,81 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     );
   }
 
-  // Categories view
+  // Categories view - show all products with category filtering
   if (showCategories) {
+    const categories = [
+      { slug: 'all-products', name: 'All Products', count: products.length },
+      { slug: 'food-beverage', name: 'Food & Beverage', count: products.filter(p => {
+        const title = p.title.toLowerCase();
+        const tags = p.tags.join(' ').toLowerCase();
+        const productType = p.productType.toLowerCase();
+        return title.includes('drink') || title.includes('energy') || title.includes('beverage') ||
+               title.includes('food') || title.includes('nft energy') ||
+               tags.includes('drinks') || tags.includes('energy') || tags.includes('beverages') ||
+               productType.includes('food') || productType.includes('beverage') ||
+               productType.toLowerCase().includes('food & beverage');
+      }).length },
+      { slug: 'apparel', name: 'Apparel', count: products.filter(p => {
+        const title = p.title.toLowerCase();
+        const tags = p.tags.join(' ').toLowerCase();
+        const productType = p.productType.toLowerCase();
+        return title.includes('shirt') || title.includes('tee') || title.includes('hoodie') ||
+               title.includes('sweatshirt') || title.includes('clothing') || title.includes('apparel') ||
+               tags.includes('apparel') || tags.includes('clothing') || tags.includes('shirt') ||
+               productType.includes('apparel') || productType.includes('clothing');
+      }).length },
+      { slug: 'accessories', name: 'Accessories', count: products.filter(p => {
+        const title = p.title.toLowerCase();
+        const tags = p.tags.join(' ').toLowerCase();
+        const productType = p.productType.toLowerCase();
+        return title.includes('hat') || title.includes('cap') || title.includes('case') ||
+               title.includes('accessory') || title.includes('accessories') ||
+               tags.includes('accessories') || tags.includes('hat') || tags.includes('cap') ||
+               productType.includes('accessories') || productType.includes('accessory');
+      }).length },
+      { slug: 'electronics', name: 'Electronics', count: products.filter(p => {
+        const title = p.title.toLowerCase();
+        const tags = p.tags.join(' ').toLowerCase();
+        const productType = p.productType.toLowerCase();
+        return title.includes('phone') || title.includes('tablet') || title.includes('computer') ||
+               title.includes('iphone') || title.includes('case') || title.includes('tech') ||
+               tags.includes('electronics') || tags.includes('tech') || tags.includes('phone') ||
+               productType.includes('electronics') || productType.includes('tech');
+      }).length },
+      { slug: 'home-garden', name: 'Home & Garden', count: products.filter(p => {
+        const title = p.title.toLowerCase();
+        const tags = p.tags.join(' ').toLowerCase();
+        const productType = p.productType.toLowerCase();
+        return title.includes('home') || title.includes('garden') || title.includes('furniture') ||
+               tags.includes('home') || tags.includes('garden') || productType.includes('home');
+      }).length },
+      { slug: 'pet-products', name: 'Pet Products', count: products.filter(p => {
+        const title = p.title.toLowerCase();
+        const tags = p.tags.join(' ').toLowerCase();
+        const productType = p.productType.toLowerCase();
+        return title.includes('pet') || title.includes('dog') || title.includes('cat') ||
+               tags.includes('pets') || productType.includes('pet');
+      }).length },
+      { slug: 'health-beauty', name: 'Health & Beauty', count: products.filter(p => {
+        const title = p.title.toLowerCase();
+        const tags = p.tags.join(' ').toLowerCase();
+        const productType = p.productType.toLowerCase();
+        return title.includes('health') || title.includes('beauty') || title.includes('skincare') ||
+               tags.includes('health') || tags.includes('beauty') || productType.includes('beauty');
+      }).length },
+      { slug: 'sports-outdoors', name: 'Sports & Outdoors', count: products.filter(p => {
+        const title = p.title.toLowerCase();
+        const tags = p.tags.join(' ').toLowerCase();
+        const productType = p.productType.toLowerCase();
+        return title.includes('sport') || title.includes('outdoor') || title.includes('fitness') ||
+               tags.includes('sports') || tags.includes('outdoor') || productType.includes('sports');
+      }).length }
+    ];
+
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900">Categories</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shop by Category</h2>
           {onBackToShop && (
             <Button
               variant="ghost"
@@ -358,7 +505,245 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
             </Button>
           )}
         </div>
-        <CategoryGrid onCategorySelect={handleCategorySelect} />
+
+        {/* Search and Filter Controls */}
+        <div className="space-y-3">
+          {/* Search Bar */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-3 pl-10 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <Icon
+              name="search"
+              size="sm"
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            />
+          </div>
+
+          {/* Category Filter Dropdown */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Filter by Category:
+            </label>
+            <select
+              value={selectedCategory}
+              onChange={(e) => handleCategorySelect(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              {categories.map((category) => (
+                <option key={category.slug} value={category.slug}>
+                  {category.name} ({category.count} items)
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Active Filters Display */}
+          <div className="flex flex-wrap gap-2">
+            {selectedCategory !== 'all-products' && (
+              <div className="inline-flex items-center space-x-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full text-xs">
+                <span>Category: {categories.find(c => c.slug === selectedCategory)?.name}</span>
+                <button
+                  onClick={() => handleCategorySelect('all-products')}
+                  className="ml-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+            {searchQuery.trim() && (
+              <div className="inline-flex items-center space-x-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-3 py-1 rounded-full text-xs">
+                <span>Search: &quot;{searchQuery}&quot;</span>
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="ml-1 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+
+        {/* Products Grid */}
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Products {selectedCategory !== 'all-products' && `in ${categories.find(c => c.slug === selectedCategory)?.name}`}
+            </h3>
+            {cart.length > 0 && (
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                {getCartItemCount()} item{getCartItemCount() !== 1 ? 's' : ''} in cart
+              </div>
+            )}
+          </div>
+
+          {filteredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 gap-4">
+              {filteredProducts.map((product, index) => (
+                <div
+                  key={`${product.isStoreProduct ? 'store' : 'shopify'}-${product.id}-${index}`}
+                  className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3 cursor-pointer hover:shadow-md dark:hover:shadow-lg hover:shadow-gray-200 dark:hover:shadow-black/20 transition-all duration-200 bg-white dark:bg-gray-800"
+                  onClick={() => navigateToProduct(product.id)}
+                >
+                  {/* Demo Warning Banner */}
+                  <div className="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 dark:border-yellow-400 p-3 rounded">
+                    <p className="text-yellow-800 dark:text-yellow-200 text-sm font-semibold text-center">
+                      ⚠️ DEMO VERSION - DO NOT PURCHASE ⚠️
+                    </p>
+                    <p className="text-yellow-700 dark:text-yellow-300 text-xs text-center mt-1">
+                      This is a development version for testing only
+                    </p>
+                  </div>
+
+                  <Image
+                    src={product.image}
+                    alt={product.title}
+                    width={400}
+                    height={192}
+                    className="w-full h-48 object-cover rounded"
+                    priority={filteredProducts.indexOf(product) === 0}
+                  />
+                  <div>
+                    <h3 className="font-semibold text-sm mb-1 text-gray-900 dark:text-gray-100">{product.title}</h3>
+                    {product.isStoreProduct && product.storeInfo && (
+                      <div className="mb-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(product.storeInfo!.url);
+                          }}
+                          className="inline-flex items-center space-x-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-full"
+                        >
+                          <Icon name="store" size="sm" />
+                          <span>Visit {product.storeInfo.name}</span>
+                        </button>
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 line-clamp-2">
+                      {product.description.replace(/<[^>]*>/g, '').substring(0, 100)}...
+                    </p>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          {(() => {
+                            const selectedVariantIndex = selectedVariants[product.id.toString()] || 0;
+                            const selectedVariant = product.variants[selectedVariantIndex] || product.variants[0];
+                            return (
+                              <>
+                                <span className="text-lg font-bold text-gray-900 dark:text-gray-100">${selectedVariant.price}</span>
+                                {selectedVariant.compareAtPrice && (
+                                  <span className="text-sm text-gray-400 dark:text-gray-500 line-through ml-2">
+                                    ${selectedVariant.compareAtPrice}
+                                  </span>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (product.isStoreProduct && product.storeInfo) {
+                              router.push(product.storeInfo.url);
+                            } else {
+                              navigateToProduct(product.id);
+                            }
+                          }}
+                          icon={<Icon name="eye" size="sm" />}
+                        >
+                          View
+                        </Button>
+                      </div>
+
+                      {/* Size/Variant Selector - only show if multiple variants */}
+                      {product.variants.length > 1 && (
+                        <div className="space-y-2">
+                          <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                            Size/Variant:
+                          </label>
+                          <select
+                            value={selectedVariants[product.id.toString()] || 0}
+                            onChange={(e) => setSelectedVariants(prev => ({
+                              ...prev,
+                              [product.id.toString()]: parseInt(e.target.value)
+                            }))}
+                            className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {product.variants.map((variant, index) => (
+                              <option key={`variant-${product.id}-${index}`} value={index}>
+                                {variant.title} - ${variant.price}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+
+                      <div className="flex items-center space-x-2">
+                        <QuantitySelector
+                          value={quantities[product.id.toString()] || 1}
+                          onChange={(qty) => setQuantities(prev => ({ ...prev, [product.id.toString()]: qty }))}
+                          min={1}
+                          max={(() => {
+                            const selectedVariantIndex = selectedVariants[product.id.toString()] || 0;
+                            const selectedVariant = product.variants[selectedVariantIndex] || product.variants[0];
+                            return selectedVariant.inventory || 99;
+                          })()}
+                          disabled={(() => {
+                            const selectedVariantIndex = selectedVariants[product.id.toString()] || 0;
+                            const selectedVariant = product.variants[selectedVariantIndex] || product.variants[0];
+                            return !selectedVariant.available;
+                          })()}
+                          size="sm"
+                        />
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToCart(product, quantities[product.id.toString()] || 1);
+                          }}
+                          disabled={(() => {
+                            const selectedVariantIndex = selectedVariants[product.id.toString()] || 0;
+                            const selectedVariant = product.variants[selectedVariantIndex] || product.variants[0];
+                            return !selectedVariant.available;
+                          })()}
+                          className="flex-1"
+                        >
+                          {(() => {
+                            const selectedVariantIndex = selectedVariants[product.id.toString()] || 0;
+                            const selectedVariant = product.variants[selectedVariantIndex] || product.variants[0];
+                            return selectedVariant.available ? 'Add to Cart' : 'Out of Stock';
+                          })()}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500 dark:text-gray-400">No products found in this category</p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleCategorySelect('all-products')}
+                className="mt-2"
+              >
+                Show All Products
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -401,9 +786,9 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
       <CategoryGrid onCategorySelect={handleCategorySelect} className="mb-6" />
 
       <div className="grid grid-cols-1 gap-4">
-        {filteredProducts.map((product) => (
-          <div 
-            key={product.id} 
+        {filteredProducts.map((product, index) => (
+          <div
+            key={`main-${product.isStoreProduct ? 'store' : 'shopify'}-${product.id}-${index}`}
             className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3 cursor-pointer hover:shadow-md dark:hover:shadow-lg hover:shadow-gray-200 dark:hover:shadow-black/20 transition-all duration-200 bg-white dark:bg-gray-800"
             onClick={() => navigateToProduct(product.id)}
           >
@@ -433,33 +818,77 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <div>
-                    <span className="text-lg font-bold text-gray-900 dark:text-gray-100">${product.price}</span>
-                    {product.compareAtPrice && (
-                      <span className="text-sm text-gray-400 dark:text-gray-500 line-through ml-2">
-                        ${product.compareAtPrice}
-                      </span>
-                    )}
+                    {(() => {
+                      const selectedVariantIndex = selectedVariants[product.id.toString()] || 0;
+                      const selectedVariant = product.variants[selectedVariantIndex] || product.variants[0];
+                      return (
+                        <>
+                          <span className="text-lg font-bold text-gray-900 dark:text-gray-100">${selectedVariant.price}</span>
+                          {selectedVariant.compareAtPrice && (
+                            <span className="text-sm text-gray-400 dark:text-gray-500 line-through ml-2">
+                              ${selectedVariant.compareAtPrice}
+                            </span>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigateToProduct(product.id);
+                      if (product.isStoreProduct && product.storeInfo) {
+                        router.push(product.storeInfo.url);
+                      } else {
+                        navigateToProduct(product.id);
+                      }
                     }}
                     icon={<Icon name="eye" size="sm" />}
                   >
                     View
                   </Button>
                 </div>
-                
+
+                {/* Size/Variant Selector - only show if multiple variants */}
+                {product.variants.length > 1 && (
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                      Size/Variant:
+                    </label>
+                    <select
+                      value={selectedVariants[product.id.toString()] || 0}
+                      onChange={(e) => setSelectedVariants(prev => ({
+                        ...prev,
+                        [product.id.toString()]: parseInt(e.target.value)
+                      }))}
+                      className="w-full text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {product.variants.map((variant, index) => (
+                        <option key={`main-variant-${product.id}-${index}`} value={index}>
+                          {variant.title} - ${variant.price}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
                 <div className="flex items-center space-x-2">
                   <QuantitySelector
-                    value={quantities[product.id] || 1}
-                    onChange={(qty) => setQuantities(prev => ({ ...prev, [product.id]: qty }))}
+                    value={quantities[product.id.toString()] || 1}
+                    onChange={(qty) => setQuantities(prev => ({ ...prev, [product.id.toString()]: qty }))}
                     min={1}
-                    max={product.variants[0]?.inventory || 99}
-                    disabled={!product.variants[0]?.available}
+                    max={(() => {
+                      const selectedVariantIndex = selectedVariants[product.id.toString()] || 0;
+                      const selectedVariant = product.variants[selectedVariantIndex] || product.variants[0];
+                      return selectedVariant.inventory || 99;
+                    })()}
+                    disabled={(() => {
+                      const selectedVariantIndex = selectedVariants[product.id.toString()] || 0;
+                      const selectedVariant = product.variants[selectedVariantIndex] || product.variants[0];
+                      return !selectedVariant.available;
+                    })()}
                     size="sm"
                   />
                   <Button
@@ -467,12 +896,20 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      addToCart(product, quantities[product.id] || 1);
+                      addToCart(product, quantities[product.id.toString()] || 1);
                     }}
-                    disabled={!product.variants[0]?.available}
+                    disabled={(() => {
+                      const selectedVariantIndex = selectedVariants[product.id.toString()] || 0;
+                      const selectedVariant = product.variants[selectedVariantIndex] || product.variants[0];
+                      return !selectedVariant.available;
+                    })()}
                     className="flex-1"
                   >
-                    {product.variants[0]?.available ? 'Add to Cart' : 'Out of Stock'}
+                    {(() => {
+                      const selectedVariantIndex = selectedVariants[product.id.toString()] || 0;
+                      const selectedVariant = product.variants[selectedVariantIndex] || product.variants[0];
+                      return selectedVariant.available ? 'Add to Cart' : 'Out of Stock';
+                    })()}
                   </Button>
                 </div>
               </div>

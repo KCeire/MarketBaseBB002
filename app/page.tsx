@@ -18,7 +18,7 @@ import {
 } from "@coinbase/onchainkit/wallet";
 import { useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Shop } from "./components/Shop";
+import { Shop } from "./components/shop";
 
 function AppContent() {
   const { setFrameReady, isFrameReady } = useMiniKit();
@@ -42,8 +42,8 @@ function AppContent() {
     return (
       <div className="flex flex-col min-h-screen font-sans text-[var(--app-foreground)] mini-app-theme from-[var(--app-background)] to-[var(--app-gray)]">
         <div className="w-full max-w-md mx-auto px-4 py-3 main-content-with-bottom-nav">
-          <header className="flex justify-between items-center mb-3 h-11">
-            <div>
+          <header className="flex justify-between items-start mb-3 h-auto min-h-[44px]">
+            <div className="flex flex-col space-y-2">
               <div className="flex items-center space-x-2">
                 <Wallet className="z-10">
                   <ConnectWallet>
@@ -60,9 +60,12 @@ function AppContent() {
                   </WalletDropdown>
                 </Wallet>
               </div>
+              <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                Shop → Share → Earn
+              </div>
             </div>
-            <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-              Shop → Share → Earn
+            <div className="flex-shrink-0">
+              {/* Space for cart button or other right-aligned items */}
             </div>
           </header>
 
@@ -84,7 +87,7 @@ function AppContent() {
     <div className="flex flex-col min-h-screen font-sans text-[var(--app-foreground)] mini-app-theme from-[var(--app-background)] to-[var(--app-gray)]">
       <div className="w-full max-w-md mx-auto px-4 py-3 main-content-with-bottom-nav">
         <header className="flex justify-between items-center mb-6">
-          <div>
+          <div className="flex flex-col space-y-2">
             <div className="flex items-center space-x-2">
               <Wallet className="z-10">
                 <ConnectWallet>
@@ -101,15 +104,18 @@ function AppContent() {
                 </WalletDropdown>
               </Wallet>
             </div>
+            <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+              Shop → Share → Earn
+            </div>
           </div>
-          <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-            Shop → Share → Earn
+          <div className="flex-shrink-0">
+            {/* Space for cart button or other right-aligned items */}
           </div>
         </header>
 
         <main className="space-y-6">
           {/* Hero Section */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-purple-600 to-purple-700 py-6 px-6 text-white min-h-[110px]">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-purple-600 to-purple-700 py-4 px-6 text-white min-h-[95px]">
             <div 
               className="absolute inset-0 bg-cover bg-center bg-no-repeat"
               style={{
