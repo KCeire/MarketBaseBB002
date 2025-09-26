@@ -9,6 +9,7 @@ import { Icon } from './ui/Icon';
 import { BasePayCheckout } from './BasePayCheckout';
 import { toast } from './ui/Toast';
 import { QuantitySelector } from './product/QuantitySelector';
+import { ShareButton } from './product/ShareButton';
 import { CategoryGrid } from './categories/CategoryGrid';
 import { getAllStoreProducts } from '@/lib/stores';
 import '@/lib/stores/nft-energy'; // Import to register NFT Energy store
@@ -772,6 +773,26 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
                           })()}
                         </Button>
                       </div>
+
+                      {/* Share Button */}
+                      <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                        <ShareButton
+                          product={{
+                            id: product.id,
+                            title: product.title,
+                            price: (() => {
+                              const selectedVariantIndex = selectedVariants[product.id.toString()] || 0;
+                              const selectedVariant = product.variants[selectedVariantIndex] || product.variants[0];
+                              return selectedVariant.price;
+                            })(),
+                            image: product.image,
+                            description: product.description
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -958,6 +979,26 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
                       return selectedVariant.available ? 'Add to Cart' : 'Out of Stock';
                     })()}
                   </Button>
+                </div>
+
+                {/* Share Button */}
+                <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                  <ShareButton
+                    product={{
+                      id: product.id,
+                      title: product.title,
+                      price: (() => {
+                        const selectedVariantIndex = selectedVariants[product.id.toString()] || 0;
+                        const selectedVariant = product.variants[selectedVariantIndex] || product.variants[0];
+                        return selectedVariant.price;
+                      })(),
+                      image: product.image,
+                      description: product.description
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                  />
                 </div>
               </div>
             </div>
