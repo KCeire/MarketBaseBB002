@@ -68,16 +68,13 @@ export function ShareButton({
 
 
       // Use MiniKit's composeCast function
-      const result = await composeCast({
+      await composeCast({
         text: castText,
         embeds: [referralUrl]
       });
 
-      if (result.success) {
-        toast.success('Shared Successfully!', 'Your product link has been shared to Farcaster');
-      } else {
-        throw new Error(result.error || 'Failed to share');
-      }
+      // If we reach here, the compose was successful
+      toast.success('Shared Successfully!', 'Your product link has been shared to Farcaster');
 
     } catch (error) {
       console.error('Share error:', error);
