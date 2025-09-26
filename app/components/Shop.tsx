@@ -67,7 +67,6 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
       const productList = data.products || [];
       setProducts(productList);
       setFilteredProducts(productList);
-     // calculateProductCounts(productList);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load products';
       setError(errorMessage);
@@ -77,56 +76,12 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     }
   };
 
-  // Calculate product counts for each category
-  // const calculateProductCounts = (productList: MarketplaceProduct[]) => {
-  //   const counts: Record<string, number> = {
-  //     'all-products': productList.length,
-  //     'electronics': 0,
-  //     'home-garden': 0,
-  //     'pet-products': 0,
-  //     'health-beauty': 0,
-  //     'sports-outdoors': 0,
-  //   };
-
-  //   productList.forEach(product => {
-  //     const title = product.title.toLowerCase();
-  //     const tags = product.tags.join(' ').toLowerCase();
-  //     const productType = product.productType.toLowerCase();
-      
-  //     // Remove phone/tablet detection since you're not selling those yet
-  //     if (title.includes('computer') || title.includes('tech') || 
-  //         tags.includes('electronics') || productType.includes('electronics')) {
-  //       counts['electronics']++;
-  //     }
-  //     if (title.includes('home') || title.includes('garden') || title.includes('furniture') ||
-  //         tags.includes('home') || tags.includes('garden') || productType.includes('home')) {
-  //       counts['home-garden']++;
-  //     }
-  //     if (title.includes('pet') || title.includes('dog') || title.includes('cat') ||
-  //         tags.includes('pets') || productType.includes('pet')) {
-  //       counts['pet-products']++;
-  //     }
-  //     if (title.includes('health') || title.includes('beauty') || title.includes('skincare') ||
-  //         tags.includes('health') || tags.includes('beauty') || productType.includes('beauty')) {
-  //       counts['health-beauty']++;
-  //     }
-  //     if (title.includes('sport') || title.includes('outdoor') || title.includes('fitness') ||
-  //         tags.includes('sports') || tags.includes('outdoor') || productType.includes('sports')) {
-  //       counts['sports-outdoors']++;
-  //     }
-  //   });
-
-  //   setProductCounts(counts);
-  // };
-
-
   // Filter products by category
   const filterProductsByCategory = (categorySlug: string) => {
     if (categorySlug === 'all-products') {
       setFilteredProducts(products);
     } else {
       // Basic category filtering based on product title and tags
-      // You can enhance this logic based on your product categorization
       const filtered = products.filter(product => {
         const title = product.title.toLowerCase();
         const tags = product.tags.join(' ').toLowerCase();
@@ -159,7 +114,6 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
 
   const handleCategorySelect = (categorySlug: string) => {
     filterProductsByCategory(categorySlug);
-    
   };
 
   const loadCartFromStorage = () => {
@@ -188,38 +142,38 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
   };
 
   const addToCart = (product: MarketplaceProduct, quantity: number = 1) => {
-  const variant = product.variants[0]; // Use first variant for simplicity
-  const cartItem: CartItem = {
-    productId: product.id,
-    variantId: variant.id,
-    title: product.title,
-    variant: variant.title,
-    price: variant.price,
-    image: product.image,
-    quantity,
-    sku: variant.sku || `${product.id}-${variant.id}`,
-  };
+    const variant = product.variants[0]; // Use first variant for simplicity
+    const cartItem: CartItem = {
+      productId: product.id,
+      variantId: variant.id,
+      title: product.title,
+      variant: variant.title,
+      price: variant.price,
+      image: product.image,
+      quantity,
+      sku: variant.sku || `${product.id}-${variant.id}`,
+    };
 
-  // Check if item exists BEFORE updating state
+    // Check if item exists BEFORE updating state
     const existing = cart.find(item => item.variantId === variant.id);
 
     setCart(prev => {
       let newCart;
-     if (existing) {
-      newCart = prev.map(item => 
-        item.variantId === variant.id 
-          ? { ...item, quantity: item.quantity + quantity }
-          : item
-      );
+      if (existing) {
+        newCart = prev.map(item => 
+          item.variantId === variant.id 
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
       } else {
         newCart = [...prev, cartItem];
       }
       saveCartToStorage(newCart);
       return newCart;
-      });
+    });
 
-      // Reset quantity selector to 1 after adding
-      setQuantities(prev => ({ ...prev, [product.id]: 1 }));
+    // Reset quantity selector to 1 after adding
+    setQuantities(prev => ({ ...prev, [product.id]: 1 }));
 
     // Show toast after state update
     setTimeout(() => {
@@ -284,7 +238,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shop</h2>
         </div>
         <div className="flex justify-center py-8">
-          <div className="text-gray-500">Loading products...</div>
+          <div className="text-gray-500 dark:text-gray-400">Loading products...</div>
         </div>
       </div>
     );
@@ -294,7 +248,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900">Shop</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shop</h2>
         </div>
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-800">Error: {error}</p>
@@ -400,7 +354,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
               onClick={onBackToShop}
               icon={<Icon name="arrow-left" size="sm" />}
             >
-              Back to Shop
+              Back to Home
             </Button>
           )}
         </div>
@@ -414,12 +368,12 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
       {/* Category Filter Bar */}
       {selectedCategory !== 'all-products' && (
         <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
-            <div className="flex items-center space-x-2">
-              <Icon name="grid" size="sm" className="text-blue-600 dark:text-blue-400" />
-              <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
+          <div className="flex items-center space-x-2">
+            <Icon name="grid" size="sm" className="text-blue-600 dark:text-blue-400" />
+            <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
               {selectedCategory.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
             </span>
-            <span className="text-xs text-blue-600">
+            <span className="text-xs text-blue-600 dark:text-blue-400">
               ({filteredProducts.length} products)
             </span>
           </div>
@@ -427,7 +381,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
             variant="ghost"
             size="sm"
             onClick={() => handleCategorySelect('all-products')}
-            className="text-blue-600 hover:text-blue-700"
+            className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
           >
             Clear Filter
           </Button>
@@ -435,7 +389,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
       )}
 
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold text-gray-900">Shop</h2>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shop</h2>
         {cart.length > 0 && (
           <div className="text-sm text-gray-600 dark:text-gray-400">
             {getCartItemCount()} item{getCartItemCount() !== 1 ? 's' : ''} in cart
@@ -448,7 +402,6 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
 
       <div className="grid grid-cols-1 gap-4">
         {filteredProducts.map((product) => (
-        
           <div 
             key={product.id} 
             className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3 cursor-pointer hover:shadow-md dark:hover:shadow-lg hover:shadow-gray-200 dark:hover:shadow-black/20 transition-all duration-200 bg-white dark:bg-gray-800"
@@ -478,51 +431,51 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
                 {product.description.replace(/<[^>]*>/g, '').substring(0, 100)}...
               </p>
               <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <div>
-                <span className="text-lg font-bold text-gray-900 dark:text-gray-100">${product.price}</span>
-                  {product.compareAtPrice && (
-                    <span className="text-sm text-gray-400 dark:text-gray-500 line-through ml-2">
-                      ${product.compareAtPrice}
-                    </span>
-                  )}
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="text-lg font-bold text-gray-900 dark:text-gray-100">${product.price}</span>
+                    {product.compareAtPrice && (
+                      <span className="text-sm text-gray-400 dark:text-gray-500 line-through ml-2">
+                        ${product.compareAtPrice}
+                      </span>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigateToProduct(product.id);
+                    }}
+                    icon={<Icon name="eye" size="sm" />}
+                  >
+                    View
+                  </Button>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <QuantitySelector
+                    value={quantities[product.id] || 1}
+                    onChange={(qty) => setQuantities(prev => ({ ...prev, [product.id]: qty }))}
+                    min={1}
+                    max={product.variants[0]?.inventory || 99}
+                    disabled={!product.variants[0]?.available}
+                    size="sm"
+                  />
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addToCart(product, quantities[product.id] || 1);
+                    }}
+                    disabled={!product.variants[0]?.available}
+                    className="flex-1"
+                  >
+                    {product.variants[0]?.available ? 'Add to Cart' : 'Out of Stock'}
+                  </Button>
+                </div>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigateToProduct(product.id);
-                }}
-                icon={<Icon name="eye" size="sm" />}
-              >
-                View
-              </Button>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <QuantitySelector
-                value={quantities[product.id] || 1}
-                onChange={(qty) => setQuantities(prev => ({ ...prev, [product.id]: qty }))}
-                min={1}
-                max={product.variants[0]?.inventory || 99}
-                disabled={!product.variants[0]?.available}
-                size="sm"
-              />
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  addToCart(product, quantities[product.id] || 1);
-                }}
-                disabled={!product.variants[0]?.available}
-                className="flex-1"
-              >
-                {product.variants[0]?.available ? 'Add to Cart' : 'Out of Stock'}
-              </Button>
-            </div>
-          </div>
             </div>
           </div>
         ))}
@@ -530,7 +483,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
 
       {filteredProducts.length === 0 && products.length > 0 && (
         <div className="text-center py-8">
-          <p className="text-gray-500">No products found in this category</p>
+          <p className="text-gray-500 dark:text-gray-400">No products found in this category</p>
           <Button
             variant="ghost"
             size="sm"
@@ -544,7 +497,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
 
       {products.length === 0 && (
         <div className="text-center py-8">
-          <p className="text-gray-500">No products available</p>
+          <p className="text-gray-500 dark:text-gray-400">No products available</p>
         </div>
       )}
     </div>
