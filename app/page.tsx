@@ -33,6 +33,43 @@ function AppContent() {
     }
   }, [setFrameReady, isFrameReady]);
 
+  // Handle referral parameters
+  useEffect(() => {
+    const handleReferralParams = async () => {
+      const productId = searchParams.get('p');
+      const referrerId = searchParams.get('ref');
+      
+      if (referrerId) {
+        sessionStorage.setItem('affiliate_ref', referrerId);
+        
+        // Track the referral visit
+        try {
+          await fetch('/api/affiliate/track-visit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              referrerId, 
+              productId,
+              timestamp: Date.now() 
+            })
+          });
+        } catch (error) {
+          console.error('Failed to track referral:', error);
+        }
+      }
+      
+      // Redirect to product page if product ID is present
+      if (productId) {
+        // Clean URL first
+        window.history.replaceState({}, '', '/');
+        // Navigate to product
+        router.push(`/product/${productId}`);
+      }
+    };
+    
+    handleReferralParams();
+  }, [searchParams, router]);
+
   const handleBackToShop = useCallback(() => {
     window.history.replaceState({}, '', '/');
   }, []);

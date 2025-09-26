@@ -124,24 +124,26 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       sku: item.sku
     }));
 
-    const requestBody = {
-      customerData: {
-        email: customerData.email,
-        shippingAddress: {
-          name: customerData.name,
-          address1: customerData.address1,
-          address2: customerData.address2 || '',
-          city: customerData.city,
-          state: customerData.state,
-          country: customerData.country,
-          zipCode: customerData.zipCode,
-        }
-      },
-      orderItems,
-      totalAmount: total,
-      customerWallet: address,
-      basePayPaymentId: basePayData?.id
-    };
+const requestBody = {
+  customerData: {
+    email: customerData.email,
+    shippingAddress: {
+      name: customerData.name,
+      address1: customerData.address1,
+      address2: customerData.address2 || '',
+      city: customerData.city,
+      state: customerData.state,
+      country: customerData.country,
+      zipCode: customerData.zipCode,
+    }
+  },
+  orderItems,
+  totalAmount: total,
+  customerWallet: address,
+  basePayPaymentId: basePayData?.id,
+  // Add affiliate tracking
+  affiliateRef: sessionStorage.getItem('affiliate_ref') || null
+};
 
     console.log('Creating order with customer data:', {
       ...requestBody,

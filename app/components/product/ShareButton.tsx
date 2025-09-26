@@ -35,26 +35,27 @@ export function ShareButton({
   const { composeCast } = useComposeCast();
 
   const generateReferralUrl = (productId: string | number, userFid?: string): string => {
-    const baseUrl = window.location.origin;
-    const productUrl = `${baseUrl}/product/${productId}`;
-
+    // CRITICAL: Use the production URL for embeds to work
+    const baseUrl = 'https://store.lkforge.xyz';
+    
+    // Use query params to maintain app recognition
+    const params = new URLSearchParams();
+    params.set('p', productId.toString());
+    
     if (userFid) {
-      return `${productUrl}?ref=${userFid}`;
+      params.set('ref', userFid);
     }
-
-    // Fallback to a generic product URL if no FID available
-    return productUrl;
+    
+    return `${baseUrl}?${params.toString()}`;
   };
 
   const handleShare = async () => {
     try {
       setIsSharing(true);
 
-      // Try to get user's FID from Farcaster Mini App SDK
       let userFid: string | undefined;
 
       try {
-        // Get the current user's FID from the Farcaster SDK context
         const context = await sdk.context;
         userFid = context.user?.fid?.toString();
         console.log('Retrieved user FID:', userFid);
@@ -64,23 +65,34 @@ export function ShareButton({
 
       const referralUrl = generateReferralUrl(product.id, userFid);
 
-      // Create the cast text
-      const castText = `Check out this amazing product: ${product.title}\n\nPrice: $${product.price}\n\n${referralUrl}`;
+      // Improved cast text
+      const castText = `🛍️ ${product.title}\n💰 $${product.price}\n\nGet yours on Base Shop!`;
 
-
-      // Use MiniKit's composeCast function
       await composeCast({
         text: castText,
         embeds: [referralUrl]
       });
 
-      // If we reach here, the compose was successful
       toast.success('Shared Successfully!', 'Your product link has been shared to Farcaster');
+
+      // Track the share
+      try {
+        await fetch('/api/affiliate/track-share', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productId: product.id,
+            userFid,
+            referralUrl
+          })
+        });
+      } catch (error) {
+        console.error('Failed to track share:', error);
+      }
 
     } catch (error) {
       console.error('Share error:', error);
 
-      // Fallback: Create manual Farcaster compose URL
       const fallbackUrl = await createFarcasterComposeUrl(product);
 
       if (fallbackUrl) {
@@ -96,7 +108,6 @@ export function ShareButton({
 
   const createFarcasterComposeUrl = async (product: Product): Promise<string | null> => {
     try {
-      // Try to get user's FID, fallback to generic link if not available
       let userFid: string | undefined;
       try {
         const context = await sdk.context;
@@ -104,11 +115,9 @@ export function ShareButton({
       } catch {
         console.log('Could not get user FID for fallback URL');
       }
+      
       const referralUrl = generateReferralUrl(product.id, userFid);
-
-      const castText = `Check out this amazing product: ${product.title}\n\nPrice: $${product.price}\n\nGet it here: ${referralUrl}`;
-
-      // Create Farcaster compose URL
+      const castText = `🛍️ ${product.title}\n💰 $${product.price}\n\nGet yours on Base Shop!`;
       const composeUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(referralUrl)}`;
 
       return composeUrl;

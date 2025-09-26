@@ -17,6 +17,9 @@ copy-files.ps1
 # production
 /build
 
+# backups
+/backup26Sep25
+
 # misc
 .DS_Store
 *.pem
@@ -38,3 +41,5 @@ next-env.d.ts
 
 # backup files
 /BaseShop-Files-To-Share
+/BaseShop-Files-To-Share
+
