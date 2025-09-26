@@ -8,123 +8,123 @@ export default function SellPage() {
     <div className="w-full max-w-md mx-auto px-4 py-3 main-content-with-bottom-nav">
       <div className="space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-gray-900">Sell on Base Shop</h1>
-          <p className="text-gray-600">Join our marketplace and reach customers worldwide</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Sell on Base Shop</h1>
+          <p className="text-gray-600 dark:text-gray-400">Join our marketplace and reach customers worldwide</p>
         </div>
 
         {/* Hero Stats */}
-        <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-6 text-center space-y-2">
-          <p className="text-2xl font-bold text-gray-900">Start Selling Today</p>
-          <p className="text-sm text-gray-600">Join our existing sellers to realise the full potential of selling Onchain</p>
+        <div className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/30 dark:to-green-900/30 rounded-xl p-6 text-center space-y-2">
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">Start Selling Today</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Join our existing sellers to realise the full potential of selling Onchain</p>
         </div>
 
         {/* Why Sell With Us */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Why Sell With Us?</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Why Sell With Us?</h2>
           <div className="space-y-4">
             <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+              <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full"></div>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">Crypto-Native Payments</p>
-                <p className="text-xs text-gray-600">Get paid instantly in USDC on Base - no waiting for traditional payment processing</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Crypto-Native Payments</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Get paid instantly in USDC on Base - no waiting for traditional payment processing</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">Global Reach</p>
-                <p className="text-xs text-gray-600">Access customers worldwide through Farcaster and Base ecosystem</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Global Reach</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Access customers worldwide through Farcaster and Base ecosystem</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+              <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                <div className="w-2 h-2 bg-purple-600 dark:bg-purple-400 rounded-full"></div>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">Custom Store Design</p>
-                <p className="text-xs text-gray-600">Create your unique branded store experience within our marketplace</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Custom Store Design</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Create your unique branded store experience within our marketplace</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
+              <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                <div className="w-2 h-2 bg-orange-600 dark:bg-orange-400 rounded-full"></div>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">Built-in Affiliate Network</p>
-                <p className="text-xs text-gray-600">Every user becomes your affiliate - amplify your reach organically</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Built-in Affiliate Network</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Every user becomes your affiliate - amplify your reach organically</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* How It Works */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">How It Works</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">How It Works</h2>
           <div className="space-y-3">
             <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold">1</div>
+              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-sm font-semibold">1</div>
               <div>
-                <p className="text-sm font-medium text-gray-900">Apply to Sell</p>
-                <p className="text-xs text-gray-600">Submit your application with product details and business info</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Apply to Sell</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Submit your application with product details and business info</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold">2</div>
+              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-sm font-semibold">2</div>
               <div>
-                <p className="text-sm font-medium text-gray-900">Get Approved</p>
-                <p className="text-xs text-gray-600">Our team reviews your application and helps with onboarding</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Get Approved</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Our team reviews your application and helps with onboarding</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold">3</div>
+              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-sm font-semibold">3</div>
               <div>
-                <p className="text-sm font-medium text-gray-900">Design Your Store</p>
-                <p className="text-xs text-gray-600">Create your custom branded experience within our marketplace</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Design Your Store</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Create your custom branded experience within our marketplace</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold">4</div>
+              <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-sm font-semibold">4</div>
               <div>
-                <p className="text-sm font-medium text-gray-900">Start Selling</p>
-                <p className="text-xs text-gray-600">List your products and start reaching customers immediately</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Start Selling</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">List your products and start reaching customers immediately</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Pricing */}
-        <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-          <h3 className="text-base font-semibold text-gray-900 text-center">Simple, Transparent Pricing</h3>
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 space-y-3">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 text-center">Simple, Transparent Pricing</h3>
           <div className="text-center">
-            <p className="text-2xl font-bold text-gray-900">**% + Payment Processing</p>
-            <p className="text-xs text-gray-600">No monthly fees • No setup costs • No hidden charges</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">**% + Payment Processing</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">No monthly fees • No setup costs • No hidden charges</p>
           </div>
         </div>
 
         {/* Featured Sellers */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">Featured Sellers</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Featured Sellers</h2>
           <div className="space-y-3">
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                <span className="text-sm font-semibold text-purple-600">AE</span>
+            <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-purple-600 dark:text-purple-400">AE</span>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">The Aesthetic Edit</p>
-                <p className="text-xs text-gray-600">Curated lifestyle products</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">The Aesthetic Edit</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Curated lifestyle products</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-sm font-semibold text-blue-600">NE</span>
+            <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">NE</span>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">NFT Energy Drinks</p>
-                <p className="text-xs text-gray-600">Digital collectibles meets the beverage industry</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">NFT Energy Drinks</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Digital collectibles meets the beverage industry</p>
               </div>
             </div>
           </div>
@@ -132,7 +132,7 @@ export default function SellPage() {
 
         {/* Call to Action */}
         <div className="space-y-3">
-          <button 
+          <button
             onClick={() => {
               toast.info('Seller Applications Opening Soon', 'Contact lk@lkforge.xyz to register your interest');
             }}
@@ -140,19 +140,19 @@ export default function SellPage() {
           >
             Apply to Become a Seller
           </button>
-          
+
           <div className="flex space-x-3">
-            <button 
+            <button
               onClick={() => {
                 toast.info('Stores Coming Soon', 'Individual seller stores are launching soon. Stay tuned!');
               }}
-              className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-medium text-sm hover:bg-gray-200 transition-colors"
+              className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg font-medium text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               Browse Stores
             </button>
-            <button 
+            <button
               onClick={() => window.location.href = '/earn'}
-              className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-medium text-sm hover:bg-gray-200 transition-colors"
+              className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg font-medium text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               Learn About Earning
             </button>
@@ -161,8 +161,8 @@ export default function SellPage() {
 
         {/* Contact */}
         <div className="text-center space-y-2">
-          <p className="text-xs text-gray-600">Questions about selling?</p>
-          <p className="text-xs text-gray-500">Contact us at lk@lkforge.xyz</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400">Questions about selling?</p>
+          <p className="text-xs text-gray-500 dark:text-gray-500">Contact us at lk@lkforge.xyz</p>
         </div>
       </div>
     </div>

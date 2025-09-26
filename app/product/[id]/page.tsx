@@ -111,10 +111,10 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
+      <div className="min-h-screen bg-background dark:bg-gray-900 p-4">
         <div className="max-w-2xl mx-auto">
           <div className="flex justify-center py-8">
-            <div className="text-gray-500">Loading product...</div>
+            <div className="text-gray-500 dark:text-gray-400">Loading product...</div>
           </div>
         </div>
       </div>
@@ -123,10 +123,10 @@ export default function ProductDetailPage() {
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4">
+      <div className="min-h-screen bg-background dark:bg-gray-900 p-4">
         <div className="max-w-2xl mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-800">Error: {error || 'Product not found'}</p>
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <p className="text-red-800 dark:text-red-400">Error: {error || 'Product not found'}</p>
             <Button 
               variant="ghost" 
               size="sm" 
@@ -142,7 +142,7 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-background dark:bg-gray-900 p-4">
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Header with back button */}
         <div className="flex items-center space-x-3">
@@ -167,7 +167,7 @@ export default function ProductDetailPage() {
         </div>
 
         {/* Product Card */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           {/* Product Image */}
           <div className="w-full">
             <Image 
@@ -183,7 +183,7 @@ export default function ProductDetailPage() {
           {/* Product Info */}
           <div className="p-6 space-y-6">
             <div>
-              <h1 className="text-2xl font-bold mb-2 text-gray-900">{product.title}</h1>
+              <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">{product.title}</h1>
               <div className="flex items-center space-x-3 mb-4">
                 <span className="text-3xl font-bold text-blue-600">${product.variants[selectedVariant]?.price || product.price}</span>
                 {product.compareAtPrice && (
@@ -197,7 +197,7 @@ export default function ProductDetailPage() {
             {/* Variants Selection */}
             {product.variants.length > 1 && (
               <div className="space-y-3">
-                <h3 className="font-semibold text-gray-900">Options:</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Options:</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {product.variants.map((variant, index) => (
                     <Button
@@ -218,7 +218,7 @@ export default function ProductDetailPage() {
 
             {/* Quantity Selection */}
             <div className="space-y-3">
-              <h3 className="font-semibold text-gray-900">Quantity:</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Quantity:</h3>
               <QuantitySelector
                 value={quantity}
                 onChange={setQuantity}
@@ -233,9 +233,9 @@ export default function ProductDetailPage() {
 
             {/* Description */}
             <div className="space-y-3">
-              <h3 className="font-semibold text-gray-900">Description:</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Description:</h3>
               <div 
-                className="text-gray-600 leading-relaxed prose prose-sm max-w-none"
+                className="text-gray-600 dark:text-gray-400 leading-relaxed prose prose-sm max-w-none"
                 dangerouslySetInnerHTML={{ 
                   __html: product.description || 'No description available.' 
                 }}
@@ -243,7 +243,7 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Add to Cart */}
-            <div className="pt-6 border-t border-gray-200">
+            <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
               <Button
                 variant="primary"
                 size="lg"
