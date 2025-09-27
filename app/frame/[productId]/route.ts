@@ -2,13 +2,12 @@
 
 import { NextRequest } from 'next/server';
 
-
 export async function GET(
   request: NextRequest,
-  { params }: { params: { productId: string } }
+  { params }: { params: Promise<{ productId: string }> }
 ) {
   const { searchParams } = new URL(request.url);
-  const productId = params.productId;
+  const { productId } = await params;
   const referrerId = searchParams.get('ref');
   
   // Fetch product data (you'll need to implement this based on your store structure)
