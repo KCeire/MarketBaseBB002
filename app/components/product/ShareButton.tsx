@@ -34,19 +34,18 @@ export function ShareButton({
   const [isSharing, setIsSharing] = useState(false);
   const { composeCast } = useComposeCast();
 
-  const generateReferralUrl = (productId: string | number, userFid?: string): string => {
-    // CRITICAL: Use the production URL for embeds to work
-    const baseUrl = 'https://store.lkforge.xyz';
+  const generateFrameUrl = (productId: string | number, userFid?: string): string => {
+    // CRITICAL: Use frame URL to get mini app embed
+    const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://store.lkforge.xyz';
     
-    // Use query params to maintain app recognition
-    const params = new URLSearchParams();
-    params.set('p', productId.toString());
+    // Create frame URL path
+    let frameUrl = `${baseUrl}/frame/${productId}`;
     
     if (userFid) {
-      params.set('ref', userFid);
+      frameUrl += `?ref=${userFid}`;
     }
     
-    return `${baseUrl}?${params.toString()}`;
+    return frameUrl;
   };
 
   const handleShare = async () => {
@@ -63,14 +62,15 @@ export function ShareButton({
         console.log('Could not get user FID from SDK, using fallback');
       }
 
-      const referralUrl = generateReferralUrl(product.id, userFid);
+      // Use frame URL instead of web URL
+      const frameUrl = generateFrameUrl(product.id, userFid);
 
       // Improved cast text
       const castText = `🛍️ ${product.title}\n💰 $${product.price}\n\nGet yours on Base Shop!`;
 
       await composeCast({
         text: castText,
-        embeds: [referralUrl]
+        embeds: [frameUrl] // Frame URL for mini app embed
       });
 
       toast.success('Shared Successfully!', 'Your product link has been shared to Farcaster');
@@ -83,7 +83,7 @@ export function ShareButton({
           body: JSON.stringify({
             productId: product.id,
             userFid,
-            referralUrl
+            frameUrl
           })
         });
       } catch (error) {
@@ -116,9 +116,10 @@ export function ShareButton({
         console.log('Could not get user FID for fallback URL');
       }
       
-      const referralUrl = generateReferralUrl(product.id, userFid);
+      // Use frame URL for fallback too
+      const frameUrl = generateFrameUrl(product.id, userFid);
       const castText = `🛍️ ${product.title}\n💰 $${product.price}\n\nGet yours on Base Shop!`;
-      const composeUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(referralUrl)}`;
+      const composeUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(frameUrl)}`;
 
       return composeUrl;
     } catch (error) {
