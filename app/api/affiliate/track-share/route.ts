@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { productId, referrerId, frameUrl } = await request.json();
+    const { productId, userFid, frameUrl } = await request.json(); // Changed referrerId to userFid
     
-    if (!productId || !referrerId) {
+    if (!productId || !userFid) { // Changed referrerId to userFid
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -13,33 +13,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Track the share event in your database
-    // This is where you'd save to Supabase or your preferred database
     console.log('📤 Share tracked:', {
       productId,
-      referrerId,
+      userFid, // Changed referrerId to userFid
       frameUrl,
       timestamp: new Date().toISOString(),
     });
-
-    // Example Supabase integration (uncomment and modify as needed):
-    /*
-    const { error } = await supabase
-      .from('affiliate_shares')
-      .insert({
-        product_id: productId,
-        referrer_id: referrerId,
-        frame_url: frameUrl,
-        shared_at: new Date().toISOString(),
-      });
-
-    if (error) {
-      console.error('Database error:', error);
-      return NextResponse.json(
-        { error: 'Failed to track share' },
-        { status: 500 }
-      );
-    }
-    */
 
     return NextResponse.json({
       success: true,
