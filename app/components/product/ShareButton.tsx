@@ -57,22 +57,25 @@ export function ShareButton({
       try {
         const context = await sdk.context;
         userFid = context.user?.fid?.toString();
-        console.log('Retrieved user FID:', userFid);
+        console.log('🔍 Retrieved user FID:', userFid);
       } catch {
-        console.log('Could not get user FID from SDK, using fallback');
+        console.log('⚠️ Could not get user FID from SDK, using fallback');
       }
 
       // Use frame URL instead of web URL
       const frameUrl = generateFrameUrl(product.id, userFid);
+      console.log('📱 Generated frame URL:', frameUrl);
 
       // Improved cast text
-      const castText = `🛍️ ${product.title}\n💰 $${product.price}\n\nGet yours on Base Shop!`;
+      const castText = `🛍️ ${product.title}\n💰 ${product.price}\n\nGet yours on Base Shop!`;
+      console.log('📝 Cast text:', castText);
 
       await composeCast({
         text: castText,
         embeds: [frameUrl] // Frame URL for mini app embed
       });
 
+      console.log('✅ Cast composed successfully');
       toast.success('Shared Successfully!', 'Your product link has been shared to Farcaster');
 
       // Track the share
@@ -82,23 +85,26 @@ export function ShareButton({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             productId: product.id,
-            userFid,
+            referrerId: userFid, // Changed from userFid to referrerId
             frameUrl
           })
         });
+        console.log('📊 Share tracked successfully');
       } catch (error) {
-        console.error('Failed to track share:', error);
+        console.error('❌ Failed to track share:', error);
       }
 
     } catch (error) {
-      console.error('Share error:', error);
+      console.error('💥 Share error:', error);
 
       const fallbackUrl = await createFarcasterComposeUrl(product);
 
       if (fallbackUrl) {
+        console.log('🔄 Using fallback URL:', fallbackUrl);
         window.open(fallbackUrl, '_blank');
         toast.info('Opening Farcaster', 'Complete your cast in the new tab');
       } else {
+        console.log('🚫 Fallback URL creation failed');
         toast.error('Share Failed', 'Unable to share product. Please try again.');
       }
     } finally {
