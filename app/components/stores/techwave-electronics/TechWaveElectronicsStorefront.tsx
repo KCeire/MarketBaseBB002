@@ -1,121 +1,77 @@
 // app/components/stores/techwave-electronics/TechWaveElectronicsStorefront.tsx
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/app/components/ui/Button';
 import { Icon } from '@/app/components/ui/Icon';
+import type { MarketplaceProduct } from '../../../types/shopify';
 
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  compareAtPrice?: number;
-  image: string;
-  category: string;
-  inStock: boolean;
-  vendor: string;
-  rating: number;
-  reviews: number;
+// Helper function to strip HTML tags from description
+function stripHtmlTags(html: string): string {
+  return html.replace(/<[^>]*>/g, '').trim();
 }
 
-const techWaveProducts: Product[] = [
-  {
-    id: 'smartphone-flagship',
-    name: 'TechWave Flagship Smartphone',
-    description: 'Latest generation smartphone with cutting-edge technology, 5G connectivity, and premium design.',
-    price: 899.99,
-    compareAtPrice: 999.99,
-    image: '/AppMedia/electronics-phone.jpg',
-    category: 'smartphones',
-    inStock: true,
-    vendor: 'TechWave',
-    rating: 4.8,
-    reviews: 124
-  },
-  {
-    id: 'wireless-earbuds',
-    name: 'TechWave Pro Earbuds',
-    description: 'Premium wireless earbuds with active noise cancellation and superior sound quality.',
-    price: 199.99,
-    compareAtPrice: 249.99,
-    image: '/AppMedia/electronics-earbuds.jpg',
-    category: 'audio',
-    inStock: true,
-    vendor: 'TechWave',
-    rating: 4.7,
-    reviews: 89
-  },
-  {
-    id: 'smart-watch',
-    name: 'TechWave Smart Watch Pro',
-    description: 'Advanced smartwatch with health monitoring, GPS, and week-long battery life.',
-    price: 349.99,
-    image: '/AppMedia/electronics-watch.jpg',
-    category: 'wearables',
-    inStock: true,
-    vendor: 'TechWave',
-    rating: 4.6,
-    reviews: 156
-  },
-  {
-    id: 'gaming-laptop',
-    name: 'TechWave Gaming Laptop RTX',
-    description: 'High-performance gaming laptop with RTX graphics and lightning-fast SSD storage.',
-    price: 1599.99,
-    compareAtPrice: 1799.99,
-    image: '/AppMedia/electronics-laptop.jpg',
-    category: 'computers',
-    inStock: true,
-    vendor: 'TechWave',
-    rating: 4.9,
-    reviews: 67
-  },
-  {
-    id: 'smart-home-hub',
-    name: 'TechWave Smart Home Hub',
-    description: 'Central control hub for all your smart home devices with voice control and app integration.',
-    price: 129.99,
-    image: '/AppMedia/electronics-hub.jpg',
-    category: 'smart-home',
-    inStock: true,
-    vendor: 'TechWave',
-    rating: 4.5,
-    reviews: 203
-  },
-  {
-    id: 'wireless-charger',
-    name: 'TechWave Fast Wireless Charger',
-    description: 'Ultra-fast wireless charging pad compatible with all Qi-enabled devices.',
-    price: 39.99,
-    compareAtPrice: 49.99,
-    image: '/AppMedia/electronics-charger.jpg',
-    category: 'accessories',
-    inStock: true,
-    vendor: 'TechWave',
-    rating: 4.4,
-    reviews: 312
-  }
-];
+// Helper function to get unique categories from products
+function getProductCategories(products: MarketplaceProduct[]) {
+  const categoryMap = new Map();
 
-const categories = [
-  { id: 'all', name: 'All Products', count: techWaveProducts.length },
-  { id: 'smartphones', name: 'Smartphones', count: techWaveProducts.filter(p => p.category === 'smartphones').length },
-  { id: 'audio', name: 'Audio', count: techWaveProducts.filter(p => p.category === 'audio').length },
-  { id: 'computers', name: 'Computers', count: techWaveProducts.filter(p => p.category === 'computers').length },
-  { id: 'wearables', name: 'Wearables', count: techWaveProducts.filter(p => p.category === 'wearables').length },
-  { id: 'smart-home', name: 'Smart Home', count: techWaveProducts.filter(p => p.category === 'smart-home').length },
-  { id: 'accessories', name: 'Accessories', count: techWaveProducts.filter(p => p.category === 'accessories').length }
-];
+  // Add "All Products" category
+  categoryMap.set('all', { id: 'all', name: 'All Products', count: products.length });
+
+  // Count products by productType
+  products.forEach(product => {
+    const category = product.productType.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const categoryName = product.productType;
+
+    if (categoryMap.has(category)) {
+      categoryMap.get(category).count++;
+    } else {
+      categoryMap.set(category, { id: category, name: categoryName, count: 1 });
+    }
+  });
+
+  return Array.from(categoryMap.values());
+}
 
 export function TechWaveElectronicsStorefront() {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [products, setProducts] = useState<MarketplaceProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/products/by-store/techwave-electronics');
+        const data = await response.json();
+
+        if (data.success) {
+          setProducts(data.products);
+        } else {
+          setError(data.error || 'Failed to load products');
+        }
+      } catch (err) {
+        setError('Failed to fetch products');
+        console.error('Error fetching products:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const categories = getProductCategories(products);
 
   const filteredProducts = selectedCategory === 'all'
-    ? techWaveProducts
-    : techWaveProducts.filter(product => product.category === selectedCategory);
+    ? products
+    : products.filter(product => {
+        const category = product.productType.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        return category === selectedCategory;
+      });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">
@@ -169,7 +125,7 @@ export function TechWaveElectronicsStorefront() {
             </p>
             <div className="flex justify-center space-x-6 text-blue-200">
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">150+</div>
+                <div className="text-2xl font-bold text-white">{products.length}+</div>
                 <div className="text-sm">Products</div>
               </div>
               <div className="text-center">
@@ -189,90 +145,128 @@ export function TechWaveElectronicsStorefront() {
       {/* Products Section */}
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          {/* Category Filter */}
-          <div className="mb-8">
-            <div className="flex flex-wrap gap-2 justify-center">
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    selectedCategory === category.id
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-white/10 text-blue-100 hover:bg-white/20'
-                  }`}
-                >
-                  {category.name} ({category.count})
-                </button>
-              ))}
+          {/* Loading State */}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+              <p className="mt-4 text-blue-200">Loading products...</p>
             </div>
-          </div>
+          )}
 
-          {/* Products Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="bg-white/10 backdrop-blur-md rounded-xl border border-blue-200/20 overflow-hidden hover:bg-white/20 transition-all duration-200 group"
+          {/* Error State */}
+          {error && (
+            <div className="text-center py-12">
+              <p className="text-red-400 mb-4">Error: {error}</p>
+              <Button
+                variant="secondary"
+                onClick={() => window.location.reload()}
+                className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-200"
               >
-                <div className="aspect-square bg-white/5 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-                    <div className="text-white/60 text-6xl">📱</div>
+                Try Again
+              </Button>
+            </div>
+          )}
+
+          {/* Products Content */}
+          {!loading && !error && (
+            <>
+              {/* Category Filter */}
+              {categories.length > 1 && (
+                <div className="mb-8">
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {categories.map((category) => (
+                      <button
+                        key={category.id}
+                        onClick={() => setSelectedCategory(category.id)}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                          selectedCategory === category.id
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-white/10 text-blue-100 hover:bg-white/20'
+                        }`}
+                      >
+                        {category.name} ({category.count})
+                      </button>
+                    ))}
                   </div>
-                  {product.compareAtPrice && (
-                    <div className="absolute top-3 left-3">
-                      <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-                        SALE
-                      </span>
-                    </div>
-                  )}
                 </div>
+              )}
 
-                <div className="p-6 space-y-4">
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-2">{product.name}</h3>
-                    <p className="text-blue-100 text-sm leading-relaxed">{product.description}</p>
-                  </div>
-
-                  <div className="flex items-center justify-between text-sm text-blue-200">
-                    <div className="flex items-center space-x-2">
-                      <div className="flex items-center">
-                        <Icon name="star" size="sm" className="text-yellow-400" />
-                        <span className="ml-1">{product.rating}</span>
-                      </div>
-                      <span>({product.reviews} reviews)</span>
-                    </div>
-                    <div className="text-green-400 text-xs">
-                      {product.inStock ? '✓ In Stock' : '✗ Out of Stock'}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-2xl font-bold text-white">${product.price}</span>
+              {/* Products Grid */}
+              {filteredProducts.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {filteredProducts.map((product) => (
+                    <div
+                      key={product.id}
+                      className="bg-white/10 backdrop-blur-md rounded-xl border border-blue-200/20 overflow-hidden hover:bg-white/20 transition-all duration-200 group"
+                    >
+                      <div className="aspect-square bg-white/5 relative overflow-hidden">
+                        {product.image ? (
+                          <img
+                            src={product.image}
+                            alt={product.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
+                            <div className="text-white/60 text-6xl">📱</div>
+                          </div>
+                        )}
                         {product.compareAtPrice && (
-                          <span className="text-blue-300 line-through text-lg">${product.compareAtPrice}</span>
+                          <div className="absolute top-3 left-3">
+                            <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                              SALE
+                            </span>
+                          </div>
                         )}
                       </div>
-                      <div className="text-xs text-blue-200">
-                        by {product.vendor}
+
+                      <div className="p-6 space-y-4">
+                        <div>
+                          <h3 className="text-lg font-bold text-white mb-2">{product.title}</h3>
+                          <p className="text-blue-100 text-sm leading-relaxed line-clamp-3">{stripHtmlTags(product.description)}</p>
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm text-blue-200">
+                          <div className="text-xs text-blue-200">
+                            {product.productType}
+                          </div>
+                          <div className="text-green-400 text-xs">
+                            ✓ Available
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-2xl font-bold text-white">${product.price}</span>
+                              {product.compareAtPrice && (
+                                <span className="text-blue-300 line-through text-lg">${product.compareAtPrice}</span>
+                              )}
+                            </div>
+                            <div className="text-xs text-blue-200">
+                              dispatched by TechWave Electronics
+                            </div>
+                          </div>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            className="bg-blue-500 hover:bg-blue-600 text-white"
+                            icon={<Icon name="shopping-cart" size="sm" />}
+                          >
+                            Add to Cart
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      disabled={!product.inStock}
-                      className="bg-blue-500 hover:bg-blue-600 text-white"
-                      icon={<Icon name="shopping-cart" size="sm" />}
-                    >
-                      Add to Cart
-                    </Button>
-                  </div>
+                  ))}
                 </div>
-              </div>
-            ))}
-          </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-blue-200 mb-4">No products found in this category.</p>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
 

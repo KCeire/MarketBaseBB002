@@ -1,119 +1,77 @@
 // app/components/stores/pawsome-pets/PawsomePetsStorefront.tsx
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/app/components/ui/Button';
 import { Icon } from '@/app/components/ui/Icon';
+import type { MarketplaceProduct } from '../../../types/shopify';
 
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  compareAtPrice?: number;
-  image: string;
-  category: string;
-  inStock: boolean;
-  vendor: string;
-  rating: number;
-  reviews: number;
+// Helper function to strip HTML tags from description
+function stripHtmlTags(html: string): string {
+  return html.replace(/<[^>]*>/g, '').trim();
 }
 
-const pawsomeProducts: Product[] = [
-  {
-    id: 'premium-dog-food',
-    name: 'Premium Organic Dog Food',
-    description: 'Nutrient-rich organic dog food made with real meat and vegetables. Perfect for all life stages.',
-    price: 49.99,
-    compareAtPrice: 59.99,
-    image: '/AppMedia/pet-food.jpg',
-    category: 'food',
-    inStock: true,
-    vendor: 'Pawsome Pets',
-    rating: 4.8,
-    reviews: 234
-  },
-  {
-    id: 'interactive-cat-toy',
-    name: 'Interactive Cat Puzzle Toy',
-    description: 'Engaging puzzle toy that keeps cats mentally stimulated and entertained for hours.',
-    price: 24.99,
-    image: '/AppMedia/cat-toy.jpg',
-    category: 'toys',
-    inStock: true,
-    vendor: 'Pawsome Pets',
-    rating: 4.7,
-    reviews: 156
-  },
-  {
-    id: 'luxury-dog-bed',
-    name: 'Luxury Orthopedic Dog Bed',
-    description: 'Memory foam dog bed with washable cover. Provides superior comfort for aging joints.',
-    price: 89.99,
-    compareAtPrice: 119.99,
-    image: '/AppMedia/dog-bed.jpg',
-    category: 'accessories',
-    inStock: true,
-    vendor: 'Pawsome Pets',
-    rating: 4.9,
-    reviews: 98
-  },
-  {
-    id: 'pet-grooming-kit',
-    name: 'Complete Pet Grooming Kit',
-    description: 'Professional-grade grooming tools including brushes, nail clippers, and shampoo.',
-    price: 34.99,
-    image: '/AppMedia/grooming-kit.jpg',
-    category: 'grooming',
-    inStock: true,
-    vendor: 'Pawsome Pets',
-    rating: 4.6,
-    reviews: 187
-  },
-  {
-    id: 'bird-cage-large',
-    name: 'Spacious Bird Cage with Stand',
-    description: 'Large bird cage with multiple perches, feeding stations, and easy-clean design.',
-    price: 159.99,
-    compareAtPrice: 199.99,
-    image: '/AppMedia/bird-cage.jpg',
-    category: 'accessories',
-    inStock: true,
-    vendor: 'Pawsome Pets',
-    rating: 4.5,
-    reviews: 67
-  },
-  {
-    id: 'fish-tank-starter',
-    name: 'Aquarium Starter Kit',
-    description: 'Complete 20-gallon aquarium kit with filter, heater, and LED lighting system.',
-    price: 129.99,
-    image: '/AppMedia/fish-tank.jpg',
-    category: 'aquarium',
-    inStock: true,
-    vendor: 'Pawsome Pets',
-    rating: 4.7,
-    reviews: 143
-  }
-];
+// Helper function to get unique categories from products
+function getProductCategories(products: MarketplaceProduct[]) {
+  const categoryMap = new Map();
 
-const categories = [
-  { id: 'all', name: 'All Products', count: pawsomeProducts.length },
-  { id: 'food', name: 'Pet Food', count: pawsomeProducts.filter(p => p.category === 'food').length },
-  { id: 'toys', name: 'Toys', count: pawsomeProducts.filter(p => p.category === 'toys').length },
-  { id: 'accessories', name: 'Accessories', count: pawsomeProducts.filter(p => p.category === 'accessories').length },
-  { id: 'grooming', name: 'Grooming', count: pawsomeProducts.filter(p => p.category === 'grooming').length },
-  { id: 'aquarium', name: 'Aquarium', count: pawsomeProducts.filter(p => p.category === 'aquarium').length }
-];
+  // Add "All Products" category
+  categoryMap.set('all', { id: 'all', name: 'All Products', count: products.length });
+
+  // Count products by productType
+  products.forEach(product => {
+    const category = product.productType.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const categoryName = product.productType;
+
+    if (categoryMap.has(category)) {
+      categoryMap.get(category).count++;
+    } else {
+      categoryMap.set(category, { id: category, name: categoryName, count: 1 });
+    }
+  });
+
+  return Array.from(categoryMap.values());
+}
 
 export function PawsomePetsStorefront() {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [products, setProducts] = useState<MarketplaceProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/products/by-store/pawsome-pets');
+        const data = await response.json();
+
+        if (data.success) {
+          setProducts(data.products);
+        } else {
+          setError(data.error || 'Failed to load products');
+        }
+      } catch (err) {
+        setError('Failed to fetch products');
+        console.error('Error fetching products:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const categories = getProductCategories(products);
 
   const filteredProducts = selectedCategory === 'all'
-    ? pawsomeProducts
-    : pawsomeProducts.filter(product => product.category === selectedCategory);
+    ? products
+    : products.filter(product => {
+        const category = product.productType.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        return category === selectedCategory;
+      });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-violet-800 to-purple-900">
@@ -169,7 +127,7 @@ export function PawsomePetsStorefront() {
             </p>
             <div className="flex justify-center space-x-6 text-purple-200">
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">120+</div>
+                <div className="text-2xl font-bold text-white">{products.length}+</div>
                 <div className="text-sm">Products</div>
               </div>
               <div className="text-center">
@@ -189,96 +147,128 @@ export function PawsomePetsStorefront() {
       {/* Products Section */}
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          {/* Category Filter */}
-          <div className="mb-8">
-            <div className="flex flex-wrap gap-2 justify-center">
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    selectedCategory === category.id
-                      ? 'bg-purple-500 text-white'
-                      : 'bg-white/10 text-purple-100 hover:bg-white/20'
-                  }`}
-                >
-                  {category.name} ({category.count})
-                </button>
-              ))}
+          {/* Loading State */}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
+              <p className="mt-4 text-purple-200">Loading products...</p>
             </div>
-          </div>
+          )}
 
-          {/* Products Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="bg-white/10 backdrop-blur-md rounded-xl border border-purple-200/20 overflow-hidden hover:bg-white/20 transition-all duration-200 group"
+          {/* Error State */}
+          {error && (
+            <div className="text-center py-12">
+              <p className="text-red-400 mb-4">Error: {error}</p>
+              <Button
+                variant="secondary"
+                onClick={() => window.location.reload()}
+                className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-200"
               >
-                <div className="aspect-square bg-white/5 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
-                    <div className="text-white/60 text-6xl">
-                      {product.category === 'food' && '🥘'}
-                      {product.category === 'toys' && '🎾'}
-                      {product.category === 'accessories' && '🛏️'}
-                      {product.category === 'grooming' && '✂️'}
-                      {product.category === 'aquarium' && '🐠'}
-                    </div>
+                Try Again
+              </Button>
+            </div>
+          )}
+
+          {/* Products Content */}
+          {!loading && !error && (
+            <>
+              {/* Category Filter */}
+              {categories.length > 1 && (
+                <div className="mb-8">
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {categories.map((category) => (
+                      <button
+                        key={category.id}
+                        onClick={() => setSelectedCategory(category.id)}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                          selectedCategory === category.id
+                            ? 'bg-purple-500 text-white'
+                            : 'bg-white/10 text-purple-100 hover:bg-white/20'
+                        }`}
+                      >
+                        {category.name} ({category.count})
+                      </button>
+                    ))}
                   </div>
-                  {product.compareAtPrice && (
-                    <div className="absolute top-3 left-3">
-                      <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-                        SALE
-                      </span>
-                    </div>
-                  )}
                 </div>
+              )}
 
-                <div className="p-6 space-y-4">
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-2">{product.name}</h3>
-                    <p className="text-purple-100 text-sm leading-relaxed">{product.description}</p>
-                  </div>
-
-                  <div className="flex items-center justify-between text-sm text-purple-200">
-                    <div className="flex items-center space-x-2">
-                      <div className="flex items-center">
-                        <Icon name="star" size="sm" className="text-yellow-400" />
-                        <span className="ml-1">{product.rating}</span>
-                      </div>
-                      <span>({product.reviews} reviews)</span>
-                    </div>
-                    <div className="text-green-400 text-xs">
-                      {product.inStock ? '✓ In Stock' : '✗ Out of Stock'}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-2xl font-bold text-white">${product.price}</span>
+              {/* Products Grid */}
+              {filteredProducts.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {filteredProducts.map((product) => (
+                    <div
+                      key={product.id}
+                      className="bg-white/10 backdrop-blur-md rounded-xl border border-purple-200/20 overflow-hidden hover:bg-white/20 transition-all duration-200 group"
+                    >
+                      <div className="aspect-square bg-white/5 relative overflow-hidden">
+                        {product.image ? (
+                          <img
+                            src={product.image}
+                            alt={product.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                            <div className="text-white/60 text-6xl">🐾</div>
+                          </div>
+                        )}
                         {product.compareAtPrice && (
-                          <span className="text-purple-300 line-through text-lg">${product.compareAtPrice}</span>
+                          <div className="absolute top-3 left-3">
+                            <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                              SALE
+                            </span>
+                          </div>
                         )}
                       </div>
-                      <div className="text-xs text-purple-200">
-                        by {product.vendor}
+
+                      <div className="p-6 space-y-4">
+                        <div>
+                          <h3 className="text-lg font-bold text-white mb-2">{product.title}</h3>
+                          <p className="text-purple-100 text-sm leading-relaxed line-clamp-3">{stripHtmlTags(product.description)}</p>
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm text-purple-200">
+                          <div className="text-xs text-purple-200">
+                            {product.productType}
+                          </div>
+                          <div className="text-green-400 text-xs">
+                            ✓ Available
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-2xl font-bold text-white">${product.price}</span>
+                              {product.compareAtPrice && (
+                                <span className="text-purple-300 line-through text-lg">${product.compareAtPrice}</span>
+                              )}
+                            </div>
+                            <div className="text-xs text-purple-200">
+                              dispatched by Pawsome Pet Paradise
+                            </div>
+                          </div>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            className="bg-purple-500 hover:bg-purple-600 text-white"
+                            icon={<Icon name="shopping-cart" size="sm" />}
+                          >
+                            Add to Cart
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      disabled={!product.inStock}
-                      className="bg-purple-500 hover:bg-purple-600 text-white"
-                      icon={<Icon name="shopping-cart" size="sm" />}
-                    >
-                      Add to Cart
-                    </Button>
-                  </div>
+                  ))}
                 </div>
-              </div>
-            ))}
-          </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-purple-200 mb-4">No products found in this category.</p>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
 

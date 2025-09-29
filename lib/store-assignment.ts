@@ -12,73 +12,26 @@ export async function initializeStorePatterns(): Promise<void> {
   }
 }
 
+// Store vendor name to store ID mapping
+const VENDOR_TO_STORE_MAP: Record<string, string> = {
+  'TechWave Electronics': 'techwave-electronics',
+  'Green Oasis Home & Garden': 'green-oasis-home',
+  'Pawsome Pet Paradise': 'pawsome-pets',
+  'Radiant Beauty Co.': 'radiant-beauty',
+  'Apex Athletics': 'apex-athletics'
+};
+
 export function categorizeProduct(product: MarketplaceProduct): string | null {
-  if (!storePatterns) {
-    console.error('Store patterns not initialized. Call initializeStorePatterns() first.');
-    return null;
+  // Use vendor-based categorization - simple and direct
+  const storeId = VENDOR_TO_STORE_MAP[product.vendor];
+
+  if (storeId) {
+    console.log(`Product "${product.title}" assigned to ${product.vendor} (vendor-based)`);
+    return storeId;
   }
 
-  const searchText = `${product.title} ${product.description} ${product.productType} ${product.tags.join(' ')}`.toLowerCase();
-
-  // Score each store based on pattern matches
-  const scores = storePatterns.map(storePattern => {
-    let score = 0;
-
-    // Check product type matches (high weight)
-    if (storePattern.pattern.productTypes.some(type =>
-      product.productType.toLowerCase().includes(type.toLowerCase()) ||
-      type.toLowerCase().includes(product.productType.toLowerCase())
-    )) {
-      score += 15;
-    }
-
-    // Check vendor matches (medium weight)
-    if (storePattern.pattern.vendors.some(vendor =>
-      product.vendor.toLowerCase().includes(vendor.toLowerCase()) ||
-      vendor.toLowerCase().includes(product.vendor.toLowerCase())
-    )) {
-      score += 10;
-    }
-
-    // Check tag matches (medium weight)
-    product.tags.forEach(productTag => {
-      if (storePattern.pattern.tags.some(patternTag =>
-        productTag.toLowerCase().includes(patternTag.toLowerCase()) ||
-        patternTag.toLowerCase().includes(productTag.toLowerCase())
-      )) {
-        score += 8;
-      }
-    });
-
-    // Check keyword matches (lower weight but important)
-    storePattern.pattern.keywords.forEach(keyword => {
-      if (searchText.includes(keyword.toLowerCase())) {
-        score += 1;
-      }
-    });
-
-    return {
-      storeId: storePattern.storeId,
-      storeName: storePattern.storeName,
-      category: storePattern.category,
-      score
-    };
-  });
-
-  // Find best match
-  const bestMatch = scores.reduce((best, current) =>
-    current.score > best.score ? current : best
-  );
-
-  // Require minimum score to avoid random assignments
-  const minimumScore = 5;
-  if (bestMatch.score < minimumScore) {
-    console.log(`Product "${product.title}" score too low (${bestMatch.score}), no store assigned`);
-    return null;
-  }
-
-  console.log(`Product "${product.title}" assigned to ${bestMatch.storeName} (score: ${bestMatch.score})`);
-  return bestMatch.storeId;
+  console.log(`Product "${product.title}" has unrecognized vendor "${product.vendor}", no store assigned`);
+  return null;
 }
 
 export function categorizeProductByKeywords(
@@ -105,14 +58,19 @@ export function categorizeProductByKeywords(
   return categorizeProduct(product);
 }
 
-export function getStoreInfo(storeId: string | null) {
-  if (!storeId || !storePatterns) return null;
+// Store information mapping
+const STORE_INFO_MAP: Record<string, { name: string; category: string }> = {
+  'techwave-electronics': { name: 'TechWave Electronics', category: 'Electronics' },
+  'green-oasis-home': { name: 'Green Oasis Home & Garden', category: 'Home & Garden' },
+  'pawsome-pets': { name: 'Pawsome Pet Paradise', category: 'Pet Products' },
+  'radiant-beauty': { name: 'Radiant Beauty Co.', category: 'Health & Beauty' },
+  'apex-athletics': { name: 'Apex Athletics', category: 'Sports & Outdoors' }
+};
 
-  const pattern = storePatterns.find(p => p.storeId === storeId);
-  return pattern ? {
-    name: pattern.storeName,
-    category: pattern.category
-  } : null;
+export function getStoreInfo(storeId: string | null) {
+  if (!storeId) return null;
+
+  return STORE_INFO_MAP[storeId] || null;
 }
 
 export async function getStorePatterns(): Promise<StorePattern[]> {
