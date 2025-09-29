@@ -5,8 +5,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/app/components/ui/Button';
 import { Icon } from '@/app/components/ui/Icon';
-import type { MarketplaceProduct } from '../../../types/shopify';
-import { addProductToCart } from '../../../../lib/cart-utils';
+import type { MarketplaceProduct } from '@/types/shopify';
+import { addProductToCart } from '@/lib/cart-utils';
 
 // Helper function to strip HTML tags from description
 function stripHtmlTags(html: string): string {
