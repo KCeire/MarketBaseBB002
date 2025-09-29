@@ -123,8 +123,8 @@ export default function StoresPage() {
   const liveStores = stores.filter(store => store.status === 'live');
 
   const handleStoreClick = (store: Store) => {
-    if (store.status === 'live' && store.id === 'nft-energy') {
-      router.push('/store/nft-energy');
+    if (store.status === 'live') {
+      router.push(store.path);
     }
   };
 
@@ -334,13 +334,6 @@ export default function StoresPage() {
                       >
                         Visit Store
                       </Button>
-                      {store.id !== 'nft-energy' && (
-                        <div className="absolute inset-0 bg-gray-900/80 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                          <span className="text-white text-xs font-medium px-2 py-1 bg-orange-500/90 rounded-full">
-                            In Development
-                          </span>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>

@@ -1,10 +1,11 @@
 // lib/shopify/api.ts
 
-import { 
-  ShopifyProduct, 
-  ShopifyProductsResponse, 
+import {
+  ShopifyProduct,
+  ShopifyProductsResponse,
   MarketplaceProduct
 } from '@/types/shopify';
+import { categorizeProduct, initializeStorePatterns } from '../store-assignment';
 
 const SHOPIFY_DOMAIN = process.env.SHOPIFY_DOMAIN;
 const SHOPIFY_ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN;
@@ -106,7 +107,7 @@ export async function getProductByHandle(handle: string): Promise<MarketplacePro
 function transformShopifyProduct(product: ShopifyProduct): MarketplaceProduct {
   const images = product.images.map(img => img.src);
   const mainImage = product.image?.src || images[0] || '';
-  
+
   return {
     id: product.id,
     title: product.title,
@@ -129,6 +130,53 @@ function transformShopifyProduct(product: ShopifyProduct): MarketplaceProduct {
       sku: variant.sku,
     })),
   };
+}
+
+// Get products for a specific store
+export async function getProductsForStore(storeId: string): Promise<MarketplaceProduct[]> {
+  try {
+    await initializeStorePatterns();
+    const allProducts = await getAllProducts();
+
+    return allProducts.filter(product => {
+      const assignedStore = categorizeProduct(product);
+      return assignedStore === storeId;
+    });
+  } catch (error) {
+    console.error(`Failed to fetch products for store ${storeId}:`, error);
+    throw error;
+  }
+}
+
+// Get products categorized by all stores
+export async function getProductsByStore(): Promise<Record<string, MarketplaceProduct[]>> {
+  try {
+    await initializeStorePatterns();
+    const allProducts = await getAllProducts();
+
+    const storeProducts: Record<string, MarketplaceProduct[]> = {
+      'techwave-electronics': [],
+      'green-oasis-home': [],
+      'pawsome-pets': [],
+      'radiant-beauty': [],
+      'apex-athletics': [],
+      'unassigned': []
+    };
+
+    allProducts.forEach(product => {
+      const storeId = categorizeProduct(product);
+      if (storeId && storeProducts[storeId]) {
+        storeProducts[storeId].push(product);
+      } else {
+        storeProducts['unassigned'].push(product);
+      }
+    });
+
+    return storeProducts;
+  } catch (error) {
+    console.error('Failed to categorize products by store:', error);
+    throw error;
+  }
 }
 
 // Test API connection

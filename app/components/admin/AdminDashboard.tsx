@@ -6,6 +6,7 @@ import { useAccount } from 'wagmi';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { toast } from '../ui/Toast';
+import type { MarketplaceProduct } from '../../../types/shopify';
 
 // Client-side interfaces (no encryption utilities needed)
 interface CustomerData {
@@ -95,12 +96,37 @@ function getStatusColor(status: string): string {
   }
 }
 
+// Product categorization interfaces
+interface StorePattern {
+  storeId: string;
+  storeName: string;
+  category: string;
+  keywordCount: number;
+  productTypes: string[];
+  vendors: string[];
+  topKeywords: string[];
+  sampleTitles: string[];
+}
+
+interface StoreProducts {
+  id: string;
+  name: string;
+  category: string;
+  products: MarketplaceProduct[];
+  count: number;
+}
+
 interface AdminDashboardProps {
   initialOrders?: DecryptedOrder[];
 }
 
 export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
   const { address } = useAccount();
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'orders' | 'products'>('orders');
+
+  // Order management state
   const [orders, setOrders] = useState<DecryptedOrder[]>(initialOrders);
   const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
@@ -112,6 +138,12 @@ export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
     dateTo: '',
     search: ''
   });
+
+  // Product categorization state
+  const [patterns, setPatterns] = useState<StorePattern[]>([]);
+  const [storeProducts, setStoreProducts] = useState<StoreProducts[]>([]);
+  const [productLoading, setProductLoading] = useState(false);
+  const [productActiveTab, setProductActiveTab] = useState<'patterns' | 'distribution'>('patterns');
 
   const fetchOrders = useCallback(async () => {
     if (!address) return;
@@ -222,6 +254,56 @@ export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
     }
   };
 
+  // Product categorization functions
+  const loadPatterns = async () => {
+    setProductLoading(true);
+    try {
+      const response = await fetch('/api/products/categorize');
+      const data = await response.json();
+
+      if (data.success) {
+        setPatterns(data.storePatterns);
+        toast.success('Patterns Loaded', `Analyzed ${data.storePatterns.length} store patterns`);
+      } else {
+        toast.error('Load Failed', data.error || 'Failed to load patterns');
+      }
+    } catch (error) {
+      console.error('Failed to load patterns:', error);
+      toast.error('Network Error', 'Failed to connect to server');
+    }
+    setProductLoading(false);
+  };
+
+  const loadStoreDistribution = async () => {
+    setProductLoading(true);
+    try {
+      const stores = ['techwave-electronics', 'green-oasis-home', 'pawsome-pets', 'radiant-beauty', 'apex-athletics'];
+
+      const promises = stores.map(async (storeId) => {
+        const response = await fetch(`/api/products/by-store/${storeId}`);
+        const data = await response.json();
+        return data.success ? {
+          id: data.store.id,
+          name: data.store.name,
+          category: data.store.category,
+          products: data.products,
+          count: data.count
+        } : null;
+      });
+
+      const results = await Promise.all(promises);
+      const validResults = results.filter(Boolean) as StoreProducts[];
+      setStoreProducts(validResults);
+
+      const totalProducts = validResults.reduce((sum, store) => sum + store.count, 0);
+      toast.success('Distribution Loaded', `Found ${totalProducts} products across ${validResults.length} stores`);
+    } catch (error) {
+      console.error('Failed to load store distribution:', error);
+      toast.error('Network Error', 'Failed to load product distribution');
+    }
+    setProductLoading(false);
+  };
+
   const confirmedOrders = orders.filter(order => order.payment_status === 'confirmed');
   const selectedConfirmedCount = Array.from(selectedOrders)
     .filter(orderId => confirmedOrders.some(order => order.id === orderId))
@@ -235,7 +317,7 @@ export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
           <div className="flex justify-between items-center mb-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Base Shop Admin</h1>
-              <p className="text-gray-600">Order Management & CJ Export (Secure)</p>
+              <p className="text-gray-600">Order Management & Product Categorization (Secure)</p>
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-500">
@@ -284,7 +366,47 @@ export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Tab Navigation */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8 px-6">
+              <button
+                onClick={() => setActiveTab('orders')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'orders'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <Icon name="shopping-cart" size="sm" className="mr-2" />
+                Order Management
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab('products');
+                  if (productActiveTab === 'patterns' && patterns.length === 0) {
+                    loadPatterns();
+                  } else if (productActiveTab === 'distribution' && storeProducts.length === 0) {
+                    loadStoreDistribution();
+                  }
+                }}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'products'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <Icon name="package" size="sm" className="mr-2" />
+                Product Categorization
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        {/* Orders Tab Content */}
+        {activeTab === 'orders' && (
+          <>
+            {/* Filters */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-semibold mb-4">Filters</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -551,6 +673,189 @@ export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
             </div>
           )}
         </div>
+        </>
+        )}
+
+        {/* Products Tab Content */}
+        {activeTab === 'products' && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Product Categorization System</h2>
+                <p className="text-gray-600 mt-1">
+                  Automatically categorizes CJ dropshipping products into your 5 stores based on existing product patterns.
+                </p>
+              </div>
+              <div className="flex space-x-4">
+                <Button
+                  variant={productActiveTab === 'patterns' ? 'primary' : 'outline'}
+                  onClick={() => {
+                    setProductActiveTab('patterns');
+                    loadPatterns();
+                  }}
+                  loading={productLoading && productActiveTab === 'patterns'}
+                >
+                  Store Patterns
+                </Button>
+                <Button
+                  variant={productActiveTab === 'distribution' ? 'primary' : 'outline'}
+                  onClick={() => {
+                    setProductActiveTab('distribution');
+                    loadStoreDistribution();
+                  }}
+                  loading={productLoading && productActiveTab === 'distribution'}
+                >
+                  Product Distribution
+                </Button>
+              </div>
+            </div>
+
+            {productLoading && (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p className="mt-2 text-gray-600">Loading...</p>
+              </div>
+            )}
+
+            {/* Store Patterns Tab */}
+            {productActiveTab === 'patterns' && !productLoading && (
+              <div className="space-y-6">
+                {patterns.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">Click &quot;Store Patterns&quot; to analyze your product patterns</p>
+                  </div>
+                ) : (
+                  patterns.map((pattern) => (
+                    <div
+                      key={pattern.storeId}
+                      className="bg-gray-50 rounded-lg p-4"
+                    >
+                      <div className="mb-3">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {pattern.storeName}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {pattern.category} • {pattern.keywordCount} keywords
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">
+                            Product Types
+                          </h4>
+                          <ul className="text-gray-600 space-y-1">
+                            {pattern.productTypes.slice(0, 5).map((type, i) => (
+                              <li key={i} className="truncate">• {type}</li>
+                            ))}
+                            {pattern.productTypes.length > 5 && (
+                              <li className="text-gray-500">+ {pattern.productTypes.length - 5} more</li>
+                            )}
+                          </ul>
+                        </div>
+
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">
+                            Top Keywords
+                          </h4>
+                          <div className="flex flex-wrap gap-1">
+                            {pattern.topKeywords.map((keyword, i) => (
+                              <span
+                                key={i}
+                                className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs"
+                              >
+                                {keyword}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">
+                            Sample Products
+                          </h4>
+                          <ul className="text-gray-600 space-y-1">
+                            {pattern.sampleTitles.map((title, i) => (
+                              <li key={i} className="truncate text-xs">• {title}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* Product Distribution Tab */}
+            {productActiveTab === 'distribution' && !productLoading && (
+              <div className="space-y-6">
+                {storeProducts.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">Click &quot;Product Distribution&quot; to see how products are categorized</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {storeProducts.map((store) => (
+                        <div
+                          key={store.id}
+                          className="bg-white border border-gray-200 rounded-lg p-4"
+                        >
+                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                            {store.name}
+                          </h3>
+                          <p className="text-sm text-gray-600 mb-3">
+                            {store.category}
+                          </p>
+                          <div className="text-2xl font-bold text-blue-600">
+                            {store.count}
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            products assigned
+                          </p>
+
+                          {store.products.slice(0, 3).map((product) => (
+                            <div
+                              key={product.id}
+                              className="mt-2 p-2 bg-gray-50 rounded text-xs"
+                            >
+                              <div className="font-medium text-gray-900 truncate">
+                                {product.title}
+                              </div>
+                              <div className="text-gray-600">
+                                ${product.price} • {product.vendor}
+                              </div>
+                            </div>
+                          ))}
+
+                          {store.count > 3 && (
+                            <div className="mt-2 text-xs text-gray-500">
+                              + {store.count - 3} more products
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                        System Status
+                      </h3>
+                      <ul className="text-blue-800 text-sm space-y-1">
+                        <li>✓ Product categorization system is active</li>
+                        <li>✓ All new CJ products will be automatically categorized</li>
+                        <li>• Use /api/products/categorize to categorize new products</li>
+                        <li>• Each store shows only relevant products</li>
+                        <li>• NFT Energy store remains separate and manually managed</li>
+                      </ul>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
