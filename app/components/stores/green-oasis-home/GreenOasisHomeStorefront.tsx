@@ -7,6 +7,8 @@ import { Button } from '@/app/components/ui/Button';
 import { Icon } from '@/app/components/ui/Icon';
 import type { MarketplaceProduct } from '@/types/shopify';
 import { addProductToCart } from '@/lib/cart-utils';
+import { ShareButton } from '@/app/components/product/ShareButton';
+import { QuantitySelector } from '@/app/components/product/QuantitySelector';
 
 // Helper function to strip HTML tags from description
 function stripHtmlTags(html: string): string {
@@ -41,6 +43,7 @@ export function GreenOasisHomeStorefront() {
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -115,28 +118,27 @@ export function GreenOasisHomeStorefront() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative py-20 px-4">
+      <section className="relative py-2 px-4">
         <div className="max-w-7xl mx-auto text-center">
-          <div className="space-y-6">
-            <h1 className="text-5xl font-bold text-white mb-6">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold text-white mb-1">
               Create Your <span className="text-green-400">Perfect Oasis</span>
             </h1>
-            <p className="text-xl text-green-100 max-w-3xl mx-auto">
-              Transform your space into a beautiful oasis. Premium furniture, decor, gardening tools,
-              and outdoor essentials for modern living.
+            <p className="text-xs text-green-100 max-w-md mx-auto">
+              Premium furniture, decor, gardening tools, and outdoor essentials.
             </p>
-            <div className="flex justify-center space-x-6 text-green-200">
+            <div className="flex justify-center space-x-3 text-green-200">
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">{products.length}+</div>
-                <div className="text-sm">Products</div>
+                <div className="text-sm font-bold text-white">{products.length}+</div>
+                <div className="text-xs">Products</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">4.9⭐</div>
-                <div className="text-sm">Rating</div>
+                <div className="text-sm font-bold text-white">4.9⭐</div>
+                <div className="text-xs">Rating</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-white">Free</div>
-                <div className="text-sm">Delivery</div>
+                <div className="text-sm font-bold text-white">Free</div>
+                <div className="text-xs">Delivery</div>
               </div>
             </div>
           </div>
@@ -145,7 +147,7 @@ export function GreenOasisHomeStorefront() {
       </section>
 
       {/* Products Section */}
-      <section className="py-16 px-4">
+      <section className="py-1 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Loading State */}
           {loading && (
@@ -196,10 +198,15 @@ export function GreenOasisHomeStorefront() {
               {/* Products Grid */}
               {filteredProducts.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {filteredProducts.map((product) => (
+                  {filteredProducts.map((product) => {
+                    const quantity = quantities[product.id.toString()] || 1;
+                    const totalPrice = (parseFloat(product.price) * quantity).toFixed(2);
+                    const totalComparePrice = product.compareAtPrice ? (parseFloat(product.compareAtPrice) * quantity).toFixed(2) : null;
+
+                    return (
                     <div
                       key={product.id}
-                      className="bg-white/10 backdrop-blur-md rounded-xl border border-green-200/20 overflow-hidden hover:bg-white/20 transition-all duration-200 group"
+                      className="bg-white/10 backdrop-blur-md rounded-xl border border-green-200/20 overflow-hidden hover:bg-white/20 transition-all duration-200 group flex flex-col"
                     >
                       <div className="aspect-square bg-white/5 relative overflow-hidden">
                         {product.image ? (
@@ -222,46 +229,87 @@ export function GreenOasisHomeStorefront() {
                         )}
                       </div>
 
-                      <div className="p-6 space-y-4">
-                        <div>
+                      <div className="p-6 flex flex-col flex-1">
+                        <div className="flex-1">
                           <h3 className="text-lg font-bold text-white mb-2">{product.title}</h3>
-                          <p className="text-green-100 text-sm leading-relaxed line-clamp-3">{stripHtmlTags(product.description)}</p>
+                          <p className="text-green-100 text-sm leading-relaxed line-clamp-3 mb-4">{stripHtmlTags(product.description)}</p>
+
+                          <div className="flex items-center justify-between text-sm text-green-200 mb-4">
+                            <div className="text-xs text-green-200">
+                              {product.productType}
+                            </div>
+                            <div className="text-green-400 text-xs">
+                              ✓ Available
+                            </div>
+                          </div>
                         </div>
 
-                        <div className="flex items-center justify-between text-sm text-green-200">
-                          <div className="text-xs text-green-200">
-                            {product.productType}
-                          </div>
-                          <div className="text-green-400 text-xs">
-                            ✓ Available
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between">
+                        <div className="space-y-3 mt-auto">
                           <div className="space-y-1">
                             <div className="flex items-center space-x-2">
-                              <span className="text-2xl font-bold text-white">${product.price}</span>
-                              {product.compareAtPrice && (
-                                <span className="text-green-300 line-through text-lg">${product.compareAtPrice}</span>
+                              <span className="text-2xl font-bold text-white">${totalPrice}</span>
+                              {totalComparePrice && (
+                                <span className="text-green-300 line-through text-lg">${totalComparePrice}</span>
                               )}
                             </div>
                             <div className="text-xs text-green-200">
                               dispatched by Green Oasis Home & Garden
                             </div>
                           </div>
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={() => addProductToCart(product, 1)}
-                            className="bg-green-500 hover:bg-green-600 text-white"
-                            icon={<Icon name="shopping-cart" size="sm" />}
-                          >
-                            Add to Cart
-                          </Button>
+
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <QuantitySelector
+                                value={quantity}
+                                onChange={(qty) => setQuantities(prev => ({ ...prev, [product.id.toString()]: qty }))}
+                                min={1}
+                                max={99}
+                                size="sm"
+                                className="flex-shrink-0"
+                              />
+                              <Button
+                                variant="primary"
+                                size="sm"
+                                onClick={() => {
+                                  addProductToCart(product, quantity);
+                                  setQuantities(prev => ({ ...prev, [product.id.toString()]: 1 }));
+                                }}
+                                className="bg-green-500 hover:bg-green-600 text-white flex-1"
+                                icon={<Icon name="shopping-cart" size="sm" />}
+                              >
+                                Add to Cart
+                              </Button>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => router.push(`/product/${product.id}`)}
+                              className="w-full border-green-300/30 text-green-200 hover:bg-green-500/10"
+                              icon={<Icon name="eye" size="sm" />}
+                            >
+                              View Details
+                            </Button>
+                          </div>
+
+                          <div className="border-t border-green-200/20 pt-3">
+                            <ShareButton
+                              product={{
+                                id: product.id,
+                                title: product.title,
+                                price: product.price,
+                                image: product.image || '',
+                                description: product.description
+                              }}
+                              variant="outline"
+                              size="sm"
+                              className="w-full border-green-300/30 text-green-200 hover:bg-green-500/10"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-12">
