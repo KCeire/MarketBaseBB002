@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/app/components/ui/Button';
 import { Icon } from '@/app/components/ui/Icon';
 import type { MarketplaceProduct } from '../../../types/shopify';
+import { addProductToCart } from '../../../../lib/cart-utils';
 
 // Helper function to strip HTML tags from description
 function stripHtmlTags(html: string): string {
@@ -250,6 +251,7 @@ export function TechWaveElectronicsStorefront() {
                           <Button
                             variant="primary"
                             size="sm"
+                            onClick={() => addProductToCart(product, 1)}
                             className="bg-blue-500 hover:bg-blue-600 text-white"
                             icon={<Icon name="shopping-cart" size="sm" />}
                           >

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/app/components/ui/Button';
 import { Icon } from '@/app/components/ui/Icon';
 import type { MarketplaceProduct } from '../../../types/shopify';
+import { addProductToCart } from '../../../../lib/cart-utils';
 
 // Helper function to strip HTML tags from description
 function stripHtmlTags(html: string): string {
@@ -251,6 +252,7 @@ export function GreenOasisHomeStorefront() {
                           <Button
                             variant="primary"
                             size="sm"
+                            onClick={() => addProductToCart(product, 1)}
                             className="bg-green-500 hover:bg-green-600 text-white"
                             icon={<Icon name="shopping-cart" size="sm" />}
                           >
