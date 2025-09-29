@@ -39,7 +39,8 @@ const dispatchCartUpdate = () => {
 };
 
 // Union type for all products (Shopify + Store products)
-type UnifiedProduct = MarketplaceProduct & {
+type UnifiedProduct = Omit<MarketplaceProduct, 'id'> & {
+  id: number | string; // Allow both number and string IDs
   storeInfo?: { name: string; slug: string; url: string; };
   isStoreProduct?: boolean;
   originalId?: string; // Store original string ID for mapping
