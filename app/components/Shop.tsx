@@ -42,6 +42,7 @@ const dispatchCartUpdate = () => {
 type UnifiedProduct = MarketplaceProduct & {
   storeInfo?: { name: string; slug: string; url: string; };
   isStoreProduct?: boolean;
+  originalId?: string; // Store original string ID for mapping
 };
 
 export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategories = false }: ShopProps) {
@@ -90,18 +91,25 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
       }
 
       // Get local store products
-      const storeProducts: UnifiedProduct[] = getAllStoreProducts().map((product, productIndex) => ({
-        ...product,
-        id: typeof product.id === 'string' ? parseInt(`9${productIndex}${Date.now().toString().slice(-6)}`) : product.id,
-        compareAtPrice: product.compareAtPrice || null,
-        isStoreProduct: true,
-        variants: product.variants.map((variant, variantIndex) => ({
-          ...variant,
-          id: typeof variant.id === 'string' ? parseInt(`8${productIndex}${variantIndex}${Date.now().toString().slice(-4)}`) : variant.id,
-          compareAtPrice: variant.compareAtPrice || null,
-          sku: variant.sku || null
-        }))
-      }));
+      const storeProducts: UnifiedProduct[] = getAllStoreProducts().map((product, productIndex) => {
+        // For NFT Energy products, preserve original ID for routing
+        const isNFTEnergy = product.storeInfo?.slug === 'nft-energy';
+        const productId = isNFTEnergy ? product.id : (typeof product.id === 'string' ? parseInt(`9${productIndex}${Date.now().toString().slice(-6)}`) : product.id);
+
+        return {
+          ...product,
+          id: productId,
+          originalId: product.id, // Store original ID for mapping
+          compareAtPrice: product.compareAtPrice || null,
+          isStoreProduct: true,
+          variants: product.variants.map((variant, variantIndex) => ({
+            ...variant,
+            id: typeof variant.id === 'string' ? parseInt(`8${productIndex}${variantIndex}${Date.now().toString().slice(-4)}`) : variant.id,
+            compareAtPrice: variant.compareAtPrice || null,
+            sku: variant.sku || null
+          }))
+        };
+      });
 
       // Combine all products
       const allProducts = [...shopifyProducts, ...storeProducts];
@@ -299,8 +307,30 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     }, 0);
   };
 
-  const navigateToProduct = (productId: number) => {
-    router.push(`/product/${productId}`);
+  // Mapping from store product IDs to NFT Energy SKUs
+  const getNFTEnergySKU = (productId: string): string => {
+    const skuMap: Record<string, string> = {
+      'nft-energy-12pack': 'NFT-ENERGY-12PK',
+      'nft-energy-tshirt': '685381941D63E',
+      'nft-energy-hoodie': '6853806B94625',
+      'nft-energy-sweatshirt': '685375E48090B',
+      'nft-energy-trucker-hat': '68537385433E6',
+      'nft-energy-iphone-case': '68537282C6DB2'
+    };
+    return skuMap[productId] || productId;
+  };
+
+  const navigateToProduct = (productId: number | string, product?: UnifiedProduct) => {
+    // Check if this is an NFT Energy product
+    if (product?.isStoreProduct && product?.storeInfo?.slug === 'nft-energy') {
+      // Use original ID if available, otherwise use current ID
+      const idToMap = product.originalId || productId.toString();
+      const sku = getNFTEnergySKU(idToMap);
+      router.push(`/nft-energy/product/${sku}`);
+    } else {
+      // Navigate to regular Shopify product page
+      router.push(`/product/${productId}`);
+    }
   };
 
   const getCartTotal = () => {
@@ -637,7 +667,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
                 <div
                   key={`${product.isStoreProduct ? 'store' : 'shopify'}-${product.id}-${index}`}
                   className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3 cursor-pointer hover:shadow-md dark:hover:shadow-lg hover:shadow-gray-200 dark:hover:shadow-black/20 transition-all duration-200 bg-white dark:bg-gray-800"
-                  onClick={() => navigateToProduct(product.id)}
+                  onClick={() => navigateToProduct(product.id, product)}
                 >
                   {/* Demo Warning Banner */}
                   <div className="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 dark:border-yellow-400 p-3 rounded">
@@ -699,10 +729,13 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (product.isStoreProduct && product.storeInfo) {
+                            // For NFT Energy products, go to product page, not store page
+                            if (product.isStoreProduct && product.storeInfo?.slug === 'nft-energy') {
+                              navigateToProduct(product.id, product);
+                            } else if (product.isStoreProduct && product.storeInfo) {
                               router.push(product.storeInfo.url);
                             } else {
-                              navigateToProduct(product.id);
+                              navigateToProduct(product.id, product);
                             }
                           }}
                           icon={<Icon name="eye" size="sm" />}
@@ -858,7 +891,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
           <div
             key={`main-${product.isStoreProduct ? 'store' : 'shopify'}-${product.id}-${index}`}
             className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3 cursor-pointer hover:shadow-md dark:hover:shadow-lg hover:shadow-gray-200 dark:hover:shadow-black/20 transition-all duration-200 bg-white dark:bg-gray-800"
-            onClick={() => navigateToProduct(product.id)}
+            onClick={() => navigateToProduct(product.id, product)}
           >
             {/* Demo Warning Banner */}
             <div className="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 dark:border-yellow-400 p-3 rounded">
@@ -906,10 +939,13 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (product.isStoreProduct && product.storeInfo) {
+                      // For NFT Energy products, go to product page, not store page
+                      if (product.isStoreProduct && product.storeInfo?.slug === 'nft-energy') {
+                        navigateToProduct(product.id, product);
+                      } else if (product.isStoreProduct && product.storeInfo) {
                         router.push(product.storeInfo.url);
                       } else {
-                        navigateToProduct(product.id);
+                        navigateToProduct(product.id, product);
                       }
                     }}
                     icon={<Icon name="eye" size="sm" />}
