@@ -116,7 +116,7 @@ export function TechWaveElectronicsStorefront() {
         </div>
       </header>
 
-      {/* Hero Section */>
+      {/* Hero Section */}
       <section className="relative py-2 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <div className="space-y-1">

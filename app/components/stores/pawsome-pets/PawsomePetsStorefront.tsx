@@ -147,7 +147,7 @@ export function PawsomePetsStorefront() {
         <div className="absolute inset-0 bg-purple-600/10 backdrop-blur-3xl"></div>
       </section>
 
-      {/* Products Section */>
+      {/* Products Section */}
       <section className="py-1 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Loading State */}
