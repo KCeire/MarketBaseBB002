@@ -307,7 +307,7 @@ export function RadiantBeautyStorefront() {
                 <Icon name="heart" size="lg" className="text-pink-400" />
               </div>
               <h3 className="text-xl font-bold text-white">Satisfaction Guarantee</h3>
-              <p className="text-pink-100">30-day money-back guarantee if you're not completely satisfied.</p>
+              <p className="text-pink-100">30-day money-back guarantee if you&apos;re not completely satisfied.</p>
             </div>
           </div>
         </div>

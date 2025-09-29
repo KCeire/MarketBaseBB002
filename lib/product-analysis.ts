@@ -126,7 +126,6 @@ function containsKeywords(text: string, keywords: string[]): boolean {
 
 function categorizeByFallback(product: MarketplaceProduct): string | null {
   const type = product.productType.toLowerCase();
-  const vendor = product.vendor.toLowerCase();
 
   // Electronics types
   if (['electronics', 'computers', 'phones', 'accessories'].some(t => type.includes(t))) {
