@@ -2,9 +2,11 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/app/components/ui/Button';
 import { Icon } from '@/app/components/ui/Icon';
 import { toast } from '@/app/components/ui/Toast';
+import { ShareButton } from '@/app/components/product/ShareButton';
 import Image from 'next/image';
 
 interface NFTEnergyProduct {
@@ -170,6 +172,7 @@ const updatedProductData: NFTEnergyProduct[] = [
 ];
 
 export function NFTEnergyProductGrid({ products }: NFTEnergyProductGridProps) {
+  const router = useRouter();
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
   const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({});
   const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -292,7 +295,7 @@ export function NFTEnergyProductGrid({ products }: NFTEnergyProductGridProps) {
         return (
           <div
             key={product.id}
-            className="bg-black/20 backdrop-blur-sm rounded-xl border border-cyan-200/20 overflow-hidden hover:border-cyan-300/40 hover:bg-black/30 transition-all duration-300"
+            className="bg-black/20 backdrop-blur-sm rounded-xl border border-cyan-200/20 overflow-hidden hover:border-cyan-300/40 hover:bg-black/30 transition-all duration-300 flex flex-col"
           >
             {/* Product Image */}
             <div className="aspect-square bg-slate-800/50 flex items-center justify-center overflow-hidden">
@@ -315,118 +318,153 @@ export function NFTEnergyProductGrid({ products }: NFTEnergyProductGridProps) {
             </div>
 
             {/* Product Info */}
-            <div className="p-6 space-y-4">
-              <div>
-                <h3 className="text-cyan-100 font-semibold text-lg mb-2">{product.name}</h3>
-                <p className="text-cyan-100/60 text-sm mb-3 leading-relaxed">{product.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-300 bg-clip-text text-transparent">
-                    ${currentPrice.toFixed(2)}
-                  </span>
-                  <span className="text-xs text-cyan-100/40">
-                    SKU: {generateProductSKU(product, selectedVariants[product.id] || product.variants[0]?.id, selectedSize)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Variants - only show if more than 1 variant */}
-              {product.variants.length > 1 && product.variants[0].name !== 'Standard' && (
+            <div className="p-6 space-y-4 flex flex-col flex-1">
+              <div className="flex-1 space-y-4">
                 <div>
-                  <label className="text-cyan-100 text-sm font-medium block mb-2">
-                    {product.category === 'drinks' ? 'Flavor' : 'Color'}:
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {product.variants.map((variant) => (
-                      <button
-                        key={variant.id}
-                        onClick={() => handleVariantChange(product.id, variant.id)}
-                        disabled={!variant.available}
-                        className={`px-3 py-1 rounded-md text-sm border transition-colors ${
-                          (selectedVariants[product.id] || product.variants[0].id) === variant.id
-                            ? 'bg-cyan-500 border-cyan-500 text-white'
-                            : 'border-cyan-300/50 text-cyan-100/70 hover:border-cyan-300/80 hover:bg-cyan-500/10'
-                        } ${!variant.available ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      >
-                        {variant.name}
-                      </button>
-                    ))}
+                  <h3 className="text-cyan-100 font-semibold text-lg mb-2">{product.name}</h3>
+                  <p className="text-cyan-100/60 text-sm mb-3 leading-relaxed">{product.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-300 bg-clip-text text-transparent">
+                      ${currentPrice.toFixed(2)}
+                    </span>
+                    <span className="text-xs text-cyan-100/40">
+                      SKU: {generateProductSKU(product, selectedVariants[product.id] || product.variants[0]?.id, selectedSize)}
+                    </span>
                   </div>
                 </div>
-              )}
 
-              {/* Sizes - Use dropdown for iPhone cases, buttons for others */}
-              {product.sizes && (
-                <div>
-                  <label className="text-cyan-100 text-sm font-medium block mb-2">
-                    {product.baseSku === '68537282C6DB2' ? 'iPhone Model:' : 'Size:'}
-                  </label>
-                  {product.useDropdown ? (
-                    // Dropdown for iPhone models
-                    <select
-                      value={selectedSizes[product.id] || product.sizes[0]?.size}
-                      onChange={(e) => handleSizeChange(product.id, e.target.value)}
-                      className="w-full px-3 py-2 bg-black/20 border border-cyan-300/50 rounded-md text-cyan-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                    >
-                      {product.sizes.map((sizeOption) => (
-                        <option key={sizeOption.size} value={sizeOption.size} className="bg-slate-800 text-cyan-100">
-                          {sizeOption.size}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    // Buttons for other products
+                {/* Variants - only show if more than 1 variant */}
+                {product.variants.length > 1 && product.variants[0].name !== 'Standard' && (
+                  <div>
+                    <label className="text-cyan-100 text-sm font-medium block mb-2">
+                      {product.category === 'drinks' ? 'Flavor' : 'Color'}:
+                    </label>
                     <div className="flex flex-wrap gap-2">
-                      {product.sizes.map((sizeOption) => (
+                      {product.variants.map((variant) => (
                         <button
-                          key={sizeOption.size}
-                          onClick={() => handleSizeChange(product.id, sizeOption.size)}
+                          key={variant.id}
+                          onClick={() => handleVariantChange(product.id, variant.id)}
+                          disabled={!variant.available}
                           className={`px-3 py-1 rounded-md text-sm border transition-colors ${
-                            (selectedSizes[product.id] || product.sizes?.[0]?.size) === sizeOption.size
+                            (selectedVariants[product.id] || product.variants[0].id) === variant.id
                               ? 'bg-cyan-500 border-cyan-500 text-white'
                               : 'border-cyan-300/50 text-cyan-100/70 hover:border-cyan-300/80 hover:bg-cyan-500/10'
-                          }`}
+                          } ${!variant.available ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
-                          {sizeOption.size}
+                          {variant.name}
                         </button>
                       ))}
                     </div>
-                  )}
-                </div>
-              )}
+                  </div>
+                )}
 
-              {/* Quantity */}
-              <div>
-                <label className="text-cyan-100 text-sm font-medium block mb-2">Quantity:</label>
-                <div className="flex items-center border border-cyan-300/50 rounded-md bg-black/20">
-                  <button
-                    onClick={() => handleQuantityChange(product.id, Math.max(1, (quantities[product.id] || 1) - 1))}
-                    className="p-2 text-cyan-100/70 hover:text-cyan-100 hover:bg-cyan-500/10 transition-colors"
-                  >
-                    <Icon name="minus" size="sm" />
-                  </button>
-                  <span className="flex-1 text-center text-cyan-100 py-2 font-medium">
-                    {quantities[product.id] || 1}
-                  </span>
-                  <button
-                    onClick={() => handleQuantityChange(product.id, (quantities[product.id] || 1) + 1)}
-                    className="p-2 text-cyan-100/70 hover:text-cyan-100 hover:bg-cyan-500/10 transition-colors"
-                  >
-                    <Icon name="plus" size="sm" />
-                  </button>
-                </div>
+                {/* Sizes - Use dropdown for iPhone cases, buttons for others */}
+                {product.sizes && (
+                  <div>
+                    <label className="text-cyan-100 text-sm font-medium block mb-2">
+                      {product.baseSku === '68537282C6DB2' ? 'iPhone Model:' : 'Size:'}
+                    </label>
+                    {product.useDropdown ? (
+                      // Dropdown for iPhone models
+                      <select
+                        value={selectedSizes[product.id] || product.sizes[0]?.size}
+                        onChange={(e) => handleSizeChange(product.id, e.target.value)}
+                        className="w-full px-3 py-2 bg-black/20 border border-cyan-300/50 rounded-md text-cyan-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                      >
+                        {product.sizes.map((sizeOption) => (
+                          <option key={sizeOption.size} value={sizeOption.size} className="bg-slate-800 text-cyan-100">
+                            {sizeOption.size}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      // Buttons for other products
+                      <div className="flex flex-wrap gap-2">
+                        {product.sizes.map((sizeOption) => (
+                          <button
+                            key={sizeOption.size}
+                            onClick={() => handleSizeChange(product.id, sizeOption.size)}
+                            className={`px-3 py-1 rounded-md text-sm border transition-colors ${
+                              (selectedSizes[product.id] || product.sizes?.[0]?.size) === sizeOption.size
+                                ? 'bg-cyan-500 border-cyan-500 text-white'
+                                : 'border-cyan-300/50 text-cyan-100/70 hover:border-cyan-300/80 hover:bg-cyan-500/10'
+                            }`}
+                          >
+                            {sizeOption.size}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {/* Add to Cart */}
-              <Button
-                variant="primary"
-                size="md"
-                onClick={() => addToCart(product)}
-                disabled={!product.inStock}
-                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 border-0 shadow-lg shadow-cyan-500/25"
-                icon={<Icon name="shopping-cart" size="sm" />}
-              >
-                {product.inStock ? 'Add to Cart' : 'Out of Stock'}
-              </Button>
+              {/* Buttons Section - moved to bottom */}
+              <div className="space-y-3">
+                {/* Quantity */}
+                <div>
+                  <label className="text-cyan-100 text-sm font-medium block mb-2">Quantity:</label>
+                  <div className="flex items-center border border-cyan-300/50 rounded-md bg-black/20">
+                    <button
+                      onClick={() => handleQuantityChange(product.id, Math.max(1, (quantities[product.id] || 1) - 1))}
+                      className="p-2 text-cyan-100/70 hover:text-cyan-100 hover:bg-cyan-500/10 transition-colors"
+                    >
+                      <Icon name="minus" size="sm" />
+                    </button>
+                    <span className="flex-1 text-center text-cyan-100 py-2 font-medium">
+                      {quantities[product.id] || 1}
+                    </span>
+                    <button
+                      onClick={() => handleQuantityChange(product.id, (quantities[product.id] || 1) + 1)}
+                      className="p-2 text-cyan-100/70 hover:text-cyan-100 hover:bg-cyan-500/10 transition-colors"
+                    >
+                      <Icon name="plus" size="sm" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  {/* Add to Cart */}
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={() => addToCart(product)}
+                    disabled={!product.inStock}
+                    className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 border-0 shadow-lg shadow-cyan-500/25"
+                    icon={<Icon name="shopping-cart" size="sm" />}
+                  >
+                    {product.inStock ? 'Add to Cart' : 'Out of Stock'}
+                  </Button>
+
+                  {/* View Details */}
+                  <Button
+                    variant="outline"
+                    size="md"
+                    onClick={() => router.push(`/nft-energy/product/${product.baseSku}`)}
+                    className="w-full border-cyan-300/30 text-cyan-200 hover:bg-cyan-500/10"
+                    icon={<Icon name="eye" size="sm" />}
+                  >
+                    View Details
+                  </Button>
+
+                  {/* Share Button */}
+                  <div className="border-t border-cyan-200/20 pt-3">
+                    <ShareButton
+                      product={{
+                        id: product.id,
+                        title: product.name,
+                        price: currentPrice.toString(),
+                        image: product.image,
+                        description: product.description,
+                        sku: generateProductSKU(product, selectedVariants[product.id] || product.variants[0]?.id, selectedSize)
+                      }}
+                      variant="outline"
+                      size="md"
+                      className="w-full border-cyan-300/30 text-cyan-200 hover:bg-cyan-500/10"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         );

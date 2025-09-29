@@ -14,6 +14,7 @@ interface Product {
   price: string;
   image: string;
   description?: string;
+  sku?: string;
 }
 
 interface ShareButtonProps {
@@ -34,17 +35,22 @@ export function ShareButton({
   const [isSharing, setIsSharing] = useState(false);
   const { composeCast } = useComposeCast();
 
-  const generateFrameUrl = (productId: string | number, userFid?: string): string => {
+  const generateFrameUrl = (product: Product, userFid?: string): string => {
     // CRITICAL: Use frame URL to get mini app embed
     const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://store.lkforge.xyz';
-    
-    // Create frame URL path
-    let frameUrl = `${baseUrl}/frame/${productId}`;
-    
+
+    // Create frame URL path - use SKU if available, otherwise use product ID
+    let frameUrl: string;
+    if (product.sku) {
+      frameUrl = `${baseUrl}/frame/sku/${product.sku}`;
+    } else {
+      frameUrl = `${baseUrl}/frame/${product.id}`;
+    }
+
     if (userFid) {
       frameUrl += `?ref=${userFid}`;
     }
-    
+
     return frameUrl;
   };
 
@@ -63,7 +69,7 @@ export function ShareButton({
       }
 
       // Use frame URL instead of web URL
-      const frameUrl = generateFrameUrl(product.id, userFid);
+      const frameUrl = generateFrameUrl(product, userFid);
       console.log('📱 Generated frame URL:', frameUrl);
 
       // Improved cast text
@@ -84,7 +90,7 @@ export function ShareButton({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            productId: product.id,
+            productId: product.sku || product.id, // Use SKU if available, otherwise product ID
             referrerId: userFid, // Changed from userFid to referrerId
             frameUrl
           })
@@ -123,7 +129,7 @@ export function ShareButton({
       }
       
       // Use frame URL for fallback too
-      const frameUrl = generateFrameUrl(product.id, userFid);
+      const frameUrl = generateFrameUrl(product, userFid);
       const castText = `🛍️ ${product.title}\n💰 $${product.price}\n\nGet yours on Base Shop!`;
       const composeUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(frameUrl)}`;
 

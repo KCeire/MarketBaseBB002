@@ -60,13 +60,9 @@ export function MoreMenu({ onClose }: MoreMenuProps) {
     {
       id: 'admin',
       label: 'Admin Panel',
-      description: 'Coming soon',
+      description: 'Manage store & orders',
       icon: 'eye',
-      badge: 'Coming Soon',
-      disabled: true,
-      action: () => {
-        alert('Admin panel coming soon! Stay tuned for updates.');
-      }
+      path: '/admin'
     },
     {
       id: 'support',
