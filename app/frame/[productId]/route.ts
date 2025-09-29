@@ -2,6 +2,14 @@
 
 import { NextRequest } from 'next/server';
 
+interface Product {
+  id: number | string;
+  title: string;
+  description?: string;
+  image: string;
+  price: string;
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ productId: string }> }
@@ -11,11 +19,11 @@ export async function GET(
   const referrerId = searchParams.get('ref');
 
   // Fetch product data from Shopify API
-  let product;
+  let product: Product | null = null;
   try {
     const shopifyResponse = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/shopify/products`);
     const shopifyData = await shopifyResponse.json();
-    product = shopifyData.products?.find((p: any) => p.id.toString() === productId);
+    product = shopifyData.products?.find((p: Product) => p.id.toString() === productId) || null;
   } catch (error) {
     console.error('Error fetching product:', error);
   }
