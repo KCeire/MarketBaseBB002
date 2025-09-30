@@ -36,7 +36,6 @@ export function ShareButton({
   const { composeCast } = useComposeCast();
 
   const generateFrameUrl = (product: Product, userFid?: string): string => {
-    // CRITICAL: Use frame URL to get mini app embed
     const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://store.lkforge.xyz';
 
     // Create frame URL path - use SKU if available, otherwise use product ID
@@ -47,9 +46,9 @@ export function ShareButton({
       frameUrl = `${baseUrl}/frame/${product.id}`;
     }
 
-    if (userFid) {
-      frameUrl += `?ref=${userFid}`;
-    }
+    // Always include ref parameter for consistency
+    const refValue = userFid || 'none';
+    frameUrl += `?ref=${refValue}`;
 
     return frameUrl;
   };
@@ -57,60 +56,92 @@ export function ShareButton({
   const handleShare = async () => {
     try {
       setIsSharing(true);
+      console.log('=== SHARE INITIATED ===');
+      console.log('Product details:', {
+        id: product.id,
+        sku: product.sku,
+        title: product.title,
+        hasImage: !!product.image
+      });
 
       let userFid: string | undefined;
 
       try {
         const context = await sdk.context;
         userFid = context.user?.fid?.toString();
-        console.log('🔍 Retrieved user FID:', userFid);
-      } catch {
-        console.log('⚠️ Could not get user FID from SDK, using fallback');
+        console.log('FID retrieved:', userFid);
+      } catch (error) {
+        console.error('Failed to get user FID from SDK:', error);
+        console.log('Proceeding without FID');
       }
 
-      // Use frame URL instead of web URL
+      // Generate frame URL
       const frameUrl = generateFrameUrl(product, userFid);
-      console.log('📱 Generated frame URL:', frameUrl);
+      console.log('Generated frame URL:', frameUrl);
+      
+      // Parse and log URL components
+      try {
+        const parsedUrl = new URL(frameUrl);
+        console.log('URL breakdown:', {
+          base: `${parsedUrl.protocol}//${parsedUrl.host}`,
+          path: parsedUrl.pathname,
+          hasRef: parsedUrl.searchParams.has('ref'),
+          refValue: parsedUrl.searchParams.get('ref'),
+          fullQueryString: parsedUrl.search
+        });
+      } catch (e) {
+        console.error('Failed to parse URL:', e);
+      }
 
       // Improved cast text
-      const castText = `🛍️ ${product.title}\n💰 ${product.price}\n\nGet yours on Base Shop!`;
-      console.log('📝 Cast text:', castText);
+      const castText = `${product.title}\n$${product.price}\n\nGet yours on Base Shop!`;
+      console.log('Cast text:', castText);
 
       await composeCast({
         text: castText,
-        embeds: [frameUrl] // Frame URL for mini app embed
+        embeds: [frameUrl]
       });
 
-      console.log('✅ Cast composed successfully');
+      console.log('composeCast() completed successfully');
       toast.success('Shared Successfully!', 'Your product link has been shared to Farcaster');
 
       // Track the share
       try {
-        await fetch('/api/affiliate/track-share', {
+        const trackPayload = {
+          productId: product.sku || product.id,
+          userFid: userFid,
+          frameUrl
+        };
+        console.log('Tracking share with payload:', trackPayload);
+        
+        const trackResponse = await fetch('/api/affiliate/track-share', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            productId: product.sku || product.id, // Use SKU if available, otherwise product ID
-            referrerId: userFid, // Changed from userFid to referrerId
-            frameUrl
-          })
+          body: JSON.stringify(trackPayload)
         });
-        console.log('📊 Share tracked successfully');
+        
+        const trackData = await trackResponse.json();
+        console.log('Share tracking response:', {
+          status: trackResponse.status,
+          data: trackData
+        });
       } catch (error) {
-        console.error('❌ Failed to track share:', error);
+        console.error('Failed to track share:', error);
       }
 
+      console.log('=== SHARE COMPLETED ===');
+
     } catch (error) {
-      console.error('💥 Share error:', error);
+      console.error('Share error:', error);
 
       const fallbackUrl = await createFarcasterComposeUrl(product);
 
       if (fallbackUrl) {
-        console.log('🔄 Using fallback URL:', fallbackUrl);
+        console.log('Using fallback URL:', fallbackUrl);
         window.open(fallbackUrl, '_blank');
         toast.info('Opening Farcaster', 'Complete your cast in the new tab');
       } else {
-        console.log('🚫 Fallback URL creation failed');
+        console.log('Fallback URL creation failed');
         toast.error('Share Failed', 'Unable to share product. Please try again.');
       }
     } finally {
@@ -130,7 +161,7 @@ export function ShareButton({
       
       // Use frame URL for fallback too
       const frameUrl = generateFrameUrl(product, userFid);
-      const castText = `🛍️ ${product.title}\n💰 $${product.price}\n\nGet yours on Base Shop!`;
+      const castText = `${product.title}\n$${product.price}\n\nGet yours on Base Shop!`;
       const composeUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(frameUrl)}`;
 
       return composeUrl;
