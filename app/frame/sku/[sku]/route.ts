@@ -87,7 +87,22 @@ export async function GET(
   const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://store.lkforge.xyz';
   const miniappUrl = `${baseUrl}/nft-energy/product/${sku}${referrerId ? `?ref=${referrerId}` : ''}`;
 
-  // Updated miniapp embed format according to Base documentation
+  // Create miniapp embed metadata according to Farcaster documentation
+  const miniappMetadata = {
+    version: "1",
+    imageUrl: `${baseUrl}${productData.image}`,
+    button: {
+      title: "Shop NFT Energy 🚀",
+      action: {
+        type: "launch_miniapp",
+        url: miniappUrl,
+        name: "NFT Energy Store",
+        splashImageUrl: `${baseUrl}/splash.png`,
+        splashBackgroundColor: "#000000"
+      }
+    }
+  };
+
   const frameHtml = `<!DOCTYPE html>
 <html>
   <head>
@@ -102,17 +117,15 @@ export async function GET(
     <meta property="og:image" content="${baseUrl}${productData.image}">
     <meta property="og:url" content="${request.url}">
 
-    <!-- Farcaster Frame - Miniapp Embed -->
+    <!-- Farcaster Miniapp Embed -->
+    <meta name="fc:miniapp" content="${JSON.stringify(miniappMetadata).replace(/"/g, '&quot;')}">
+
+    <!-- Backward compatibility with legacy frame format -->
     <meta property="fc:frame" content="vNext">
     <meta property="fc:frame:image" content="${baseUrl}${productData.image}">
     <meta property="fc:frame:button:1" content="Shop NFT Energy 🚀">
     <meta property="fc:frame:button:1:action" content="link">
     <meta property="fc:frame:button:1:target" content="${miniappUrl}">
-    <meta property="fc:frame:button:1:action:type" content="launch_frame">
-    <meta property="fc:frame:button:1:action:name" content="NFT Energy Store">
-    <meta property="fc:frame:button:1:action:url" content="${miniappUrl}">
-    <meta property="fc:frame:button:1:action:splash_image_url" content="${baseUrl}/splash.png">
-    <meta property="fc:frame:button:1:action:splash_background_color" content="#000000">
   </head>
   <body>
     <div style="font-family: system-ui; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #1e293b, #0f172a); color: #e2e8f0; min-height: 100vh;">
