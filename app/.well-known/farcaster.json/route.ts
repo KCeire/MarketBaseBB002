@@ -14,6 +14,11 @@ function withValidProperties(
 export async function GET() {
   const URL = process.env.NEXT_PUBLIC_URL;
 
+    // Parse allowed addresses from environment variable
+  const allowedAddresses = process.env.NEXT_PUBLIC_BASE_BUILDER_ALLOWED_ADDRESSES
+    ? process.env.NEXT_PUBLIC_BASE_BUILDER_ALLOWED_ADDRESSES.split(',').map(addr => addr.trim())
+    : ["0xE40b9f2A321715DF69EF67AD30BA7453A289BCeB"];
+
   return Response.json({
     noindex: true,
     accountAssociation: {
@@ -40,5 +45,8 @@ export async function GET() {
       ogDescription: process.env.NEXT_PUBLIC_APP_OG_DESCRIPTION,
       ogImageUrl: process.env.NEXT_PUBLIC_APP_OG_IMAGE,
     }),
+    baseBuilder: {
+      allowedAddresses: allowedAddresses,
+    },
   });
 }
