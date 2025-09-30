@@ -2,7 +2,7 @@
 
 import { NextRequest } from 'next/server';
 
-// NFT Energy product data - same as in NFTEnergyProductGrid
+// NFT Energy product data
 const nftEnergyProducts = [
   {
     id: 'nft-energy-12pack',
@@ -68,7 +68,13 @@ export async function GET(
   const { sku } = await params;
   const referrerId = searchParams.get('ref');
 
-  // Find product by SKU (handle both base SKU and variant SKUs)
+  console.log('NFT Energy frame route hit:', {
+    sku,
+    referrerId,
+    fullUrl: request.url
+  });
+
+  // Find product by SKU
   const product = nftEnergyProducts.find(p =>
     p.baseSku === sku || sku.startsWith(p.baseSku)
   );
@@ -87,30 +93,43 @@ export async function GET(
   const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://store.lkforge.xyz';
   const miniappUrl = `${baseUrl}/nft-energy/product/${sku}${referrerId ? `?ref=${referrerId}` : ''}`;
 
-  // Create miniapp embed metadata according to Farcaster documentation
-  const miniappMetadata = {
-    version: "1",
-    imageUrl: `${baseUrl}${productData.image}`,
+  // Ensure absolute URL
+  const absoluteImageUrl = `${baseUrl}${productData.image}`;
+
+  // Validate image exists
+  try {
+    const imgCheck = await fetch(absoluteImageUrl, { 
+      method: 'HEAD', 
+      signal: AbortSignal.timeout(2000) 
+    });
+    if (!imgCheck.ok) {
+      console.warn(`Image not found for SKU ${sku}: ${absoluteImageUrl}`);
+    }
+  } catch (error) {
+    console.warn(`Image validation failed for ${absoluteImageUrl}:`, error);
+  }
+
+  // CORRECT format
+  const frameMetadata = {
+    version: "next",
+    imageUrl: absoluteImageUrl,
     button: {
-      title: "Shop NFT Energy 🚀",
+      title: "Shop NFT Energy",
       action: {
-        type: "launch_miniapp",
-        url: miniappUrl,
+        type: "launch_frame",
         name: "NFT Energy Store",
+        url: miniappUrl,
         splashImageUrl: `${baseUrl}/splash.png`,
         splashBackgroundColor: "#000000"
       }
     }
   };
 
-  // Helper function to escape HTML attributes
   const escapeHtml = (str: string) => {
     return str
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+      .replace(/>/g, '&gt;');
   };
 
   const frameHtml = `<!DOCTYPE html>
@@ -124,29 +143,22 @@ export async function GET(
     <!-- Open Graph -->
     <meta property="og:title" content="${escapeHtml(productData.name)} - NFT Energy Store">
     <meta property="og:description" content="${escapeHtml(productData.description)}">
-    <meta property="og:image" content="${baseUrl}${productData.image}">
+    <meta property="og:image" content="${absoluteImageUrl}">
     <meta property="og:url" content="${request.url}">
 
-    <!-- Farcaster Miniapp Embed -->
-    <meta name="fc:miniapp" content="${JSON.stringify(miniappMetadata).replace(/"/g, '&quot;')}">
-
-    <!-- Backward compatibility with legacy frame format -->
-    <meta property="fc:frame" content="vNext">
-    <meta property="fc:frame:image" content="${baseUrl}${productData.image}">
-    <meta property="fc:frame:button:1" content="Shop NFT Energy 🚀">
-    <meta property="fc:frame:button:1:action" content="link">
-    <meta property="fc:frame:button:1:target" content="${miniappUrl}">
+    <!-- Farcaster Frame - CORRECT FORMAT -->
+    <meta name="fc:frame" content='${JSON.stringify(frameMetadata)}'>
   </head>
   <body>
     <div style="font-family: system-ui; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #1e293b, #0f172a); color: #e2e8f0; min-height: 100vh;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #22d3ee; margin-bottom: 10px;">${productData.name}</h1>
+        <h1 style="color: #22d3ee; margin-bottom: 10px;">${escapeHtml(productData.name)}</h1>
         <p style="color: #0891b2; font-size: 14px;">NFT Energy - Where Web3 Meets Real Energy</p>
       </div>
 
       <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 20px; border: 1px solid rgba(34, 211, 238, 0.2);">
-        <img src="${baseUrl}${productData.image}" alt="${productData.name}" style="max-width: 100%; border-radius: 8px; margin-bottom: 15px;">
-        <p style="margin-bottom: 15px; line-height: 1.5;">${productData.description}</p>
+        <img src="${absoluteImageUrl}" alt="${escapeHtml(productData.name)}" style="max-width: 100%; border-radius: 8px; margin-bottom: 15px;">
+        <p style="margin-bottom: 15px; line-height: 1.5;">${escapeHtml(productData.description)}</p>
         <p style="font-size: 18px; font-weight: bold; color: #22d3ee;">From $${productData.basePrice.toFixed(2)}</p>
         <p style="color: #64748b; font-size: 14px; margin-top: 15px;">SKU: ${productData.baseSku}</p>
       </div>
@@ -161,8 +173,8 @@ export async function GET(
   return new Response(frameHtml, {
     status: 200,
     headers: {
-      'Content-Type': 'text/html',
-      'Cache-Control': 'public, max-age=300',
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'public, max-age=300, s-maxage=300',
     },
   });
 }
