@@ -13,6 +13,7 @@
     "@base-org/account-ui": "^1.0.1",
     "@coinbase/onchainkit": "^0.38.19",
     "@farcaster/frame-sdk": "^0.1.8",
+    "@farcaster/miniapp-sdk": "^0.1.10",
     "@supabase/supabase-js": "^2.57.4",
     "@tanstack/react-query": "^5.87.4",
     "@types/bcryptjs": "^2.4.6",
