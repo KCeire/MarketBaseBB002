@@ -103,17 +103,27 @@ export async function GET(
     }
   };
 
+  // Helper function to escape HTML attributes
+  const escapeHtml = (str: string) => {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+
   const frameHtml = `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>${productData.name} - NFT Energy Store</title>
-    <meta name="description" content="${productData.description}">
+    <title>${escapeHtml(productData.name)} - NFT Energy Store</title>
+    <meta name="description" content="${escapeHtml(productData.description)}">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="${productData.name} - NFT Energy Store">
-    <meta property="og:description" content="${productData.description}">
+    <meta property="og:title" content="${escapeHtml(productData.name)} - NFT Energy Store">
+    <meta property="og:description" content="${escapeHtml(productData.description)}">
     <meta property="og:image" content="${baseUrl}${productData.image}">
     <meta property="og:url" content="${request.url}">
 

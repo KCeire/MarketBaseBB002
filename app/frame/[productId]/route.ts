@@ -42,10 +42,15 @@ export async function GET(
   const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://store.lkforge.xyz';
   const miniappUrl = `${baseUrl}?p=${productId}${referrerId ? `&ref=${referrerId}` : ''}`;
 
+  // Ensure absolute URL for image
+  const absoluteImageUrl = product.image.startsWith('http')
+    ? product.image
+    : `${baseUrl}${product.image}`;
+
   // Create miniapp embed metadata according to Farcaster documentation
   const miniappMetadata = {
     version: "1",
-    imageUrl: product.image,
+    imageUrl: absoluteImageUrl,
     button: {
       title: "Shop Now 🛍️",
       action: {
@@ -58,18 +63,28 @@ export async function GET(
     }
   };
 
+  // Helper function to escape HTML attributes
+  const escapeHtml = (str: string) => {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+
   const frameHtml = `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>${product.title} - Base Shop</title>
-    <meta name="description" content="${product.description || 'Shop on Base Shop'}">
+    <title>${escapeHtml(product.title)} - Base Shop</title>
+    <meta name="description" content="${escapeHtml(product.description || 'Shop on Base Shop')}">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="${product.title} - Base Shop">
-    <meta property="og:description" content="${product.description || 'Shop on Base Shop'}">
-    <meta property="og:image" content="${product.image}">
+    <meta property="og:title" content="${escapeHtml(product.title)} - Base Shop">
+    <meta property="og:description" content="${escapeHtml(product.description || 'Shop on Base Shop')}">
+    <meta property="og:image" content="${absoluteImageUrl}">
     <meta property="og:url" content="${request.url}">
 
     <!-- Farcaster Miniapp Embed -->
