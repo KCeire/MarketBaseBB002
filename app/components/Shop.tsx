@@ -57,6 +57,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [selectedVariants, setSelectedVariants] = useState<Record<string, number>>({});
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'name' | 'newest'>('newest');
 
   // Suppress unused variable warning
   void setActiveTab;
@@ -69,11 +70,11 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     initializeShop();
   }, []);
 
-  // Apply filters when products, category, or search query changes
+  // Apply filters when products, category, search query, or sort changes
   useEffect(() => {
     applyFilters();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [products, selectedCategory, searchQuery]);
+  }, [products, selectedCategory, searchQuery, sortBy]);
 
   const fetchProducts = async () => {
     try {
@@ -85,7 +86,55 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
         const response = await fetch('/api/shopify/products');
         if (response.ok) {
           const data = await response.json();
-          shopifyProducts.push(...(data.products || []));
+          // Map Shopify products to stores based on vendor or product characteristics
+          const mappedProducts = (data.products || []).map((product: MarketplaceProduct) => {
+            let storeInfo = undefined;
+
+            // Map products to stores based on vendor or product type
+            const vendor = product.vendor.toLowerCase();
+            const title = product.title.toLowerCase();
+            const productType = product.productType.toLowerCase();
+
+            if (vendor.includes('apex') || title.includes('survival') || title.includes('tactical') || productType.includes('sports')) {
+              storeInfo = {
+                name: 'Apex Athletics',
+                slug: 'apex-athletics',
+                url: '/store/apex-athletics'
+              };
+            } else if (vendor.includes('techwave') || vendor.includes('tech') || productType.includes('electronics')) {
+              storeInfo = {
+                name: 'TechWave Electronics',
+                slug: 'techwave-electronics',
+                url: '/store/techwave-electronics'
+              };
+            } else if (vendor.includes('pawsome') || vendor.includes('pet') || productType.includes('pet')) {
+              storeInfo = {
+                name: 'Pawsome Pets',
+                slug: 'pawsome-pets',
+                url: '/store/pawsome-pets'
+              };
+            } else if (vendor.includes('radiant') || vendor.includes('beauty') || productType.includes('beauty')) {
+              storeInfo = {
+                name: 'Radiant Beauty',
+                slug: 'radiant-beauty',
+                url: '/store/radiant-beauty'
+              };
+            } else if (vendor.includes('green') || vendor.includes('oasis') || vendor.includes('home') || productType.includes('home')) {
+              storeInfo = {
+                name: 'Green Oasis Home',
+                slug: 'green-oasis-home',
+                url: '/store/green-oasis-home'
+              };
+            }
+
+            return {
+              ...product,
+              storeInfo,
+              isStoreProduct: !!storeInfo
+            };
+          });
+
+          shopifyProducts.push(...mappedProducts);
         }
       } catch (err) {
         console.warn('Failed to fetch Shopify products:', err);
@@ -190,7 +239,29 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
       });
     }
 
-    setFilteredProducts(filtered);
+    // Apply sorting
+    const sortedFiltered = [...filtered].sort((a, b) => {
+      const getPrice = (product: UnifiedProduct) => {
+        const selectedVariantIndex = selectedVariants[product.id.toString()] || 0;
+        const selectedVariant = product.variants[selectedVariantIndex] || product.variants[0];
+        return parseFloat(selectedVariant.price);
+      };
+
+      switch (sortBy) {
+        case 'price-asc':
+          return getPrice(a) - getPrice(b);
+        case 'price-desc':
+          return getPrice(b) - getPrice(a);
+        case 'name':
+          return a.title.localeCompare(b.title);
+        case 'newest':
+        default:
+          // For newest, prioritize store products and maintain original order
+          return 0;
+      }
+    });
+
+    setFilteredProducts(sortedFiltered);
   };
 
   // Filter products by category
@@ -621,6 +692,23 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
             </select>
           </div>
 
+          {/* Sort Dropdown */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Sort by:
+            </label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'price-asc' | 'price-desc' | 'name' | 'newest')}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="newest">Newest First</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="name">Name A-Z</option>
+            </select>
+          </div>
+
           {/* Active Filters Display */}
           <div className="flex flex-wrap gap-2">
             {selectedCategory !== 'all-products' && (
@@ -700,7 +788,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
                           className="inline-flex items-center space-x-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-full"
                         >
                           <Icon name="store" size="sm" />
-                          <span>Visit {product.storeInfo.name}</span>
+                          <span>Visit {product.storeInfo.name} Store</span>
                         </button>
                       </div>
                     )}
@@ -887,6 +975,28 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
       {/* Category Grid - Show on main shop view */}
       <CategoryGrid onCategorySelect={handleCategorySelect} className="mb-6" />
 
+      {/* Sort Controls */}
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center space-x-2">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Sort by:
+          </label>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as 'price-asc' | 'price-desc' | 'name' | 'newest')}
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="newest">Newest First</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="name">Name A-Z</option>
+          </select>
+        </div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-4">
         {filteredProducts.map((product, index) => (
           <div
@@ -914,6 +1024,20 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
             />
             <div>
               <h3 className="font-semibold text-sm mb-1 text-gray-900 dark:text-gray-100">{product.title}</h3>
+              {product.isStoreProduct && product.storeInfo && (
+                <div className="mb-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(product.storeInfo!.url);
+                    }}
+                    className="inline-flex items-center space-x-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-full"
+                  >
+                    <Icon name="store" size="sm" />
+                    <span>Visit {product.storeInfo.name} Store</span>
+                  </button>
+                </div>
+              )}
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 line-clamp-2">
                 {product.description.replace(/<[^>]*>/g, '').substring(0, 100)}...
               </p>
