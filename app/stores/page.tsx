@@ -2,9 +2,13 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { Button } from '@/app/components/ui/Button';
 import { Icon } from '@/app/components/ui/Icon';
 import Image from 'next/image';
+import { getAllStoreProducts } from '@/lib/stores';
+import '@/lib/stores/nft-energy'; // Import to register NFT Energy store
+import type { MarketplaceProduct } from '@/types/shopify';
 
 interface Store {
   id: string;
@@ -119,6 +123,64 @@ const stores: Store[] = [
 
 export default function StoresPage() {
   const router = useRouter();
+  const [actualProductCounts, setActualProductCounts] = useState<Record<string, number>>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const calculateProductCounts = async () => {
+      try {
+        // Get store products from registered stores (like NFT Energy)
+        const storeProducts = getAllStoreProducts();
+
+        // Get Shopify products and map them to stores
+        const shopifyResponse = await fetch('/api/shopify/products');
+        const shopifyData = shopifyResponse.ok ? await shopifyResponse.json() : { products: [] };
+
+        const counts: Record<string, number> = {};
+
+        // Count store products
+        storeProducts.forEach(product => {
+          const storeSlug = product.storeInfo.slug;
+          counts[storeSlug] = (counts[storeSlug] || 0) + 1;
+          console.log('Store product:', product.title, 'mapped to store:', storeSlug);
+        });
+
+        // Count Shopify products mapped to stores
+        (shopifyData.products || []).forEach((product: MarketplaceProduct) => {
+          const vendor = product.vendor.toLowerCase();
+          const title = product.title.toLowerCase();
+          const productType = product.productType.toLowerCase();
+
+          let storeSlug = null;
+
+          if (vendor.includes('apex') || title.includes('survival') || title.includes('tactical') || productType.includes('sports')) {
+            storeSlug = 'apex-athletics';
+          } else if (vendor.includes('techwave') || vendor.includes('tech') || productType.includes('electronics')) {
+            storeSlug = 'techwave-electronics';
+          } else if (vendor.includes('pawsome') || vendor.includes('pet') || productType.includes('pet')) {
+            storeSlug = 'pawsome-pets';
+          } else if (vendor.includes('radiant') || vendor.includes('beauty') || productType.includes('beauty')) {
+            storeSlug = 'radiant-beauty';
+          } else if (vendor.includes('green') || vendor.includes('oasis') || vendor.includes('home') || productType.includes('home')) {
+            storeSlug = 'green-oasis-home';
+          }
+
+          if (storeSlug) {
+            counts[storeSlug] = (counts[storeSlug] || 0) + 1;
+          }
+        });
+
+        console.log('Final product counts:', counts);
+        setActualProductCounts(counts);
+      } catch (error) {
+        console.error('Error calculating product counts:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    calculateProductCounts();
+  }, []);
 
   const liveStores = stores.filter(store => store.status === 'live');
 
@@ -312,11 +374,9 @@ export default function StoresPage() {
                         <div className="flex items-center space-x-4">
                           <div className="flex items-center space-x-1 text-gray-500">
                             <Icon name="package" size="sm" />
-                            <span>{store.stats.products} products</span>
-                          </div>
-                          <div className="flex items-center space-x-1 text-gray-500">
-                            <Icon name="star" size="sm" />
-                            <span>{store.stats.rating} ({store.stats.reviews})</span>
+                            <span>
+                              {loading ? '...' : (actualProductCounts[store.id] || 0)} products
+                            </span>
                           </div>
                         </div>
                         <div className="text-xs text-green-600 font-medium">
@@ -404,7 +464,7 @@ export default function StoresPage() {
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 text-center">
             <div className="text-2xl font-bold text-green-600 dark:text-green-400 mb-1">
-              900+
+              {loading ? '...' : Object.values(actualProductCounts).reduce((sum, count) => sum + count, 0) || '900+'}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">
               Products Listed
