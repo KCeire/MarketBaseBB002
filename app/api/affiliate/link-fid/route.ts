@@ -1,6 +1,6 @@
 // app/api/affiliate/link-fid/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
+import { supabaseAdmin } from '@/lib/supabase/client';
 
 interface LinkFidRequest {
   visitorFid: string;
@@ -17,7 +17,7 @@ interface LinkFidResponse {
 export async function POST(request: NextRequest): Promise<NextResponse<LinkFidResponse>> {
   try {
     const body: LinkFidRequest = await request.json();
-    const { visitorFid, sessionId } = body;
+    const { visitorFid } = body;
 
     if (!visitorFid) {
       return NextResponse.json({
@@ -26,17 +26,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<LinkFidRe
       }, { status: 400 });
     }
 
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      {
-        cookies: {
-          get: () => undefined,
-          set: () => {},
-          remove: () => {},
-        },
-      }
-    );
+    const supabase = supabaseAdmin;
 
     // For now, we'll use a simple approach where we link recent anonymous clicks
     // In the future, you could enhance this with session tracking or localStorage tokens
@@ -134,17 +124,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }, { status: 400 });
     }
 
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      {
-        cookies: {
-          get: () => undefined,
-          set: () => {},
-          remove: () => {},
-        },
-      }
-    );
+    const supabase = supabaseAdmin;
 
     // Get affiliate stats for this FID
     const { data: earnings, error } = await supabase

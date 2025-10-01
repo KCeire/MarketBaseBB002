@@ -1,6 +1,6 @@
 // app/api/affiliate/track-click/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
+import { supabaseAdmin } from '@/lib/supabase/client';
 
 interface TrackClickRequest {
   referrerFid: string;
@@ -36,18 +36,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<TrackClic
       }, { status: 400 });
     }
 
-    // Create Supabase client
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      {
-        cookies: {
-          get: () => undefined,
-          set: () => {},
-          remove: () => {},
-        },
-      }
-    );
+    // Use admin client for server-side operations
+    const supabase = supabaseAdmin;
 
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30); // 30 days from now
@@ -78,7 +68,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<TrackClic
       // Update existing click - extend expiry and update visitor_fid if provided
       clickId = existingClick[0].click_id;
 
-      const updateData: any = {
+      const updateData: {
+        last_clicked_at: string;
+        expires_at: string;
+        visitor_fid?: string;
+      } = {
         last_clicked_at: new Date().toISOString(),
         expires_at: expiresAt.toISOString()
       };
@@ -165,17 +159,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }, { status: 400 });
     }
 
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      {
-        cookies: {
-          get: () => undefined,
-          set: () => {},
-          remove: () => {},
-        },
-      }
-    );
+    const supabase = supabaseAdmin;
 
     // Use the helper function to find valid affiliate click
     const { data, error } = await supabase

@@ -14,7 +14,7 @@ async function processAffiliateAttributions(
   buyerFid: string,
   orderItems: OrderItem[],
   orderReference: string,
-  totalOrderAmount: number
+  _totalOrderAmount: number
 ): Promise<void> {
   const affiliateConversions: Array<{
     clickId: string;

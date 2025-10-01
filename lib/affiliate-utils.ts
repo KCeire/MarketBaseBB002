@@ -196,10 +196,12 @@ export function storeAffiliateDataLocally(
     const clicks = existingData ? JSON.parse(existingData) : [];
 
     // Remove expired clicks
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const validClicks = clicks.filter((click: any) => click.expires > Date.now());
 
     // Add new click (or update existing)
     const existingIndex = validClicks.findIndex(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (click: any) => click.referrerFid === referrerFid && click.productId === productId
     );
 
@@ -227,6 +229,7 @@ export async function processStoredAffiliateClicks(visitorFid: string): Promise<
     if (!storedData) return;
 
     const clicks = JSON.parse(storedData);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const validClicks = clicks.filter((click: any) => click.expires > Date.now());
 
     if (validClicks.length === 0) {
