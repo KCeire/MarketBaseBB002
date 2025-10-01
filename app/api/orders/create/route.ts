@@ -9,7 +9,7 @@ import {
   sanitizeForLogging
 } from '@/lib/encryption';
 
-// Helper function to process affiliate attributions for multiple products in an order
+// Helper function to process affiliate attributions for products in an order
 async function processAffiliateAttributions(
   buyerFid: string,
   orderItems: OrderItem[],
@@ -24,9 +24,17 @@ async function processAffiliateAttributions(
     productId: string;
   }> = [];
 
+  console.log('🔍 Processing affiliate attributions for:', {
+    buyerFid,
+    orderItems: orderItems.map(item => ({ productId: item.productId, title: item.title })),
+    orderReference
+  });
+
   // Process each product in the order for affiliate attribution
   for (const item of orderItems) {
     try {
+      console.log(`🔍 Looking for affiliate click for product: ${item.productId} (buyer FID: ${buyerFid})`);
+
       // Find affiliate click for this specific product
       const { data: affiliateClick, error } = await supabaseAdmin
         .rpc('find_affiliate_click', {
@@ -42,9 +50,17 @@ async function processAffiliateAttributions(
       if (affiliateClick && affiliateClick.length > 0) {
         const click = affiliateClick[0];
 
+        console.log(`✅ Found affiliate click for product ${item.productId}:`, {
+          clickId: click.click_id,
+          referrerFid: click.referrer_fid,
+          productId: item.productId
+        });
+
         // Calculate commission for this specific item (2% of item total)
         const itemTotal = parseFloat(item.price) * item.quantity;
         const commissionAmount = itemTotal * 0.02; // 2% commission
+
+        console.log(`💰 Processing conversion: ${commissionAmount} commission on ${itemTotal} total`);
 
         // Process the conversion
         const { error: conversionError } = await supabaseAdmin
@@ -55,8 +71,10 @@ async function processAffiliateAttributions(
           });
 
         if (conversionError) {
-          console.error(`Error processing affiliate conversion for product ${item.productId}:`, conversionError);
+          console.error(`❌ Error processing affiliate conversion for product ${item.productId}:`, conversionError);
         } else {
+          console.log(`✅ Affiliate conversion processed successfully for product ${item.productId}`);
+
           affiliateConversions.push({
             clickId: click.click_id,
             referrerFid: click.referrer_fid,
@@ -75,6 +93,8 @@ async function processAffiliateAttributions(
             commissionRate: '2%'
           });
         }
+      } else {
+        console.log(`❌ No affiliate click found for product ${item.productId} and buyer FID ${buyerFid}`);
       }
     } catch (error) {
       console.error(`Error processing affiliate attribution for product ${item.productId}:`, error);
@@ -237,8 +257,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       expiresAt: typedOrder.expires_at
     });
 
-    // Process affiliate attribution if user has FID and has ordered multiple products
+    // Process affiliate attribution if user has FID
     if (farcasterFid) {
+      console.log('🔗 Starting affiliate attribution process for order:', {
+        farcasterFid,
+        orderReference: typedOrder.order_reference,
+        itemCount: orderItems.length
+      });
+
       try {
         await processAffiliateAttributions(
           farcasterFid,
@@ -250,6 +276,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
         // Log but don't fail the order if affiliate processing fails
         console.error('Affiliate attribution error (non-blocking):', affiliateError);
       }
+    } else {
+      console.log('⚠️ No Farcaster FID provided, skipping affiliate attribution');
     }
 
     // Return success response

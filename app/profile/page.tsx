@@ -3,11 +3,21 @@
 
 import { useAccount } from 'wagmi';
 import { useState, useEffect } from 'react';
+import sdk from '@farcaster/miniapp-sdk';
 
 interface UserStats {
   orderCount: number;
   totalSpent: number;
   loading: boolean;
+}
+
+interface AffiliateStats {
+  referrer_fid: string;
+  total_clicks: number;
+  conversions: number;
+  total_earned: number;
+  avg_commission: number;
+  last_earning_date: string | null;
 }
 
 export default function ProfilePage() {
@@ -17,6 +27,33 @@ export default function ProfilePage() {
     totalSpent: 0,
     loading: true
   });
+  const [affiliateStats, setAffiliateStats] = useState<AffiliateStats | null>(null);
+  const [userFid, setUserFid] = useState<string | null>(null);
+
+  // Fetch Farcaster context and affiliate data
+  useEffect(() => {
+    const fetchFarcasterData = async () => {
+      try {
+        const context = await sdk.context;
+        const fid = context.user?.fid?.toString();
+
+        if (fid) {
+          setUserFid(fid);
+
+          // Fetch affiliate stats
+          const response = await fetch(`/api/affiliate/link-fid?fid=${fid}`);
+          if (response.ok) {
+            const data = await response.json();
+            setAffiliateStats(data.affiliateStats);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching Farcaster data:', error);
+      }
+    };
+
+    fetchFarcasterData();
+  }, []);
 
   // Fetch user statistics
   useEffect(() => {
@@ -120,22 +157,48 @@ export default function ProfilePage() {
 
         {/* Affiliate Earnings */}
         <div className="bg-green-900/20 rounded-xl border border-green-600 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-100">Affiliate Earnings</h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold text-gray-100">Affiliate Earnings</h2>
+            {userFid && (
+              <div className="text-xs text-gray-400">
+                FID: {userFid}
+              </div>
+            )}
+          </div>
+
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-400">Total Earned</span>
-              <span className="text-lg font-bold text-green-300">$0.00</span>
+              <span className="text-lg font-bold text-green-300">
+                ${affiliateStats ? affiliateStats.total_earned.toFixed(2) : '0.00'}
+              </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-400">Referrals</span>
-              <span className="text-sm font-medium text-gray-100">0</span>
+              <span className="text-sm text-gray-400">Successful Sales</span>
+              <span className="text-sm font-medium text-gray-100">
+                {affiliateStats ? affiliateStats.conversions : 0}
+              </span>
             </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-400">Total Clicks</span>
+              <span className="text-sm font-medium text-gray-100">
+                {affiliateStats ? affiliateStats.total_clicks : 0}
+              </span>
+            </div>
+            {affiliateStats && affiliateStats.total_clicks > 0 && (
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-400">Conversion Rate</span>
+                <span className="text-sm font-medium text-gray-100">
+                  {((affiliateStats.conversions / affiliateStats.total_clicks) * 100).toFixed(1)}%
+                </span>
+              </div>
+            )}
             <div className="pt-2">
               <button
                 onClick={() => window.location.href = '/earn'}
                 className="w-full bg-green-600 text-white py-2 rounded-lg text-sm hover:bg-green-700"
               >
-                Learn About Earning
+                {affiliateStats && affiliateStats.total_earned > 0 ? 'View Earnings Details' : 'Learn About Earning'}
               </button>
             </div>
           </div>
