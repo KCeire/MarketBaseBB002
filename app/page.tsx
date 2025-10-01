@@ -42,19 +42,21 @@ function AppContent() {
       if (referrerId) {
         sessionStorage.setItem('affiliate_ref', referrerId);
         
-        // Track the referral visit
-        try {
-          await fetch('/api/affiliate/track-visit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              referrerId, 
-              productId,
-              timestamp: Date.now() 
-            })
-          });
-        } catch (error) {
-          console.error('Failed to track referral:', error);
+        // Track the affiliate click if there's a product
+        if (productId) {
+          try {
+            await fetch('/api/affiliate/track-click', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                referrerFid: referrerId,
+                productId: productId
+              })
+            });
+            console.log('🔗 Affiliate click tracked:', { referrerId, productId });
+          } catch (error) {
+            console.error('Failed to track affiliate click:', error);
+          }
         }
       }
       

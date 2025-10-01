@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { pay, getPaymentStatus } from '@base-org/account';
 import { BasePayButton } from '@base-org/account-ui/react';
+import sdk from '@farcaster/miniapp-sdk';
 import { Button } from './ui/Button';
 import { Icon } from './ui/Icon';
 import { toast } from './ui/Toast';
@@ -124,26 +125,35 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       sku: item.sku
     }));
 
-const requestBody = {
-  customerData: {
-    email: customerData.email,
-    shippingAddress: {
-      name: customerData.name,
-      address1: customerData.address1,
-      address2: customerData.address2 || '',
-      city: customerData.city,
-      state: customerData.state,
-      country: customerData.country,
-      zipCode: customerData.zipCode,
+    // Get buyer's FID for affiliate tracking
+    let buyerFid: string | undefined;
+    try {
+      const context = await sdk.context;
+      buyerFid = context.user?.fid?.toString();
+    } catch (error) {
+      console.log('Could not get buyer FID:', error);
     }
-  },
-  orderItems,
-  totalAmount: total,
-  customerWallet: address,
-  basePayPaymentId: basePayData?.id,
-  // Add affiliate tracking
-  affiliateRef: sessionStorage.getItem('affiliate_ref') || null
-};
+
+    const requestBody = {
+      customerData: {
+        email: customerData.email,
+        shippingAddress: {
+          name: customerData.name,
+          address1: customerData.address1,
+          address2: customerData.address2 || '',
+          city: customerData.city,
+          state: customerData.state,
+          country: customerData.country,
+          zipCode: customerData.zipCode,
+        }
+      },
+      orderItems,
+      totalAmount: total,
+      customerWallet: address,
+      basePayPaymentId: basePayData?.id,
+      // Add Farcaster FID for affiliate tracking
+      farcasterFid: buyerFid
+    };
 
     console.log('Creating order with customer data:', {
       ...requestBody,
