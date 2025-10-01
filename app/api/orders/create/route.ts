@@ -22,6 +22,8 @@ interface CreateOrderRequest {
   orderItems: OrderItem[];
   totalAmount: string;
   customerWallet: string;
+  farcasterFid?: string; // NEW: Optional Farcaster FID
+  farcasterUsername?: string; // NEW: Optional Farcaster username
 }
 
 interface CreateOrderResponse {
@@ -38,7 +40,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
   try {
     // Parse request body
     const body: CreateOrderRequest = await request.json();
-    const { customerData, orderItems, totalAmount, customerWallet } = body;
+    const { customerData, orderItems, totalAmount, customerWallet, farcasterFid, farcasterUsername } = body;
 
     // Validate required fields
     if (!customerData || !orderItems || !totalAmount || !customerWallet) {
@@ -84,6 +86,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
     const orderData = {
       order_reference: orderReference,
       customer_wallet: customerWallet,
+      farcaster_fid: farcasterFid || null, // NEW: Store FID if available
+      farcaster_username: farcasterUsername || null, // NEW: Store username if available
       encrypted_customer_data: encryptedCustomerData,
       order_items: orderItems,
       total_amount: totalAmountNumber, // Use number for DECIMAL field
@@ -141,6 +145,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       currency: typedOrder.currency,
       itemCount: orderItems.length,
       customerWallet: customerWallet ? `${customerWallet.slice(0, 6)}...${customerWallet.slice(-4)}` : '[MISSING]',
+      farcasterFid: farcasterFid || 'No FID',
+      farcasterUsername: farcasterUsername || 'No username',
       expiresAt: typedOrder.expires_at
     });
 

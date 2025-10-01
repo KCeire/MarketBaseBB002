@@ -6,6 +6,8 @@ export interface DecryptedOrder {
   id: string;
   order_reference: string;
   customer_wallet: string;
+  farcaster_fid?: string | null; // NEW: Farcaster user FID
+  farcaster_username?: string | null; // NEW: Farcaster username
   customerData: CustomerData;
   order_items: OrderItem[];
   total_amount: number;
@@ -48,6 +50,11 @@ export interface CJExportData {
   'Country': string;
   'Email': string;
   'Shipping Phone Number': string;
+  'Customer Wallet': string; // NEW: For refund purposes
+  'Farcaster FID': string; // NEW: Primary account identifier
+  'Farcaster Username': string; // NEW: For customer support
+  'Payment Hash': string; // NEW: Transaction reference
+  'Order Status': string; // NEW: Processing status
 }
 
 export interface OrderFilters {
@@ -62,6 +69,8 @@ export function decryptOrderForAdmin(encryptedOrder: {
   id: string;
   order_reference: string;
   customer_wallet: string;
+  farcaster_fid?: string | null;
+  farcaster_username?: string | null;
   encrypted_customer_data: string;
   order_items: OrderItem[];
   total_amount: number;
@@ -85,6 +94,8 @@ export function decryptOrderForAdmin(encryptedOrder: {
       id: encryptedOrder.id,
       order_reference: encryptedOrder.order_reference,
       customer_wallet: encryptedOrder.customer_wallet,
+      farcaster_fid: encryptedOrder.farcaster_fid,
+      farcaster_username: encryptedOrder.farcaster_username,
       customerData,
       order_items: encryptedOrder.order_items,
       total_amount: encryptedOrder.total_amount,
@@ -128,6 +139,11 @@ export function decryptOrderForAdmin(encryptedOrder: {
         'Country': order.customerData.shippingAddress.country,
         'Email': order.customerData.email,
         'Shipping Phone Number': order.customerData.shippingAddress.phone || '',
+        'Customer Wallet': order.customer_wallet, // NEW: For refund purposes
+        'Farcaster FID': order.farcaster_fid || 'N/A', // NEW: Primary account identifier
+        'Farcaster Username': order.farcaster_username || 'N/A', // NEW: For customer support
+        'Payment Hash': order.payment_hash || 'N/A', // NEW: Transaction reference
+        'Order Status': order.order_status || 'confirmed', // NEW: Processing status
       });
     });
   });

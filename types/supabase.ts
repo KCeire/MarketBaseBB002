@@ -7,6 +7,8 @@ export interface Database {
           id: string;
           order_reference: string;
           customer_wallet: string;
+          farcaster_fid?: string | null; // NEW: Farcaster user FID
+          farcaster_username?: string | null; // NEW: Farcaster username
           encrypted_customer_data: string;
           order_items: OrderItem[];
           total_amount: number; // Changed from string to number to match DECIMAL(10,2)
@@ -29,6 +31,8 @@ export interface Database {
           id?: string;
           order_reference: string;
           customer_wallet: string;
+          farcaster_fid?: string | null; // NEW: Farcaster user FID
+          farcaster_username?: string | null; // NEW: Farcaster username
           encrypted_customer_data: string;
           order_items: OrderItem[];
           total_amount: number; // Changed from string to number
@@ -51,6 +55,8 @@ export interface Database {
           id?: string;
           order_reference?: string;
           customer_wallet?: string;
+          farcaster_fid?: string | null; // NEW: Farcaster user FID
+          farcaster_username?: string | null; // NEW: Farcaster username
           encrypted_customer_data?: string;
           order_items?: OrderItem[];
           total_amount?: number; // Changed from string to number
@@ -166,6 +172,8 @@ export interface DatabaseOrder {
   id: string;
   order_reference: string;
   customer_wallet: string;
+  farcaster_fid?: string | null; // NEW: Farcaster user FID
+  farcaster_username?: string | null; // NEW: Farcaster username
   encrypted_customer_data: string;
   order_items: OrderItem[];
   total_amount: number;

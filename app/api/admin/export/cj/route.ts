@@ -136,21 +136,26 @@ export async function POST(request: NextRequest): Promise<NextResponse<CJExportR
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('CJ Orders');
 
-    // Define headers matching CJ format
+    // Define headers matching CJ format with Farcaster data
     const headers = [
       'Order Number',
-      'SKU', 
+      'SKU',
       'Quantity',
       'Product Title',
       'Customer Name',
       'Address1',
-      'Address2', 
+      'Address2',
       'City',
       'Province',
       'ZIP',
       'Country',
       'Email',
-      'Shipping Phone Number'
+      'Shipping Phone Number',
+      'Customer Wallet',
+      'Farcaster FID',
+      'Farcaster Username',
+      'Payment Hash',
+      'Order Status'
     ];
 
     // Add headers to worksheet
@@ -165,7 +170,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<CJExportR
       fgColor: { argb: 'FFE0E0E0' }
     };
 
-    // Add data rows - Fixed: Properly typed row parameter
+    // Add data rows - Updated with Farcaster data
     cjData.forEach((row: {
       'Order Number': string;
       'SKU': string;
@@ -180,6 +185,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<CJExportR
       'Country': string;
       'Email': string;
       'Shipping Phone Number': string;
+      'Customer Wallet': string;
+      'Farcaster FID': string;
+      'Farcaster Username': string;
+      'Payment Hash': string;
+      'Order Status': string;
     }) => {
       worksheet.addRow([
         row['Order Number'],
@@ -194,7 +204,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<CJExportR
         row['ZIP'],
         row['Country'],
         row['Email'],
-        row['Shipping Phone Number']
+        row['Shipping Phone Number'],
+        row['Customer Wallet'],
+        row['Farcaster FID'],
+        row['Farcaster Username'],
+        row['Payment Hash'],
+        row['Order Status']
       ]);
     });
 
@@ -212,7 +227,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<CJExportR
       { width: 10 }, // ZIP
       { width: 10 }, // Country
       { width: 25 }, // Email
-      { width: 15 }  // Shipping Phone Number
+      { width: 15 }, // Shipping Phone Number
+      { width: 20 }, // Customer Wallet
+      { width: 12 }, // Farcaster FID
+      { width: 18 }, // Farcaster Username
+      { width: 20 }, // Payment Hash
+      { width: 12 }  // Order Status
     ];
 
     // Generate Excel buffer - FIXED: Use Buffer.from() instead of .length
