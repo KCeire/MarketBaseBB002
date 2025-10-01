@@ -266,6 +266,31 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       });
 
       try {
+        // First, try to link any recent anonymous clicks to this FID
+        console.log('🔄 Attempting to link anonymous clicks to FID:', farcasterFid);
+
+        const linkResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/affiliate/link-fid`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            visitorFid: farcasterFid
+          }),
+        });
+
+        if (linkResponse.ok) {
+          const linkResult = await linkResponse.json();
+          if (linkResult.linkedClicks > 0) {
+            console.log(`✅ Successfully linked ${linkResult.linkedClicks} anonymous clicks to FID ${farcasterFid}`);
+          } else {
+            console.log('ℹ️ No anonymous clicks found to link for FID:', farcasterFid);
+          }
+        } else {
+          console.warn('⚠️ Failed to link anonymous clicks, proceeding with attribution anyway');
+        }
+
+        // Now proceed with affiliate attribution
         await processAffiliateAttributions(
           farcasterFid,
           orderItems,
