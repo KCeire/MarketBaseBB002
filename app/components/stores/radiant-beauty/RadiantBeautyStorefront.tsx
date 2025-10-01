@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Button } from '@/app/components/ui/Button';
 import { Icon } from '@/app/components/ui/Icon';
 import type { MarketplaceProduct } from '@/types/shopify';
@@ -213,10 +214,12 @@ export function RadiantBeautyStorefront() {
                     >
                       <div className="aspect-square bg-white/5 relative overflow-hidden">
                         {product.image ? (
-                          <img
+                          <Image
                             src={product.image}
                             alt={product.title}
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           />
                         ) : (
                           <div className="absolute inset-0 bg-gradient-to-br from-pink-500/20 to-rose-500/20 flex items-center justify-center">

@@ -1,7 +1,7 @@
 // app/orders/page.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import { Icon } from '../components/ui/Icon';
 // Local utility functions for client-side use
@@ -98,7 +98,7 @@ export default function OrdersPage() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     if (!address) {
       setLoading(false);
       return;
@@ -135,12 +135,12 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [address, filter]);
 
   // Initial load
   useEffect(() => {
     fetchOrders();
-  }, [address, filter]);
+  }, [fetchOrders]);
 
   // Real-time polling every 45 seconds
   useEffect(() => {
@@ -151,7 +151,7 @@ export default function OrdersPage() {
     }, 45000); // 45 seconds
 
     return () => clearInterval(interval);
-  }, [address, filter]);
+  }, [address, fetchOrders]);
 
   const filteredOrders = orders.filter(order => {
     if (filter === 'all') return true;

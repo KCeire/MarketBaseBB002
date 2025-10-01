@@ -31,11 +31,11 @@ export default function ProfilePage() {
         const data = await response.json();
 
         if (data.success && data.orders) {
-          const confirmedOrders = data.orders.filter((order: any) =>
+          const confirmedOrders = data.orders.filter((order: { payment_status: string }) =>
             order.payment_status === 'confirmed'
           );
 
-          const totalSpent = confirmedOrders.reduce((sum: number, order: any) =>
+          const totalSpent = confirmedOrders.reduce((sum: number, order: { total_amount: number }) =>
             sum + order.total_amount, 0
           );
 
