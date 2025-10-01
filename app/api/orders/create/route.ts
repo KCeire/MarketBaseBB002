@@ -14,6 +14,7 @@ async function processAffiliateAttributions(
   buyerFid: string,
   orderItems: OrderItem[],
   orderReference: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _totalOrderAmount: number
 ): Promise<void> {
   const affiliateConversions: Array<{
