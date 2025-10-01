@@ -44,4 +44,10 @@ next-env.d.ts
 /BaseShop-Files-To-Share
 /ShareButton-Files
 
+# supabase
+supabase/.temp/
+supabase/.branches/
+supabase/.git/
+.supabase/
+
 

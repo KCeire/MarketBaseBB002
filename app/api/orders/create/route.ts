@@ -2,12 +2,98 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/client';
 import { OrderItem, CustomerData } from '@/types/supabase';
-import { 
-  encryptCustomerData, 
-  generateOrderReference, 
+import {
+  encryptCustomerData,
+  generateOrderReference,
   validateCustomerData,
-  sanitizeForLogging 
+  sanitizeForLogging
 } from '@/lib/encryption';
+
+// Helper function to process affiliate attributions for multiple products in an order
+async function processAffiliateAttributions(
+  buyerFid: string,
+  orderItems: OrderItem[],
+  orderReference: string,
+  totalOrderAmount: number
+): Promise<void> {
+  const affiliateConversions: Array<{
+    clickId: string;
+    referrerFid: string;
+    commissionAmount: number;
+    productId: string;
+  }> = [];
+
+  // Process each product in the order for affiliate attribution
+  for (const item of orderItems) {
+    try {
+      // Find affiliate click for this specific product
+      const { data: affiliateClick, error } = await supabaseAdmin
+        .rpc('find_affiliate_click', {
+          p_visitor_fid: buyerFid,
+          p_product_id: item.productId.toString() // Ensure string format
+        });
+
+      if (error) {
+        console.error(`Error finding affiliate click for product ${item.productId}:`, error);
+        continue;
+      }
+
+      if (affiliateClick && affiliateClick.length > 0) {
+        const click = affiliateClick[0];
+
+        // Calculate commission for this specific item (2% of item total)
+        const itemTotal = parseFloat(item.price) * item.quantity;
+        const commissionAmount = itemTotal * 0.02; // 2% commission
+
+        // Process the conversion
+        const { error: conversionError } = await supabaseAdmin
+          .rpc('process_affiliate_conversion', {
+            p_click_id: click.click_id,
+            p_order_id: orderReference,
+            p_order_total: itemTotal // Use item total, not full order total
+          });
+
+        if (conversionError) {
+          console.error(`Error processing affiliate conversion for product ${item.productId}:`, conversionError);
+        } else {
+          affiliateConversions.push({
+            clickId: click.click_id,
+            referrerFid: click.referrer_fid,
+            commissionAmount,
+            productId: item.productId.toString()
+          });
+
+          console.log(`💰 Affiliate commission earned:`, {
+            orderReference,
+            productId: item.productId,
+            productTitle: item.title,
+            referrerFid: click.referrer_fid,
+            buyerFid,
+            itemTotal: itemTotal.toFixed(2),
+            commissionAmount: commissionAmount.toFixed(4),
+            commissionRate: '2%'
+          });
+        }
+      }
+    } catch (error) {
+      console.error(`Error processing affiliate attribution for product ${item.productId}:`, error);
+    }
+  }
+
+  // Log summary of affiliate attributions for this order
+  if (affiliateConversions.length > 0) {
+    const totalCommissions = affiliateConversions.reduce((sum, conv) => sum + conv.commissionAmount, 0);
+    const uniqueReferrers = [...new Set(affiliateConversions.map(conv => conv.referrerFid))];
+
+    console.log(`📊 Affiliate attribution summary for order ${orderReference}:`, {
+      totalProducts: orderItems.length,
+      productsWithAffiliates: affiliateConversions.length,
+      totalCommissions: totalCommissions.toFixed(4),
+      uniqueReferrers,
+      conversions: affiliateConversions
+    });
+  }
+}
 
 // Temporary debug - remove after fixing
 console.log('Environment check:', {
@@ -149,6 +235,21 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       farcasterUsername: farcasterUsername || 'No username',
       expiresAt: typedOrder.expires_at
     });
+
+    // Process affiliate attribution if user has FID and has ordered multiple products
+    if (farcasterFid) {
+      try {
+        await processAffiliateAttributions(
+          farcasterFid,
+          orderItems,
+          typedOrder.order_reference,
+          typedOrder.total_amount
+        );
+      } catch (affiliateError) {
+        // Log but don't fail the order if affiliate processing fails
+        console.error('Affiliate attribution error (non-blocking):', affiliateError);
+      }
+    }
 
     // Return success response
     return NextResponse.json({
