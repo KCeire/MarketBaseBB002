@@ -106,13 +106,21 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
   };
 
   const createOrderWithCustomerData = async (): Promise<string> => {
+    console.log('🚀 CHECKOUT: Starting order creation process...');
+
     if (!isConnected || !address) {
-      throw new Error('Wallet not connected');
+      const error = 'Wallet not connected';
+      console.error('❌ CHECKOUT: Wallet validation failed:', error);
+      throw new Error(error);
     }
 
     if (!validateForm()) {
-      throw new Error('Please fill in all required fields');
+      const error = 'Please fill in all required fields';
+      console.error('❌ CHECKOUT: Form validation failed:', error);
+      throw new Error(error);
     }
+
+    console.log('✅ CHECKOUT: Wallet and form validations passed');
 
     // Transform cart items to match API expectations
     const orderItems = cart.map(item => ({
@@ -126,13 +134,21 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       sku: item.sku
     }));
 
+    console.log('📦 CHECKOUT: Order items prepared:', {
+      itemCount: orderItems.length,
+      totalAmount: total,
+      items: orderItems.map(item => ({ productId: item.productId, title: item.title, price: item.price, quantity: item.quantity }))
+    });
+
     // Get buyer's FID for affiliate tracking
     let buyerFid: string | undefined;
     try {
+      console.log('🔍 CHECKOUT: Attempting to get buyer FID from Farcaster context...');
       const context = await sdk.context;
       buyerFid = context.user?.fid?.toString();
+      console.log('✅ CHECKOUT: Buyer FID retrieved:', { buyerFid: buyerFid || 'none' });
     } catch (error) {
-      console.log('Could not get buyer FID:', error);
+      console.warn('⚠️ CHECKOUT: Could not get buyer FID:', error);
     }
 
     const requestBody = {
@@ -158,9 +174,10 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       skipAffiliateAttribution: true
     };
 
-    console.log('Creating order with customer data:', {
+    console.log('📞 CHECKOUT: Calling order creation API with data:', {
       ...requestBody,
-      customerData: { ...requestBody.customerData, email: '[REDACTED]' }
+      customerData: { ...requestBody.customerData, email: '[REDACTED]' },
+      timestamp: new Date().toISOString()
     });
 
     const response = await fetch('/api/orders/create', {
@@ -171,37 +188,63 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       body: JSON.stringify(requestBody),
     });
 
+    console.log('📞 CHECKOUT: Order creation API response status:', response.status);
+
     if (!response.ok) {
       const error = await response.json();
+      console.error('❌ CHECKOUT: Order creation API failed:', {
+        status: response.status,
+        error: error,
+        requestBody: { ...requestBody, customerData: { ...requestBody.customerData, email: '[REDACTED]' } }
+      });
       throw new Error(error.error || 'Failed to create order');
     }
 
     const data = await response.json();
-    
+    console.log('✅ CHECKOUT: Order creation API response:', {
+      success: data.success,
+      orderReference: data.orderReference,
+      hasAffiliate: !!data.affiliateProcessed
+    });
+
     if (!data.success) {
+      console.error('❌ CHECKOUT: Order creation marked as failed in response:', data);
       throw new Error(data.error || 'Order creation failed');
     }
-    
+
+    console.log(`🎯 CHECKOUT: Order created successfully: ${data.orderReference}`);
     return data.orderReference;
   };
 
   // Start payment verification in background after order creation
   const startBackgroundVerification = async (orderRef: string, transactionId: string) => {
     try {
-      console.log(`🔄 Starting background payment verification for order ${orderRef}`);
+      console.log('🚀 CHECKOUT: Starting background payment verification:', {
+        orderRef,
+        transactionId,
+        testnet: process.env.NODE_ENV !== 'production',
+        timestamp: new Date().toISOString()
+      });
 
       const result = await startPaymentVerification(orderRef, transactionId, {
         testnet: process.env.NODE_ENV !== 'production',
         onProgress: (attempt, status) => {
-          console.log(`Payment verification attempt ${attempt}: ${status}`);
+          console.log(`🔄 CHECKOUT PROGRESS: Payment verification attempt ${attempt}: ${status}`);
         },
         onSuccess: (result) => {
-          console.log('🎉 Payment verified successfully!', result);
+          console.log('🎉 CHECKOUT SUCCESS: Payment verified successfully!', {
+            result,
+            orderRef,
+            affiliateProcessed: result.affiliateProcessed,
+            paymentStatus: result.paymentStatus
+          });
           setPaymentStep('success');
 
           if (result.affiliateProcessed) {
+            console.log('💰 CHECKOUT: Affiliate rewards were processed for this order');
             toast.success('Payment Complete', 'Your order is confirmed and affiliate rewards have been processed!');
           } else {
+            console.log('ℹ️ CHECKOUT: No affiliate rewards processed (normal for non-affiliate orders)');
             toast.success('Payment Complete', 'Your order is confirmed!');
           }
 
@@ -210,7 +253,11 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
           }
         },
         onError: (error) => {
-          console.error('💥 Payment verification failed:', error);
+          console.error('💥 CHECKOUT ERROR: Payment verification failed:', {
+            error,
+            orderRef,
+            transactionId
+          });
           toast.error('Payment Verification Failed', error);
           setPaymentStep('form'); // Allow retry
 
@@ -249,18 +296,28 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
 
   const handleBasePayment = async () => {
     try {
+      console.log('🚀 CHECKOUT: Starting Base Pay payment process...');
       setPaymentStep('processing');
 
       if (!isConnected) {
-        throw new Error('Please connect your wallet first');
+        const error = 'Please connect your wallet first';
+        console.error('❌ CHECKOUT: Wallet not connected for Base Pay:', error);
+        throw new Error(error);
       }
 
       const marketplaceAddress = process.env.NEXT_PUBLIC_MARKETPLACE_WALLET_ADDRESS;
       if (!marketplaceAddress) {
-        throw new Error('Marketplace address not configured');
+        const error = 'Marketplace address not configured';
+        console.error('❌ CHECKOUT: Missing marketplace address:', error);
+        throw new Error(error);
       }
 
-      console.log('Initiating Base Pay payment...');
+      console.log('💳 CHECKOUT: Initiating Base Pay payment:', {
+        amount: total,
+        to: marketplaceAddress,
+        testnet: process.env.NODE_ENV !== 'production',
+        timestamp: new Date().toISOString()
+      });
       toast.info('Processing Payment', 'Please complete payment in Base App');
 
       // Initiate Base Pay payment with customer info collection
@@ -276,11 +333,17 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
         }
       });
 
-      console.log('Base Pay payment completed:', payment.id);
+      console.log('✅ CHECKOUT: Base Pay payment completed successfully:', {
+        paymentId: payment.id,
+        hasPayerInfo: !!payment.payerInfoResponses,
+        email: payment.payerInfoResponses?.email ? '[PRESENT]' : '[MISSING]',
+        address: payment.payerInfoResponses?.physicalAddress ? '[PRESENT]' : '[MISSING]'
+      });
       setPaymentId(payment.id);
       setBasePayData(payment);
 
       // Auto-populate form with Base Pay data
+      console.log('📝 CHECKOUT: Auto-populating form with Base Pay data...');
       populateFormFromBasePay(payment);
 
       // Show form for review/editing and dismiss payment processing toast
@@ -301,25 +364,30 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
 
   const handleConfirmOrder = async () => {
     try {
+      console.log('🚀 CHECKOUT: Starting final order confirmation...');
       setPaymentStep('confirming');
 
       // Create order with customer data (without starting affiliate attribution)
+      console.log('📝 CHECKOUT: Creating order with customer data...');
       const orderRef = await createOrderWithCustomerData();
       setOrderReference(orderRef);
-      console.log('Order created:', orderRef);
+      console.log('✅ CHECKOUT: Order created successfully:', orderRef);
 
       // Show success message immediately (dismiss any pending payment toast)
       toast.success('Order Created', `Order ${orderRef} created successfully`);
 
       // Start background payment verification with affiliate processing
       if (basePayData) {
+        console.log('🔄 CHECKOUT: Starting background payment verification process...');
         // Don't await this - let it run in background
         startBackgroundVerification(orderRef, basePayData.id);
 
         // Move to confirming state
         toast.info('Confirming Payment', 'Verifying payment on blockchain...');
       } else {
-        throw new Error('Payment data not available');
+        const error = 'Payment data not available';
+        console.error('❌ CHECKOUT: Missing Base Pay data:', { basePayData, paymentId });
+        throw new Error(error);
       }
 
     } catch (err) {

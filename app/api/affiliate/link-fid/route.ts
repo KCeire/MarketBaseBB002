@@ -19,7 +19,13 @@ export async function POST(request: NextRequest): Promise<NextResponse<LinkFidRe
     const body: LinkFidRequest = await request.json();
     const { visitorFid } = body;
 
+    console.log('🔗 AFFILIATE LINK-FID: API called with:', {
+      visitorFid,
+      timestamp: new Date().toISOString()
+    });
+
     if (!visitorFid) {
+      console.error('❌ AFFILIATE LINK-FID: Missing visitorFid in request');
       return NextResponse.json({
         success: false,
         error: 'Missing required field: visitorFid'
@@ -36,23 +42,36 @@ export async function POST(request: NextRequest): Promise<NextResponse<LinkFidRe
     const oneHourAgo = new Date();
     oneHourAgo.setHours(oneHourAgo.getHours() - 1);
 
+    console.log('🔍 AFFILIATE LINK-FID: Searching for anonymous clicks to link:', {
+      lookbackTime: oneHourAgo.toISOString(),
+      currentTime: new Date().toISOString()
+    });
+
     const { data: anonymousClicks, error: findError } = await supabase
       .from('affiliate_clicks')
-      .select('click_id, referrer_fid, product_id, clicked_at')
+      .select('click_id, referrer_fid, product_id, clicked_at, expires_at')
       .is('visitor_fid', null)
       .gte('clicked_at', oneHourAgo.toISOString())
       .gte('expires_at', new Date().toISOString()) // Still active
       .eq('converted', false);
 
     if (findError) {
-      console.error('Error finding anonymous clicks:', findError);
+      console.error('❌ AFFILIATE LINK-FID: Database error finding anonymous clicks:', {
+        error: findError,
+        errorCode: findError?.code,
+        errorMessage: findError?.message,
+        visitorFid
+      });
       return NextResponse.json({
         success: false,
         error: 'Database error'
       }, { status: 500 });
     }
 
+    console.log(`📋 AFFILIATE LINK-FID: Found ${anonymousClicks?.length || 0} anonymous clicks to potentially link`);
+
     if (!anonymousClicks || anonymousClicks.length === 0) {
+      console.log('ℹ️ AFFILIATE LINK-FID: No anonymous clicks found to link');
       return NextResponse.json({
         success: true,
         linkedClicks: 0,
@@ -62,9 +81,18 @@ export async function POST(request: NextRequest): Promise<NextResponse<LinkFidRe
 
     // Update anonymous clicks to link them to this FID
     // Exclude self-referrals
+    console.log('🔍 AFFILIATE LINK-FID: Filtering out self-referrals...');
     const clicksToUpdate = anonymousClicks.filter(click => click.referrer_fid !== visitorFid);
 
+    console.log(`📋 AFFILIATE LINK-FID: Self-referral filtering results:`, {
+      totalFound: anonymousClicks.length,
+      afterFiltering: clicksToUpdate.length,
+      selfReferralsExcluded: anonymousClicks.length - clicksToUpdate.length,
+      visitorFid
+    });
+
     if (clicksToUpdate.length === 0) {
+      console.log('ℹ️ AFFILIATE LINK-FID: No valid clicks found to link (self-referrals excluded)');
       return NextResponse.json({
         success: true,
         linkedClicks: 0,
@@ -73,6 +101,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<LinkFidRe
     }
 
     const clickIds = clicksToUpdate.map(click => click.click_id);
+    console.log('💾 AFFILIATE LINK-FID: Updating clicks with visitor FID:', {
+      clickIds,
+      visitorFid,
+      updateCount: clickIds.length
+    });
 
     const { error: updateError } = await supabase
       .from('affiliate_clicks')
@@ -83,14 +116,20 @@ export async function POST(request: NextRequest): Promise<NextResponse<LinkFidRe
       .in('click_id', clickIds);
 
     if (updateError) {
-      console.error('Error linking FID to clicks:', updateError);
+      console.error('❌ AFFILIATE LINK-FID: Failed to update clicks:', {
+        error: updateError,
+        errorCode: updateError?.code,
+        errorMessage: updateError?.message,
+        clickIds,
+        visitorFid
+      });
       return NextResponse.json({
         success: false,
         error: 'Failed to link clicks to FID'
       }, { status: 500 });
     }
 
-    console.log(`🔗 Linked ${clickIds.length} anonymous clicks to FID ${visitorFid}:`, {
+    console.log(`✅ AFFILIATE LINK-FID: Successfully linked ${clickIds.length} anonymous clicks to FID ${visitorFid}:`, {
       linkedClicks: clickIds.length,
       clickIds,
       visitorFid

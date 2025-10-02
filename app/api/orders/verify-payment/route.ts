@@ -53,36 +53,63 @@ async function processOrderAffiliateAttributions(
   let processed = 0;
   let errors = 0;
 
-  console.log('🔗 Processing affiliate attributions for confirmed payment:', {
+  console.log('🔗 AFFILIATE PROCESSING START: Processing affiliate attributions for confirmed payment:', {
     orderReference,
     buyerFid,
-    itemCount: orderItems.length
+    itemCount: orderItems?.length || 0,
+    timestamp: new Date().toISOString()
   });
 
   // First, try to link any recent anonymous clicks to this FID
+  console.log('🔗 AFFILIATE STEP A: Attempting to link anonymous clicks to FID...');
   try {
-    const linkResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/affiliate/link-fid`, {
+    const linkUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/affiliate/link-fid`;
+    console.log(`📞 AFFILIATE STEP A: Calling link-fid API: ${linkUrl}`);
+
+    const linkResponse = await fetch(linkUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ visitorFid: buyerFid }),
     });
 
+    console.log(`📞 AFFILIATE STEP A: Link-fid API response status: ${linkResponse.status}`);
+
     if (linkResponse.ok) {
       const linkResult = await linkResponse.json();
+      console.log(`✅ AFFILIATE STEP A SUCCESS: Link result:`, linkResult);
       if (linkResult.linkedClicks > 0) {
-        console.log(`✅ Linked ${linkResult.linkedClicks} anonymous clicks to FID ${buyerFid}`);
+        console.log(`🔗 AFFILIATE STEP A: Successfully linked ${linkResult.linkedClicks} anonymous clicks to FID ${buyerFid}`);
+      } else {
+        console.log(`ℹ️ AFFILIATE STEP A: No anonymous clicks found to link for FID ${buyerFid}`);
       }
+    } else {
+      const errorText = await linkResponse.text();
+      console.error(`❌ AFFILIATE STEP A FAILED: Link-fid API error (${linkResponse.status}):`, errorText);
     }
   } catch (error) {
-    console.warn('⚠️ Failed to link anonymous clicks:', error);
+    console.error('❌ AFFILIATE STEP A ERROR: Failed to link anonymous clicks:', error);
   }
 
   // Process each product for affiliate attribution
-  for (const item of orderItems) {
-    try {
-      console.log(`🔍 Processing affiliate attribution for product: ${item.productId}`);
+  console.log(`🔗 AFFILIATE STEP B: Processing ${orderItems?.length || 0} items for affiliate attribution...`);
 
+  if (!orderItems || orderItems.length === 0) {
+    console.log('⚠️ AFFILIATE STEP B: No order items found to process');
+    return { processed, errors };
+  }
+
+  for (let i = 0; i < orderItems.length; i++) {
+    const item = orderItems[i];
+    console.log(`🔍 AFFILIATE STEP B${i + 1}: Processing item ${i + 1}/${orderItems.length}:`, {
+      productId: item.productId,
+      title: item.title,
+      price: item.price,
+      quantity: item.quantity
+    });
+
+    try {
       // Find affiliate click for this specific product
+      console.log(`🔍 AFFILIATE STEP B${i + 1}A: Searching for affiliate click (productId: ${item.productId}, buyerFid: ${buyerFid})`);
       const { data: affiliateClick, error } = await supabaseAdmin
         .rpc('find_affiliate_click', {
           p_visitor_fid: buyerFid,
@@ -90,22 +117,37 @@ async function processOrderAffiliateAttributions(
         });
 
       if (error) {
-        console.error(`❌ Error finding affiliate click for product ${item.productId}:`, error);
+        console.error(`❌ AFFILIATE STEP B${i + 1}A FAILED: Error finding affiliate click for product ${item.productId}:`, {
+          error,
+          errorCode: error?.code,
+          errorMessage: error?.message,
+          productId: item.productId,
+          buyerFid
+        });
         errors++;
         continue;
       }
+
+      console.log(`📋 AFFILIATE STEP B${i + 1}A RESULT: Found ${affiliateClick?.length || 0} affiliate clicks for product ${item.productId}`);
 
       if (affiliateClick && affiliateClick.length > 0) {
         const click = affiliateClick[0];
         const itemTotal = parseFloat(item.price) * item.quantity;
 
-        console.log(`✅ Found affiliate click for product ${item.productId}:`, {
+        console.log(`✅ AFFILIATE STEP B${i + 1}B: Found affiliate click for product ${item.productId}:`, {
           clickId: click.click_id,
           referrerFid: click.referrer_fid,
-          itemTotal
+          visitorFid: click.visitor_fid,
+          productId: click.product_id,
+          clickedAt: click.clicked_at,
+          converted: click.converted,
+          itemPrice: item.price,
+          quantity: item.quantity,
+          itemTotal: itemTotal
         });
 
         // Process the conversion
+        console.log(`💰 AFFILIATE STEP B${i + 1}C: Processing conversion for click ${click.click_id}...`);
         const { error: conversionError } = await supabaseAdmin
           .rpc('process_affiliate_conversion', {
             p_click_id: click.click_id,
@@ -114,17 +156,33 @@ async function processOrderAffiliateAttributions(
           });
 
         if (conversionError) {
-          console.error(`❌ Error processing affiliate conversion for product ${item.productId}:`, conversionError);
+          console.error(`❌ AFFILIATE STEP B${i + 1}C FAILED: Error processing affiliate conversion for product ${item.productId}:`, {
+            error: conversionError,
+            errorCode: conversionError?.code,
+            errorMessage: conversionError?.message,
+            clickId: click.click_id,
+            orderReference,
+            itemTotal
+          });
           errors++;
         } else {
-          console.log(`💰 Affiliate conversion processed successfully for product ${item.productId}`);
+          console.log(`✅ AFFILIATE STEP B${i + 1}C SUCCESS: Affiliate conversion processed successfully for product ${item.productId}`, {
+            clickId: click.click_id,
+            commissionAmount: itemTotal * 0.02,
+            itemTotal
+          });
           processed++;
         }
       } else {
-        console.log(`ℹ️ No affiliate click found for product ${item.productId} and buyer FID ${buyerFid}`);
+        console.log(`ℹ️ AFFILIATE STEP B${i + 1}: No affiliate click found for product ${item.productId} and buyer FID ${buyerFid}`);
       }
     } catch (error) {
-      console.error(`Error processing affiliate attribution for product ${item.productId}:`, error);
+      console.error(`❌ AFFILIATE STEP B${i + 1} ERROR: Exception processing affiliate attribution for product ${item.productId}:`, {
+        error,
+        productId: item.productId,
+        buyerFid,
+        orderReference
+      });
       errors++;
     }
   }
@@ -138,22 +196,35 @@ export async function POST(request: NextRequest): Promise<NextResponse<VerifyPay
     const body: VerifyPaymentRequest = await request.json();
     const { orderReference, transactionId, testnet = false } = body;
 
+    console.log('🚀 Payment verification API called with:', {
+      orderReference,
+      transactionId,
+      testnet,
+      timestamp: new Date().toISOString()
+    });
+
     if (!orderReference || !transactionId) {
+      console.error('❌ Missing required fields in payment verification request');
       return NextResponse.json({
         success: false,
         error: 'Missing required fields: orderReference and transactionId'
       }, { status: 400 });
     }
 
-    console.log(`🔍 Verifying payment for order ${orderReference}, transaction ${transactionId}`);
+    console.log(`🔍 STEP 1: Verifying payment for order ${orderReference}, transaction ${transactionId}`);
 
     // Step 1: Check payment status with Base Pay
     let paymentData;
     try {
+      console.log('📞 Calling Base Pay getPaymentStatus...');
       paymentData = await getPaymentStatus({ id: transactionId, testnet });
-      console.log('💳 Payment status from Base Pay:', paymentData);
+      console.log('💳 STEP 1 RESULT: Payment status from Base Pay:', {
+        status: paymentData.status,
+        transactionHash: paymentData.transactionHash,
+        completedAt: paymentData.completedAt
+      });
     } catch (error) {
-      console.error('❌ Failed to check payment status:', error);
+      console.error('❌ STEP 1 FAILED: Failed to check payment status:', error);
       return NextResponse.json({
         success: false,
         error: 'Failed to verify payment status'
@@ -162,6 +233,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<VerifyPay
 
     // Step 2: If payment is not completed, return current status
     if (paymentData.status !== 'completed') {
+      console.log(`⏳ STEP 2: Payment not completed yet. Status: ${paymentData.status}`);
       return NextResponse.json({
         success: true,
         paymentStatus: paymentData.status,
@@ -170,7 +242,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<VerifyPay
       });
     }
 
+    console.log('✅ STEP 2: Payment confirmed as completed, proceeding with order update...');
+
     // Step 3: Get order from database
+    console.log(`🔍 STEP 3: Fetching order from database: ${orderReference}`);
     const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')
       .select('*')
@@ -178,25 +253,48 @@ export async function POST(request: NextRequest): Promise<NextResponse<VerifyPay
       .single();
 
     if (orderError || !order) {
-      console.error('❌ Order not found:', orderError);
+      console.error('❌ STEP 3 FAILED: Order not found:', {
+        orderReference,
+        error: orderError,
+        errorCode: orderError?.code,
+        errorMessage: orderError?.message
+      });
       return NextResponse.json({
         success: false,
         error: 'Order not found'
       }, { status: 404 });
     }
 
+    console.log('✅ STEP 3 SUCCESS: Order found:', {
+      orderReference: order.order_reference,
+      paymentStatus: order.payment_status,
+      orderStatus: order.order_status,
+      farcasterFid: order.farcaster_fid,
+      totalAmount: order.total_amount,
+      createdAt: order.created_at
+    });
+
     // Step 4: Check if order is already confirmed
     if (order.payment_status === 'confirmed' && order.payment_hash) {
-      console.log('ℹ️ Order already confirmed, checking affiliate attribution');
+      console.log('🔄 STEP 4: Order already confirmed, checking affiliate attribution');
+      console.log('📋 Order already confirmed details:', {
+        paymentHash: order.payment_hash,
+        paymentStatus: order.payment_status,
+        orderStatus: order.order_status
+      });
 
       // Still process affiliate attribution if FID exists and not already processed
       let affiliateResult = { processed: 0, errors: 0 };
       if (order.farcaster_fid) {
+        console.log(`🎯 STEP 4A: Processing affiliate attributions for already confirmed order (FID: ${order.farcaster_fid})`);
         affiliateResult = await processOrderAffiliateAttributions(
           orderReference,
           order.farcaster_fid,
           order.order_items
         );
+        console.log(`✅ STEP 4A COMPLETE: Affiliate attribution result:`, affiliateResult);
+      } else {
+        console.log('ℹ️ STEP 4A SKIPPED: No Farcaster FID found for already confirmed order');
       }
 
       return NextResponse.json({
@@ -207,7 +305,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<VerifyPay
       });
     }
 
+    console.log('🔄 STEP 4: Order not yet confirmed, proceeding with confirmation...');
+
     // Step 5: Update order with payment confirmation
+    console.log('🔄 STEP 5: Updating order with payment confirmation...');
     const updateData = {
       payment_status: 'confirmed' as const,
       payment_hash: paymentData.transactionHash || transactionId,
@@ -216,31 +317,47 @@ export async function POST(request: NextRequest): Promise<NextResponse<VerifyPay
       updated_at: new Date().toISOString()
     };
 
+    console.log('📝 STEP 5: Order update data:', updateData);
+
     const { error: updateError } = await supabaseAdmin
       .from('orders')
       .update(updateData)
       .eq('order_reference', orderReference);
 
     if (updateError) {
-      console.error('❌ Failed to update order:', updateError);
+      console.error('❌ STEP 5 FAILED: Failed to update order:', {
+        orderReference,
+        error: updateError,
+        errorCode: updateError?.code,
+        errorMessage: updateError?.message,
+        updateData
+      });
       return NextResponse.json({
         success: false,
         error: 'Failed to update order'
       }, { status: 500 });
     }
 
-    console.log(`✅ Order ${orderReference} confirmed with payment hash: ${updateData.payment_hash}`);
+    console.log(`✅ STEP 5 SUCCESS: Order ${orderReference} confirmed with payment hash: ${updateData.payment_hash}`);
 
     // Step 6: Process affiliate attribution if buyer has FID
+    console.log('🔄 STEP 6: Starting affiliate attribution processing...');
     let affiliateResult = { processed: 0, errors: 0 };
     if (order.farcaster_fid) {
+      console.log(`🎯 STEP 6A: Processing affiliate attributions for FID: ${order.farcaster_fid}`);
+      console.log('📋 Order items to process:', order.order_items);
       affiliateResult = await processOrderAffiliateAttributions(
         orderReference,
         order.farcaster_fid,
         order.order_items
       );
+      console.log(`✅ STEP 6A COMPLETE: Final affiliate attribution result:`, {
+        processed: affiliateResult.processed,
+        errors: affiliateResult.errors,
+        totalItems: order.order_items?.length || 0
+      });
     } else {
-      console.log('ℹ️ No Farcaster FID provided, skipping affiliate attribution');
+      console.log('ℹ️ STEP 6 SKIPPED: No Farcaster FID provided, skipping affiliate attribution');
     }
 
     return NextResponse.json({
