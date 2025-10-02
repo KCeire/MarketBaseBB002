@@ -131,6 +131,7 @@ interface CreateOrderRequest {
   customerWallet: string;
   farcasterFid?: string; // NEW: Optional Farcaster FID
   farcasterUsername?: string; // NEW: Optional Farcaster username
+  skipAffiliateAttribution?: boolean; // NEW: Skip affiliate processing at order creation
 }
 
 interface CreateOrderResponse {
@@ -147,7 +148,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
   try {
     // Parse request body
     const body: CreateOrderRequest = await request.json();
-    const { customerData, orderItems, totalAmount, customerWallet, farcasterFid, farcasterUsername } = body;
+    const { customerData, orderItems, totalAmount, customerWallet, farcasterFid, farcasterUsername, skipAffiliateAttribution = false } = body;
 
     // Validate required fields
     if (!customerData || !orderItems || !totalAmount || !customerWallet) {
@@ -257,8 +258,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       expiresAt: typedOrder.expires_at
     });
 
-    // Process affiliate attribution if user has FID
-    if (farcasterFid) {
+    // Process affiliate attribution if user has FID and not skipped
+    if (farcasterFid && !skipAffiliateAttribution) {
       console.log('🔗 Starting affiliate attribution process for order:', {
         farcasterFid,
         orderReference: typedOrder.order_reference,
@@ -301,6 +302,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
         // Log but don't fail the order if affiliate processing fails
         console.error('Affiliate attribution error (non-blocking):', affiliateError);
       }
+    } else if (skipAffiliateAttribution) {
+      console.log('ℹ️ Affiliate attribution skipped - will be processed during payment verification');
     } else {
       console.log('⚠️ No Farcaster FID provided, skipping affiliate attribution');
     }

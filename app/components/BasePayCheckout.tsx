@@ -3,12 +3,13 @@
 
 import React, { useState } from 'react';
 import { useAccount } from 'wagmi';
-import { pay, getPaymentStatus } from '@base-org/account';
+import { pay } from '@base-org/account';
 import { BasePayButton } from '@base-org/account-ui/react';
 import sdk from '@farcaster/miniapp-sdk';
 import { Button } from './ui/Button';
 import { Icon } from './ui/Icon';
 import { toast } from './ui/Toast';
+import { startPaymentVerification } from '@/lib/payment-verification';
 
 interface CartItem {
   productId: number;
@@ -152,7 +153,9 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       customerWallet: address,
       basePayPaymentId: basePayData?.id,
       // Add Farcaster FID for affiliate tracking
-      farcasterFid: buyerFid
+      farcasterFid: buyerFid,
+      // Skip affiliate attribution at order creation - will be processed during payment verification
+      skipAffiliateAttribution: true
     };
 
     console.log('Creating order with customer data:', {
@@ -182,76 +185,66 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
     return data.orderReference;
   };
 
-  const updateOrderWithPaymentStatus = async (orderRef: string, paymentId: string, status: string) => {
+  // Start payment verification in background after order creation
+  const startBackgroundVerification = async (orderRef: string, transactionId: string) => {
     try {
-      const response = await fetch('/api/orders/update-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      console.log(`🔄 Starting background payment verification for order ${orderRef}`);
+
+      const result = await startPaymentVerification(orderRef, transactionId, {
+        testnet: process.env.NODE_ENV !== 'production',
+        onProgress: (attempt, status) => {
+          console.log(`Payment verification attempt ${attempt}: ${status}`);
         },
-        body: JSON.stringify({
-          orderReference: orderRef,
-          transactionHash: paymentId,
-          paymentStatus: status
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Update payment API error:', errorData);
-        throw new Error(`API Error: ${errorData.error || response.statusText}`);
-      }
-
-    } catch (err) {
-      console.error('Error updating order payment status:', err);
-      toast.error('Payment Update Failed', 'Unable to update payment status');
-    }
-  };
-
-  const pollPaymentStatus = async (paymentId: string, orderRef: string) => {
-    const maxAttempts = 30;
-    let attempts = 0;
-
-    const poll = async (): Promise<void> => {
-      try {
-        attempts++;
-        
-        const status = await getPaymentStatus({ 
-          id: paymentId,
-          testnet: false
-        });
-
-        console.log(`Payment status check ${attempts}:`, status.status);
-
-        if (status.status === 'completed') {
-          await updateOrderWithPaymentStatus(orderRef, paymentId, 'confirmed');
+        onSuccess: (result) => {
+          console.log('🎉 Payment verified successfully!', result);
           setPaymentStep('success');
-          
+
+          if (result.affiliateProcessed) {
+            toast.success('Payment Complete', 'Your order is confirmed and affiliate rewards have been processed!');
+          } else {
+            toast.success('Payment Complete', 'Your order is confirmed!');
+          }
+
           if (onSuccess) {
             onSuccess(orderRef);
           }
-          return;
+        },
+        onError: (error) => {
+          console.error('💥 Payment verification failed:', error);
+          toast.error('Payment Verification Failed', error);
+          setPaymentStep('form'); // Allow retry
+
+          if (onError) {
+            onError(error);
+          }
+        }
+      });
+
+      // If verification completed immediately (already confirmed)
+      if (result.success && result.paymentStatus === 'completed') {
+        setPaymentStep('success');
+
+        if (result.affiliateProcessed) {
+          toast.success('Payment Complete', 'Your order is confirmed and affiliate rewards have been processed!');
+        } else {
+          toast.success('Payment Complete', 'Your order is confirmed!');
         }
 
-        if (status.status === 'failed') {
-          await updateOrderWithPaymentStatus(orderRef, paymentId, 'failed');
-          throw new Error('Payment failed on blockchain');
+        if (onSuccess) {
+          onSuccess(orderRef);
         }
-
-        if (attempts < maxAttempts && status.status === 'pending') {
-          setTimeout(poll, 2000);
-        } else if (attempts >= maxAttempts) {
-          throw new Error('Payment confirmation timeout');
-        }
-
-      } catch (err) {
-        console.error('Error polling payment status:', err);
-        await updateOrderWithPaymentStatus(orderRef, paymentId, 'failed');
-        throw err;
       }
-    };
 
-    poll();
+    } catch (error) {
+      console.error('Error starting payment verification:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Payment verification failed';
+      toast.error('Payment Verification Error', errorMessage);
+      setPaymentStep('form'); // Allow retry
+
+      if (onError) {
+        onError(errorMessage);
+      }
+    }
   };
 
   const handleBasePayment = async () => {
@@ -274,7 +267,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       const payment = await pay({
         amount: total,
         to: marketplaceAddress,
-        testnet: false,
+        testnet: process.env.NODE_ENV !== 'production', // Use testnet in development
         payerInfo: {
           requests: [
             { type: 'email' },
@@ -283,14 +276,14 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
         }
       });
 
-      console.log('Base Pay payment initiated:', payment.id);
+      console.log('Base Pay payment completed:', payment.id);
       setPaymentId(payment.id);
       setBasePayData(payment);
 
       // Auto-populate form with Base Pay data
       populateFormFromBasePay(payment);
-      
-      // Show form for review/editing
+
+      // Show form for review/editing and dismiss payment processing toast
       setPaymentStep('form');
       toast.success('Payment Authorized', 'Please review shipping details');
 
@@ -309,25 +302,31 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
   const handleConfirmOrder = async () => {
     try {
       setPaymentStep('confirming');
-      toast.paymentPending();
 
-      // Create order with customer data
+      // Create order with customer data (without starting affiliate attribution)
       const orderRef = await createOrderWithCustomerData();
       setOrderReference(orderRef);
       console.log('Order created:', orderRef);
 
-      toast.info('Order Created', `Order ${orderRef} is being confirmed`);
+      // Show success message immediately (dismiss any pending payment toast)
+      toast.success('Order Created', `Order ${orderRef} created successfully`);
 
-      // Start payment confirmation polling
+      // Start background payment verification with affiliate processing
       if (basePayData) {
-        await pollPaymentStatus(basePayData.id, orderRef);
+        // Don't await this - let it run in background
+        startBackgroundVerification(orderRef, basePayData.id);
+
+        // Move to confirming state
+        toast.info('Confirming Payment', 'Verifying payment on blockchain...');
+      } else {
+        throw new Error('Payment data not available');
       }
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Order creation failed';
       console.error('Order creation error:', err);
       setPaymentStep('form');
-      
+
       toast.error('Order Failed', errorMessage);
       if (onError) {
         onError(errorMessage);
