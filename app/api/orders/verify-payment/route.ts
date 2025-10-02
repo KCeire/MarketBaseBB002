@@ -47,8 +47,8 @@ async function getPaymentStatus({ id, testnet = false }: { id: string; testnet?:
 async function processOrderAffiliateAttributions(
   orderReference: string,
   buyerFid: string,
-  orderItems: any[],
-  totalAmount: number
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  orderItems: any[]
 ): Promise<{ processed: number; errors: number }> {
   let processed = 0;
   let errors = 0;
@@ -195,8 +195,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<VerifyPay
         affiliateResult = await processOrderAffiliateAttributions(
           orderReference,
           order.farcaster_fid,
-          order.order_items,
-          order.total_amount
+          order.order_items
         );
       }
 
@@ -238,8 +237,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<VerifyPay
       affiliateResult = await processOrderAffiliateAttributions(
         orderReference,
         order.farcaster_fid,
-        order.order_items,
-        order.total_amount
+        order.order_items
       );
     } else {
       console.log('ℹ️ No Farcaster FID provided, skipping affiliate attribution');
