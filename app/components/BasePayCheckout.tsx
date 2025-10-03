@@ -706,12 +706,12 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
     );
   }
 
-  // Shipping form state
+  // Order confirmation state (after payment, before final confirmation)
   if (paymentStep === 'form') {
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Confirm Shipping Details</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Order Confirmation</h3>
           <Button
             variant="ghost"
             size="sm"
@@ -725,7 +725,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
         <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-4">
           <p className="text-sm text-green-700">
             <Icon name="check" size="sm" className="inline mr-1" />
-            Payment authorized! Please confirm shipping details below.
+            Payment authorized! Please review your order details below.
           </p>
         </div>
 
@@ -874,10 +874,10 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
             size="lg"
             className="w-full"
             onClick={handleConfirmOrder}
-            disabled={!validateForm()}
+            disabled={false}
             icon={<Icon name="check" size="sm" />}
           >
-            Confirm Order & Ship
+            Complete Order
           </Button>
         </div>
       </div>
