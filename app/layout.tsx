@@ -12,6 +12,7 @@ import { FloatingCartButton } from "./components/cart/FloatingCartButton";
 import { ToastContainer } from "./components/ui/Toast";
 import { FarcasterSDKInitializer } from "./components/FarcasterSDK";
 import { ErudaInitializer } from "./components/ErudaInitializer";
+import { MobileConsole } from "./components/MobileConsole";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -97,6 +98,7 @@ export default function RootLayout({
             <ToastContainer />
             <FarcasterSDKInitializer />
             <ErudaInitializer />
+            <MobileConsole />
           </Providers>
         </ThemeProvider>
       </body>
