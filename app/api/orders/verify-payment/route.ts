@@ -63,28 +63,15 @@ async function processOrderAffiliateAttributions(
   // First, try to link any recent anonymous clicks to this FID
   console.log('🔗 AFFILIATE STEP A: Attempting to link anonymous clicks to FID...');
   try {
-    const linkUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/affiliate/link-fid`;
-    console.log(`📞 AFFILIATE STEP A: Calling link-fid API: ${linkUrl}`);
+    // Import and call the shared function directly instead of making HTTP request
+    const { linkAnonymousClicksToFid } = await import('@/app/api/affiliate/link-fid/route');
+    const linkResult = await linkAnonymousClicksToFid(buyerFid);
 
-    const linkResponse = await fetch(linkUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ visitorFid: buyerFid }),
-    });
-
-    console.log(`📞 AFFILIATE STEP A: Link-fid API response status: ${linkResponse.status}`);
-
-    if (linkResponse.ok) {
-      const linkResult = await linkResponse.json();
-      console.log(`✅ AFFILIATE STEP A SUCCESS: Link result:`, linkResult);
-      if (linkResult.linkedClicks > 0) {
-        console.log(`🔗 AFFILIATE STEP A: Successfully linked ${linkResult.linkedClicks} anonymous clicks to FID ${buyerFid}`);
-      } else {
-        console.log(`ℹ️ AFFILIATE STEP A: No anonymous clicks found to link for FID ${buyerFid}`);
-      }
+    console.log(`✅ AFFILIATE STEP A SUCCESS: Link result:`, linkResult);
+    if (linkResult.success && linkResult.linkedClicks && linkResult.linkedClicks > 0) {
+      console.log(`🔗 AFFILIATE STEP A: Successfully linked ${linkResult.linkedClicks} anonymous clicks to FID ${buyerFid}`);
     } else {
-      const errorText = await linkResponse.text();
-      console.error(`❌ AFFILIATE STEP A FAILED: Link-fid API error (${linkResponse.status}):`, errorText);
+      console.log(`ℹ️ AFFILIATE STEP A: No anonymous clicks found to link for FID ${buyerFid}`);
     }
   } catch (error) {
     console.error('❌ AFFILIATE STEP A ERROR: Failed to link anonymous clicks:', error);
