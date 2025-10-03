@@ -169,9 +169,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       customerWallet: address,
       basePayPaymentId: basePayData?.id,
       // Add Farcaster FID for affiliate tracking
-      farcasterFid: buyerFid,
-      // Skip affiliate attribution at order creation - will be processed during payment verification
-      skipAffiliateAttribution: true
+      farcasterFid: buyerFid
     };
 
     console.log('📞 CHECKOUT: Calling order creation API with data:', {
