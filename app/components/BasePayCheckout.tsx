@@ -123,21 +123,6 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
     return required.every(field => customerData[field as keyof CustomerFormData]?.trim());
   };
 
-  const populateFormFromBasePay = (paymentResult: PaymentResult) => {
-    const physicalAddress = paymentResult.payerInfoResponses?.physicalAddress;
-    const customerName = physicalAddress?.name;
-
-    setCustomerData({
-      email: paymentResult.payerInfoResponses?.email || '',
-      name: customerName ? `${customerName.firstName} ${customerName.familyName}` : '',
-      address1: physicalAddress?.address1 || '',
-      address2: physicalAddress?.address2 || '',
-      city: physicalAddress?.city || '',
-      state: physicalAddress?.state || '',
-      country: physicalAddress?.countryCode || 'US',
-      zipCode: physicalAddress?.postalCode || '',
-    });
-  };
 
   const createOrderWithCustomerData = async (): Promise<string> => {
     console.log('🚀 CHECKOUT: Starting order creation process...');
@@ -352,35 +337,26 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       });
       toast.info('Processing Payment', 'Please complete payment in Base App');
 
-      // Initiate Base Pay payment with customer info collection
+      // Initiate Base Pay payment (shipping info already collected)
       const payment = await pay({
         amount: total,
         to: marketplaceAddress,
-        testnet: process.env.NODE_ENV !== 'production', // Use testnet in development
-        payerInfo: {
-          requests: [
-            { type: 'email' },
-            { type: 'physicalAddress' }
-          ]
-        }
+        testnet: process.env.NODE_ENV !== 'production' // Use testnet in development
       });
 
       console.log('✅ CHECKOUT: Base Pay payment completed successfully:', {
         paymentId: payment.id,
-        hasPayerInfo: !!payment.payerInfoResponses,
-        email: payment.payerInfoResponses?.email ? '[PRESENT]' : '[MISSING]',
-        address: payment.payerInfoResponses?.physicalAddress ? '[PRESENT]' : '[MISSING]'
+        timestamp: new Date().toISOString()
       });
       setPaymentId(payment.id);
       setBasePayData(payment);
 
-      // Auto-populate form with Base Pay data
-      console.log('📝 CHECKOUT: Auto-populating form with Base Pay data...');
-      populateFormFromBasePay(payment);
+      // Payment completed - proceed to confirmation
+      console.log('📝 CHECKOUT: Payment completed, proceeding to order confirmation...');
 
-      // Show form for review/editing and dismiss payment processing toast
+      // Show confirmation page (shipping info already collected)
       setPaymentStep('form');
-      toast.success('Payment Authorized', 'Please review shipping details');
+      toast.success('Payment Authorized', 'Please review your order details');
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Payment failed';
