@@ -1,7 +1,7 @@
 // app/components/BasePayCheckout.tsx
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { pay } from '@base-org/account';
 import { BasePayButton } from '@base-org/account-ui/react';
@@ -61,10 +61,11 @@ interface PaymentResult {
 
 export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayCheckoutProps) {
   const { address, isConnected } = useAccount();
-  const [paymentStep, setPaymentStep] = useState<'ready' | 'form' | 'processing' | 'confirming' | 'success'>('ready');
+  const [paymentStep, setPaymentStep] = useState<'shipping' | 'ready' | 'form' | 'processing' | 'confirming' | 'success'>('shipping');
   const [orderReference, setOrderReference] = useState<string>('');
   const [paymentId, setPaymentId] = useState<string>('');
   const [basePayData, setBasePayData] = useState<PaymentResult | null>(null);
+  const [affiliateData, setAffiliateData] = useState<{referrerFid: string; productIds: string[]} | null>(null);
 
   const [customerData, setCustomerData] = useState<CustomerFormData>({
     email: '',
@@ -76,6 +77,34 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
     country: 'US',
     zipCode: '',
   });
+
+  // Load affiliate data from localStorage for display
+  useEffect(() => {
+    try {
+      const storedData = localStorage.getItem('affiliate_clicks');
+      if (storedData) {
+        const clicks = JSON.parse(storedData);
+        const validClicks = clicks.filter((click: any) => click.expires > Date.now());
+
+        if (validClicks.length > 0) {
+          // Group by referrer and collect product IDs
+          const referrerMap = new Map();
+          validClicks.forEach((click: any) => {
+            if (!referrerMap.has(click.referrerFid)) {
+              referrerMap.set(click.referrerFid, []);
+            }
+            referrerMap.get(click.referrerFid).push(click.productId);
+          });
+
+          // For now, just show the first referrer (most common case)
+          const [referrerFid, productIds] = referrerMap.entries().next().value;
+          setAffiliateData({ referrerFid, productIds });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading affiliate data for display:', error);
+    }
+  }, []);
 
   const handleInputChange = (field: keyof CustomerFormData, value: string) => {
     setCustomerData(prev => ({
@@ -431,6 +460,174 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
     );
   }
 
+  // Shipping information state (before payment)
+  if (paymentStep === 'shipping') {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Shipping Information</h3>
+        </div>
+
+        {/* Affiliate Information Display */}
+        {affiliateData && (
+          <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center space-x-2">
+              <Icon name="users" size="sm" className="text-blue-600 dark:text-blue-400" />
+              <div>
+                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                  Affiliate Order (Referrer: {affiliateData.referrerFid})
+                </p>
+                <p className="text-xs text-blue-700 dark:text-blue-300">
+                  Products: {affiliateData.productIds.join(', ')}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Email *
+            </label>
+            <input
+              type="email"
+              value={customerData.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
+              className={inputStyles}
+              placeholder="your@email.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Full Name *
+            </label>
+            <input
+              type="text"
+              value={customerData.name}
+              onChange={(e) => handleInputChange('name', e.target.value)}
+              className={inputStyles}
+              placeholder="John Doe"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Address Line 1 *
+            </label>
+            <input
+              type="text"
+              value={customerData.address1}
+              onChange={(e) => handleInputChange('address1', e.target.value)}
+              className={inputStyles}
+              placeholder="123 Main Street"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Address Line 2
+            </label>
+            <input
+              type="text"
+              value={customerData.address2}
+              onChange={(e) => handleInputChange('address2', e.target.value)}
+              className={inputStyles}
+              placeholder="Apartment, suite, etc."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              City *
+            </label>
+            <input
+              type="text"
+              value={customerData.city}
+              onChange={(e) => handleInputChange('city', e.target.value)}
+              className={inputStyles}
+              placeholder="New York"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              State/Province *
+            </label>
+            <input
+              type="text"
+              value={customerData.state}
+              onChange={(e) => handleInputChange('state', e.target.value)}
+              className={inputStyles}
+              placeholder="NY"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              ZIP/Postal Code *
+            </label>
+            <input
+              type="text"
+              value={customerData.zipCode}
+              onChange={(e) => handleInputChange('zipCode', e.target.value)}
+              className={inputStyles}
+              placeholder="10001"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Country *
+            </label>
+            <select
+              value={customerData.country}
+              onChange={(e) => handleInputChange('country', e.target.value)}
+              className={inputStyles}
+            >
+              <option value="US">United States</option>
+              <option value="CA">Canada</option>
+              <option value="GB">United Kingdom</option>
+              <option value="AU">Australia</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="border-t pt-4">
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-lg font-bold text-gray-900 dark:text-gray-100">Total: ${total} USDC</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              {isConnected ? `Connected: ${address?.slice(0, 6)}...${address?.slice(-4)}` : 'Not connected'}
+            </span>
+          </div>
+
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={() => {
+              if (validateForm()) {
+                setPaymentStep('ready');
+              } else {
+                toast.error('Missing Information', 'Please fill in all required fields');
+              }
+            }}
+            disabled={!validateForm() || !isConnected}
+            className="w-full"
+          >
+            {!isConnected ? 'Connect Wallet First' : 'Continue to Payment'}
+          </Button>
+
+          {!isConnected && (
+            <p className="text-sm text-amber-600 dark:text-amber-400 text-center mt-2">
+              Please connect your wallet to continue
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   // Payment success state
   if (paymentStep === 'success') {
     return (
@@ -645,6 +842,23 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
         </div>
 
         <div className="border-t pt-4">
+          {/* Affiliate Information Display */}
+          {affiliateData && (
+            <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex items-center space-x-2">
+                <Icon name="users" size="sm" className="text-blue-600 dark:text-blue-400" />
+                <div>
+                  <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                    Affiliate Order (Referrer: {affiliateData.referrerFid})
+                  </p>
+                  <p className="text-xs text-blue-700 dark:text-blue-300">
+                    Products: {affiliateData.productIds.join(', ')}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="flex justify-between items-center mb-4">
             <span className="text-lg font-bold text-gray-900 dark:text-gray-100">Total: ${total} USDC</span>
             <span className="text-sm text-gray-600 dark:text-gray-400">Payment Authorized</span>
@@ -669,19 +883,59 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
   return (
     <div className="space-y-4">
       <div className="border-t pt-4">
+        {/* Affiliate Information Display */}
+        {affiliateData && (
+          <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center space-x-2">
+              <Icon name="users" size="sm" className="text-blue-600 dark:text-blue-400" />
+              <div>
+                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                  Affiliate Order (Referrer: {affiliateData.referrerFid})
+                </p>
+                <p className="text-xs text-blue-700 dark:text-blue-300">
+                  Products: {affiliateData.productIds.join(', ')}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Shipping Summary */}
+        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="flex justify-between items-center mb-2">
+            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">Shipping To:</h4>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setPaymentStep('shipping')}
+              className="text-blue-600 hover:text-blue-700"
+            >
+              Edit
+            </Button>
+          </div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            <p>{customerData.name}</p>
+            <p>{customerData.address1}</p>
+            {customerData.address2 && <p>{customerData.address2}</p>}
+            <p>{customerData.city}, {customerData.state} {customerData.zipCode}</p>
+            <p>{customerData.country}</p>
+            <p className="mt-1 font-medium">{customerData.email}</p>
+          </div>
+        </div>
+
         <div className="flex justify-between items-center mb-4">
           <span className="text-lg font-bold text-gray-900 dark:text-gray-100">Total: ${total} USDC</span>
           <span className="text-sm text-gray-600 dark:text-gray-400">Connected: {address?.slice(0, 6)}...{address?.slice(-4)}</span>
         </div>
-        
+
         <div className="space-y-3">
           <BasePayButton
             colorScheme="light"
             onClick={handleBasePayment}
           />
-          
+
           <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-            Secure USDC payment • Review shipping details after payment
+            Secure USDC payment • Shipping details confirmed
           </p>
         </div>
       </div>
