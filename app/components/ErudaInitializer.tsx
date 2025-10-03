@@ -21,9 +21,9 @@ export function ErudaInitializer() {
       script.src = 'https://cdn.jsdelivr.net/npm/eruda@3.0.1/eruda.min.js';
       script.onload = () => {
         try {
-          // @ts-ignore - eruda will be available on window
+          // @ts-expect-error - eruda will be available on window
           if (window.eruda) {
-            // @ts-ignore
+            // @ts-expect-error - eruda will be available on window
             window.eruda.init();
             console.log('✅ Eruda mobile console initialized via CDN');
           } else {

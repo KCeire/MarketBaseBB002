@@ -27,7 +27,9 @@ export function MobileConsole() {
     const originalInfo = console.info;
 
     // Create log capturing function
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const createLogCapture = (type: ConsoleLog['type'], originalMethod: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return (...args: any[]) => {
         // Call original method first
         originalMethod.apply(console, args);
