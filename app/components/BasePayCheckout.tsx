@@ -84,11 +84,13 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       const storedData = localStorage.getItem('affiliate_clicks');
       if (storedData) {
         const clicks = JSON.parse(storedData);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const validClicks = clicks.filter((click: any) => click.expires > Date.now());
 
         if (validClicks.length > 0) {
           // Group by referrer and collect product IDs
           const referrerMap = new Map();
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           validClicks.forEach((click: any) => {
             if (!referrerMap.has(click.referrerFid)) {
               referrerMap.set(click.referrerFid, []);
@@ -97,8 +99,11 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
           });
 
           // For now, just show the first referrer (most common case)
-          const [referrerFid, productIds] = referrerMap.entries().next().value;
-          setAffiliateData({ referrerFid, productIds });
+          const firstEntry = referrerMap.entries().next().value;
+          if (firstEntry) {
+            const [referrerFid, productIds] = firstEntry;
+            setAffiliateData({ referrerFid, productIds });
+          }
         }
       }
     } catch (error) {
