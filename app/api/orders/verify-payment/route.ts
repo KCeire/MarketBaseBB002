@@ -63,8 +63,8 @@ async function processOrderAffiliateAttributions(
   // First, try to link any recent anonymous clicks to this FID
   console.log('🔗 AFFILIATE STEP A: Attempting to link anonymous clicks to FID...');
   try {
-    // Import and call the shared function directly instead of making HTTP request
-    const { linkAnonymousClicksToFid } = await import('@/app/api/affiliate/link-fid/route');
+    // Import and call the shared function from utility file
+    const { linkAnonymousClicksToFid } = await import('@/lib/affiliate-link-utils');
     const linkResult = await linkAnonymousClicksToFid(buyerFid);
 
     console.log(`✅ AFFILIATE STEP A SUCCESS: Link result:`, linkResult);

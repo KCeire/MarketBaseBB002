@@ -270,8 +270,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
         // First, try to link any recent anonymous clicks to this FID
         console.log('🔄 Attempting to link anonymous clicks to FID:', farcasterFid);
 
-        // Import and call the shared function directly instead of making HTTP request
-        const { linkAnonymousClicksToFid } = await import('@/app/api/affiliate/link-fid/route');
+        // Import and call the shared function from utility file
+        const { linkAnonymousClicksToFid } = await import('@/lib/affiliate-link-utils');
         const linkResult = await linkAnonymousClicksToFid(farcasterFid);
 
         if (linkResult.success) {
