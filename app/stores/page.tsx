@@ -470,20 +470,36 @@ export default function StoresPage() {
               Products Listed
             </div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 text-center">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 text-center relative">
             <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1">
               $50K+
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">
               Monthly Volume
             </div>
+            {/* Coming Soon Overlay */}
+            <div className="absolute inset-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                  Coming Soon
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 text-center">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 text-center relative">
             <div className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-1">
               4.8⭐
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">
               Avg Rating
+            </div>
+            {/* Coming Soon Overlay */}
+            <div className="absolute inset-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                  Coming Soon
+                </div>
+              </div>
             </div>
           </div>
         </section>

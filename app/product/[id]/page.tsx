@@ -554,7 +554,7 @@ export default function ProductDetailPage() {
           {/* Desktop Close Button */}
           <button
             onClick={closeGallery}
-            className="hidden md:block absolute top-4 right-4 z-20 w-12 h-12 bg-white bg-opacity-10 hover:bg-white hover:bg-opacity-20 rounded-full text-white transition-all duration-200 flex items-center justify-center text-xl font-bold"
+            className="hidden md:block absolute top-4 right-4 z-50 text-white hover:text-gray-300 transition-colors"
           >
             <Icon name="x" size="lg" className="text-white" />
           </button>

@@ -109,24 +109,27 @@ export default function SellPage() {
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Featured Sellers</h2>
           <div className="space-y-3">
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
-                <span className="text-sm font-semibold text-purple-600 dark:text-purple-400">AE</span>
+            <button
+              onClick={() => window.location.href = '/store/nft-energy'}
+              className="w-full flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+            >
+              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200 dark:border-gray-600">
+                <img
+                  src="/stores/NFTEnergyDrinks/NFTEnergyDrinksLogo.png"
+                  alt="NFT Energy Drinks Logo"
+                  className="w-8 h-8 object-contain"
+                />
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">The Aesthetic Edit</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Curated lifestyle products</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">NE</span>
-              </div>
-              <div>
+              <div className="flex-1 text-left">
                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100">NFT Energy Drinks</p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Digital collectibles meets the beverage industry</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Where Web3 meets real energy</p>
               </div>
-            </div>
+              <div className="text-gray-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </button>
           </div>
         </div>
 
