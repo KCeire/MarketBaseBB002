@@ -10,6 +10,9 @@ interface ConsoleLog {
 }
 
 export function MobileConsole() {
+  // Temporary disable flag - set to false to disable mobile console
+  const MOBILE_CONSOLE_ENABLED = false;
+
   const [logs, setLogs] = useState<ConsoleLog[]>([]);
   const [isVisible, setIsVisible] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -17,6 +20,11 @@ export function MobileConsole() {
   const logContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!MOBILE_CONSOLE_ENABLED) {
+      console.log('🔧 Mobile console is temporarily disabled');
+      return;
+    }
+
     // Show console in all environments for debugging
     console.log('🔧 Mobile console viewer initialized');
 
@@ -89,6 +97,11 @@ export function MobileConsole() {
         return `${baseStyle} bg-gray-50 text-gray-800 dark:bg-gray-800 dark:text-gray-200`;
     }
   };
+
+  // Don't render anything if disabled
+  if (!MOBILE_CONSOLE_ENABLED) {
+    return null;
+  }
 
   return (
     <>

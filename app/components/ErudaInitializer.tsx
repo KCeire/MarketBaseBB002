@@ -4,6 +4,14 @@ import { useEffect } from 'react';
 
 export function ErudaInitializer() {
   useEffect(() => {
+    // Temporary disable flag - set to false to disable eruda
+    const ERUDA_ENABLED = false;
+
+    if (!ERUDA_ENABLED) {
+      console.log('🔧 Eruda is temporarily disabled');
+      return;
+    }
+
     // Load eruda in all environments for debugging
     console.log('🔧 Attempting to load eruda mobile console...');
 

@@ -291,7 +291,7 @@ export default function ProductDetailPage() {
 
           {/* Gallery Section */}
           {product.images && product.images.length > 1 && (
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 space-y-4">
               <button
                 onClick={openGallery}
                 className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
@@ -303,6 +303,54 @@ export default function ProductDetailPage() {
                 </div>
                 <Icon name="chevron-right" size="sm" className="text-gray-400" />
               </button>
+
+              {/* Thumbnail Images */}
+              <div className="relative">
+                <div className="flex overflow-x-auto scrollbar-hide space-x-2 pb-2" id="thumbnail-container">
+                  {product.images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setSelectedImageIndex(index);
+                        openGallery();
+                      }}
+                      className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-colors"
+                    >
+                      <Image
+                        src={image}
+                        alt={`Product image ${index + 1}`}
+                        width={80}
+                        height={80}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+
+                {/* Scroll arrows for thumbnails */}
+                {product.images.length > 6 && (
+                  <>
+                    <button
+                      onClick={() => {
+                        const container = document.getElementById('thumbnail-container');
+                        if (container) container.scrollLeft -= 200;
+                      }}
+                      className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-full shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center transition-colors z-10"
+                    >
+                      <Icon name="chevron-left" size="sm" className="text-gray-600 dark:text-gray-400" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        const container = document.getElementById('thumbnail-container');
+                        if (container) container.scrollLeft += 200;
+                      }}
+                      className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-full shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center transition-colors z-10"
+                    >
+                      <Icon name="chevron-right" size="sm" className="text-gray-600 dark:text-gray-400" />
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           )}
 
@@ -506,9 +554,9 @@ export default function ProductDetailPage() {
           {/* Desktop Close Button */}
           <button
             onClick={closeGallery}
-            className="hidden md:block absolute top-4 right-4 z-20 w-10 h-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full text-white transition-colors"
+            className="hidden md:block absolute top-4 right-4 z-20 w-12 h-12 bg-white bg-opacity-10 hover:bg-white hover:bg-opacity-20 rounded-full text-white transition-all duration-200 flex items-center justify-center text-xl font-bold"
           >
-            ✕
+            <Icon name="x" size="lg" className="text-white" />
           </button>
 
           {/* Current Image Display */}
