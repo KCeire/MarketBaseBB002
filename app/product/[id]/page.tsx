@@ -157,6 +157,20 @@ export default function ProductDetailPage() {
     }
   }, [product?.id]);
 
+  // Get the current image to display with proper fallback logic
+  const getCurrentImage = () => {
+    if (!product) return '';
+
+    // If we have images array and it's populated
+    if (product.images && product.images.length > 0) {
+      // Return the selected image, or first image if selected index is out of bounds
+      return product.images[selectedImageIndex] || product.images[0];
+    }
+
+    // Fallback to the main product image
+    return product.image || '';
+  };
+
   // Handle keyboard navigation in gallery
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -265,7 +279,7 @@ export default function ProductDetailPage() {
                     className="w-full relative overflow-hidden rounded-t-lg"
                   >
                     <Image
-                      src={product.images[selectedImageIndex] || product.images[0] || product.image}
+                      src={getCurrentImage()}
                       alt={`${product.title} - Image ${selectedImageIndex + 1}`}
                       width={600}
                       height={400}
@@ -352,7 +366,7 @@ export default function ProductDetailPage() {
                   className="w-full relative overflow-hidden rounded-t-lg"
                 >
                   <Image
-                    src={product.image}
+                    src={getCurrentImage()}
                     alt={product.title}
                     width={600}
                     height={400}
@@ -662,6 +676,16 @@ export default function ProductDetailPage() {
                 )}
                 <span>Press ESC to close</span>
               </div>
+            </div>
+
+            {/* Mobile Exit Banner */}
+            <div className="md:hidden absolute bottom-0 left-0 right-0 pb-safe" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
+              <button
+                onClick={closeGallery}
+                className="w-full bg-black bg-opacity-60 backdrop-blur-sm text-white py-4 text-center text-lg font-medium hover:bg-opacity-80 transition-colors"
+              >
+                ✕ Tap to Exit Gallery
+              </button>
             </div>
           </div>
         </div>
