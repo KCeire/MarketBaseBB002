@@ -145,7 +145,15 @@ async function processOrderAffiliateAttributions(
         });
 
         // Process the conversion
-        console.log(`💰 AFFILIATE STEP B${i + 1}C: Processing conversion for click ${click.click_id}...`);
+        console.log(`💰 AFFILIATE STEP B${i + 1}C: Processing conversion for click ${click.click_id}...`, {
+          clickId: click.click_id,
+          orderReference,
+          itemTotal,
+          expectedCommission: itemTotal * 0.02,
+          rawPrice: item.price,
+          parsedPrice: parseFloat(item.price),
+          quantity: item.quantity
+        });
         const { error: conversionError } = await supabaseAdmin
           .rpc('process_affiliate_conversion', {
             p_click_id: click.click_id,
@@ -170,6 +178,19 @@ async function processOrderAffiliateAttributions(
             itemTotal
           });
           processed++;
+
+          // Verify the commission was actually set
+          const { data: verifyClick, error: verifyError } = await supabaseAdmin
+            .from('affiliate_clicks')
+            .select('commission_amount, converted, commission_earned_at')
+            .eq('click_id', click.click_id)
+            .single();
+
+          console.log(`🔍 AFFILIATE STEP B${i + 1}C VERIFY: Commission verification:`, {
+            clickId: click.click_id,
+            verifyClick,
+            verifyError: verifyError?.message
+          });
         }
       } else {
         console.log(`ℹ️ AFFILIATE STEP B${i + 1}: No affiliate click found for product ${item.productId} and buyer FID ${buyerFid}`);
