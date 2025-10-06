@@ -34,6 +34,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [thumbnailScrollRef, setThumbnailScrollRef] = useState<HTMLDivElement | null>(null);
 
   const productId = params.id as string;
 
@@ -113,6 +114,11 @@ export default function ProductDetailPage() {
     router.back();
   };
 
+  // Function to remove images from HTML description since they're now in the gallery
+  const removeImagesFromDescription = (html: string) => {
+    return html.replace(/<img[^>]*>/gi, '');
+  };
+
   // Simple function to get store URL from vendor name
   const getStoreUrl = (vendor: string) => {
     const vendorLower = vendor.toLowerCase();
@@ -144,6 +150,13 @@ export default function ProductDetailPage() {
     }
   };
 
+  // Reset selected image when product changes
+  useEffect(() => {
+    if (product) {
+      setSelectedImageIndex(0);
+    }
+  }, [product?.id]);
+
   // Handle keyboard navigation in gallery
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -165,6 +178,22 @@ export default function ProductDetailPage() {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isGalleryOpen]);
+
+  // Thumbnail scroll functions
+  const scrollThumbnails = (direction: 'left' | 'right') => {
+    if (!thumbnailScrollRef) return;
+
+    const scrollAmount = 200; // Adjust as needed
+    const currentScroll = thumbnailScrollRef.scrollLeft;
+    const targetScroll = direction === 'left'
+      ? currentScroll - scrollAmount
+      : currentScroll + scrollAmount;
+
+    thumbnailScrollRef.scrollTo({
+      left: targetScroll,
+      behavior: 'smooth'
+    });
+  };
 
   if (loading) {
     return (
@@ -236,7 +265,7 @@ export default function ProductDetailPage() {
                     className="w-full relative overflow-hidden rounded-t-lg"
                   >
                     <Image
-                      src={product.images[selectedImageIndex] || product.image}
+                      src={product.images[selectedImageIndex] || product.images[0] || product.image}
                       alt={`${product.title} - Image ${selectedImageIndex + 1}`}
                       width={600}
                       height={400}
@@ -260,26 +289,50 @@ export default function ProductDetailPage() {
                 {/* Thumbnail Gallery - Only show if multiple images */}
                 {product.images.length > 1 && (
                   <div className="px-6 pb-4">
-                    <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-                      {product.images.map((image, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setSelectedImageIndex(index)}
-                          className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                            selectedImageIndex === index
-                              ? 'border-blue-500 ring-2 ring-blue-200 dark:ring-blue-800'
-                              : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-                          }`}
-                        >
-                          <Image
-                            src={image}
-                            alt={`${product.title} thumbnail ${index + 1}`}
-                            width={64}
-                            height={64}
-                            className="w-full h-full object-cover"
-                          />
-                        </button>
-                      ))}
+                    <div className="relative">
+                      {/* Left scroll arrow */}
+                      <button
+                        onClick={() => scrollThumbnails('left')}
+                        className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 w-8 h-8 bg-white dark:bg-gray-800 rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        style={{ marginLeft: '-16px' }}
+                      >
+                        <Icon name="chevron-left" size="sm" className="text-gray-600 dark:text-gray-400" />
+                      </button>
+
+                      {/* Thumbnail container */}
+                      <div
+                        ref={setThumbnailScrollRef}
+                        className="flex gap-2 overflow-x-auto scrollbar-hide px-4"
+                      >
+                        {product.images.map((image, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setSelectedImageIndex(index)}
+                            className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                              selectedImageIndex === index
+                                ? 'border-blue-500 ring-2 ring-blue-200 dark:ring-blue-800'
+                                : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                            }`}
+                          >
+                            <Image
+                              src={image}
+                              alt={`${product.title} thumbnail ${index + 1}`}
+                              width={64}
+                              height={64}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Right scroll arrow */}
+                      <button
+                        onClick={() => scrollThumbnails('right')}
+                        className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 w-8 h-8 bg-white dark:bg-gray-800 rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        style={{ marginRight: '-16px' }}
+                      >
+                        <Icon name="chevron-right" size="sm" className="text-gray-600 dark:text-gray-400" />
+                      </button>
                     </div>
 
                     {/* Image counter */}
@@ -449,10 +502,10 @@ export default function ProductDetailPage() {
             {/* Description */}
             <div className="space-y-3">
               <h3 className="font-semibold text-gray-900 dark:text-gray-100">Description:</h3>
-              <div 
+              <div
                 className="text-gray-600 dark:text-gray-400 leading-relaxed prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ 
-                  __html: product.description || 'No description available.' 
+                dangerouslySetInnerHTML={{
+                  __html: removeImagesFromDescription(product.description) || 'No description available.'
                 }}
               />
             </div>
@@ -519,9 +572,9 @@ export default function ProductDetailPage() {
       {/* Fullscreen Gallery Modal */}
       {isGalleryOpen && product && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-95">
-          <div className="h-full w-full flex flex-col">
+          <div className="h-full w-full flex flex-col safe-area-inset">
             {/* Modal Header */}
-            <div className="flex items-center justify-between text-white p-4 flex-shrink-0 bg-black bg-opacity-30">
+            <div className="flex items-center justify-between text-white p-4 pt-safe flex-shrink-0 bg-black bg-opacity-30" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
               <div className="flex items-center space-x-4">
                 <h2 className="text-lg md:text-xl font-semibold truncate">{product.title}</h2>
                 <span className="text-sm opacity-75 flex-shrink-0">
@@ -530,7 +583,7 @@ export default function ProductDetailPage() {
               </div>
               <button
                 onClick={closeGallery}
-                className="p-2 hover:bg-white hover:bg-opacity-20 rounded-full transition-colors flex-shrink-0"
+                className="p-3 md:p-2 hover:bg-white hover:bg-opacity-20 rounded-full transition-colors flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
               >
                 <Icon name="x" size="lg" className="text-white" />
               </button>

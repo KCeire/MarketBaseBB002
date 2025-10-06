@@ -105,7 +105,25 @@ export async function getProductByHandle(handle: string): Promise<MarketplacePro
 }
 
 function transformShopifyProduct(product: ShopifyProduct): MarketplaceProduct {
-  const images = product.images.map(img => img.src);
+  // Extract images from the official images array
+  const productImages = product.images.map(img => img.src);
+
+  // Extract images from description HTML
+  const descriptionImages: string[] = [];
+  if (product.body_html) {
+    const imgRegex = /<img[^>]+src="([^">]+)"/gi;
+    let match;
+    while ((match = imgRegex.exec(product.body_html)) !== null) {
+      const imgSrc = match[1];
+      // Only add if not already in product images and is a valid image URL
+      if (!productImages.includes(imgSrc) && imgSrc.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i)) {
+        descriptionImages.push(imgSrc);
+      }
+    }
+  }
+
+  // Combine all images, with product images first
+  const images = [...productImages, ...descriptionImages];
   const mainImage = product.image?.src || images[0] || '';
 
   return {

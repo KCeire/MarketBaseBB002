@@ -14,6 +14,12 @@ const nextConfig = {
         port: '',
         pathname: '/s/files/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'cf.cjdropshipping.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
