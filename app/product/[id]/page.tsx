@@ -34,7 +34,6 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
-  const [thumbnailScrollRef, setThumbnailScrollRef] = useState<HTMLDivElement | null>(null);
 
   const productId = params.id as string;
 
@@ -157,30 +156,43 @@ export default function ProductDetailPage() {
     }
   }, [product?.id]);
 
-  // Get the current image to display with proper fallback logic
-  const getCurrentImage = () => {
-    if (!product) return '/placeholder-image.jpg'; // Fallback placeholder
+  // Get the first available image for display
+  const getFirstImage = () => {
+    if (!product) return '/placeholder-image.jpg';
 
-    // If we have images array and it's populated
+    // Try images array first
+    if (product.images && product.images.length > 0 && product.images[0]) {
+      return product.images[0];
+    }
+
+    // Fallback to main product image
+    if (product.image) {
+      return product.image;
+    }
+
+    // Ultimate fallback
+    return '/placeholder-image.jpg';
+  };
+
+  // Get the current image for gallery (keeps the robust logic for gallery)
+  const getCurrentImage = () => {
+    if (!product) return '/placeholder-image.jpg';
+
     if (product.images && product.images.length > 0) {
-      // Ensure selectedImageIndex is within bounds
       const validIndex = Math.max(0, Math.min(selectedImageIndex, product.images.length - 1));
       const selectedImage = product.images[validIndex];
       if (selectedImage && selectedImage.trim() !== '') {
         return selectedImage;
       }
-      // Try first image
       if (product.images[0] && product.images[0].trim() !== '') {
         return product.images[0];
       }
     }
 
-    // Fallback to the main product image
     if (product.image && product.image.trim() !== '') {
       return product.image;
     }
 
-    // Ultimate fallback
     return '/placeholder-image.jpg';
   };
 
@@ -206,21 +218,6 @@ export default function ProductDetailPage() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isGalleryOpen]);
 
-  // Thumbnail scroll functions
-  const scrollThumbnails = (direction: 'left' | 'right') => {
-    if (!thumbnailScrollRef) return;
-
-    const scrollAmount = 200; // Adjust as needed
-    const currentScroll = thumbnailScrollRef.scrollLeft;
-    const targetScroll = direction === 'left'
-      ? currentScroll - scrollAmount
-      : currentScroll + scrollAmount;
-
-    thumbnailScrollRef.scrollTo({
-      left: targetScroll,
-      behavior: 'smooth'
-    });
-  };
 
   if (loading) {
     return (
@@ -281,129 +278,40 @@ export default function ProductDetailPage() {
 
         {/* Product Card */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-          {/* Product Image Gallery */}
-          <div className="w-full">
-            {product.images && product.images.length > 0 ? (
-              <div className="space-y-4">
-                {/* Main Image */}
-                <div className="w-full relative group">
-                  <button
-                    onClick={openGallery}
-                    className="w-full relative overflow-hidden rounded-t-lg"
-                  >
-                    <Image
-                      key={`main-${product.id}-${selectedImageIndex}`}
-                      src={getCurrentImage()}
-                      alt={`${product.title} - Image ${selectedImageIndex + 1}`}
-                      width={600}
-                      height={400}
-                      className="w-full h-80 object-cover transition-transform duration-300 group-hover:scale-105"
-                      priority
-                      unoptimized={getCurrentImage().includes('placeholder')}
-                    />
-                    {/* Overlay with expand icon */}
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
-                      <div className="bg-white bg-opacity-90 rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <Icon name="expand" size="lg" className="text-gray-700" />
-                      </div>
-                    </div>
-                  </button>
+          {/* Single Product Image - Click to Open Gallery */}
+          <div className="w-full relative group">
+            <button
+              onClick={openGallery}
+              className="w-full relative overflow-hidden rounded-t-lg"
+            >
+              <Image
+                src={getFirstImage()}
+                alt={product.title}
+                width={600}
+                height={400}
+                className="w-full h-80 object-cover transition-transform duration-300 group-hover:scale-105"
+                priority
+              />
 
-                  {/* Click hint */}
-                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    Click to expand
-                  </div>
+              {/* Overlay with expand icon */}
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
+                <div className="bg-white bg-opacity-90 rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <Icon name="expand" size="lg" className="text-gray-700" />
                 </div>
-
-                {/* Thumbnail Gallery - Only show if multiple images */}
-                {product.images.length > 1 && (
-                  <div className="px-6 pb-4">
-                    <div className="relative">
-                      {/* Left scroll arrow */}
-                      <button
-                        onClick={() => scrollThumbnails('left')}
-                        className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 w-8 h-8 bg-white dark:bg-gray-800 rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                        style={{ marginLeft: '-16px' }}
-                      >
-                        <Icon name="chevron-left" size="sm" className="text-gray-600 dark:text-gray-400" />
-                      </button>
-
-                      {/* Thumbnail container */}
-                      <div
-                        ref={setThumbnailScrollRef}
-                        className="flex gap-2 overflow-x-auto scrollbar-hide px-4"
-                      >
-                        {product.images.map((image, index) => (
-                          <button
-                            key={index}
-                            onClick={() => setSelectedImageIndex(index)}
-                            className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                              selectedImageIndex === index
-                                ? 'border-blue-500 ring-2 ring-blue-200 dark:ring-blue-800'
-                                : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-                            }`}
-                          >
-                            <Image
-                              src={image}
-                              alt={`${product.title} thumbnail ${index + 1}`}
-                              width={64}
-                              height={64}
-                              className="w-full h-full object-cover"
-                            />
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Right scroll arrow */}
-                      <button
-                        onClick={() => scrollThumbnails('right')}
-                        className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 w-8 h-8 bg-white dark:bg-gray-800 rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                        style={{ marginRight: '-16px' }}
-                      >
-                        <Icon name="chevron-right" size="sm" className="text-gray-600 dark:text-gray-400" />
-                      </button>
-                    </div>
-
-                    {/* Image counter */}
-                    <div className="text-center mt-2">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        Image {selectedImageIndex + 1} of {product.images.length}
-                      </span>
-                    </div>
-                  </div>
-                )}
               </div>
-            ) : (
-              /* Fallback for single image */
-              <div className="w-full relative group">
-                <button
-                  onClick={openGallery}
-                  className="w-full relative overflow-hidden rounded-t-lg"
-                >
-                  <Image
-                    key={`fallback-${product.id}-${selectedImageIndex}`}
-                    src={getCurrentImage()}
-                    alt={product.title}
-                    width={600}
-                    height={400}
-                    className="w-full h-80 object-cover transition-transform duration-300 group-hover:scale-105"
-                    priority
-                    unoptimized={getCurrentImage().includes('placeholder')}
-                  />
-                  {/* Overlay with expand icon */}
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
-                    <div className="bg-white bg-opacity-90 rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <Icon name="expand" size="lg" className="text-gray-700" />
-                    </div>
-                  </div>
-                </button>
+            </button>
 
-                {/* Click hint */}
-                <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  Click to expand
-                </div>
+            {/* Multiple images indicator */}
+            {product.images && product.images.length > 1 && (
+              <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+                {product.images.length} photos
               </div>
             )}
+
+            {/* Click hint */}
+            <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              Click to {product.images && product.images.length > 1 ? 'view gallery' : 'expand'}
+            </div>
           </div>
 
           {/* Product Info */}
