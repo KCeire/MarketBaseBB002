@@ -279,7 +279,7 @@ export default function ProductDetailPage() {
         {/* Product Card */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           {/* Single Product Image - Click to Open Gallery */}
-          <div className="w-full relative group">
+          <div className="w-full relative">
             <button
               onClick={openGallery}
               className="w-full relative overflow-hidden rounded-t-lg"
@@ -289,13 +289,12 @@ export default function ProductDetailPage() {
                 alt={product.title}
                 width={600}
                 height={400}
-                className="w-full h-80 object-cover transition-transform duration-300 group-hover:scale-105"
-                priority
+                className="w-full h-80 object-cover"
               />
 
               {/* Overlay with expand icon */}
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
-                <div className="bg-white bg-opacity-90 rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="absolute inset-0 bg-black bg-opacity-10 flex items-center justify-center">
+                <div className="bg-white bg-opacity-90 rounded-full p-3">
                   <Icon name="expand" size="lg" className="text-gray-700" />
                 </div>
               </div>
@@ -308,8 +307,8 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {/* Click hint */}
-            <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            {/* Click hint - always visible */}
+            <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
               Click to {product.images && product.images.length > 1 ? 'view gallery' : 'expand'}
             </div>
           </div>
