@@ -508,69 +508,67 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      {/* Fullscreen Gallery Modal */}
+      {/* Simple Mobile-First Gallery */}
       {isGalleryOpen && product && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-95">
-          <div className="h-full w-full flex flex-col safe-area-inset">
-            {/* Minimal Header - Desktop close button only */}
-            <div className="hidden md:flex justify-end text-white p-4 flex-shrink-0" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
-              <button
-                onClick={closeGallery}
-                className="p-2 hover:bg-white hover:bg-opacity-20 rounded-full transition-colors flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
-              >
-                <Icon name="x" size="lg" className="text-white" />
-              </button>
-            </div>
+        <div className="fixed inset-0 z-50 bg-black">
+          {/* Desktop Close Button */}
+          <button
+            onClick={closeGallery}
+            className="hidden md:block absolute top-4 right-4 z-20 w-10 h-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full text-white transition-colors"
+          >
+            ✕
+          </button>
 
-            {/* Main Image Container - Takes remaining space */}
-            <div className="flex-1 relative flex items-center justify-center min-h-0 p-4">
-              <div className="relative max-w-full max-h-full">
-                <Image
-                  key={`gallery-${product.id}-${selectedImageIndex}`}
-                  src={getCurrentImage()}
-                  alt={`${product.title} - Image ${selectedImageIndex + 1}`}
-                  width={1200}
-                  height={800}
-                  className="max-w-full max-h-full object-contain"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
-                  priority
-                  unoptimized={getCurrentImage().includes('placeholder')}
-                />
-              </div>
+          {/* Current Image Display */}
+          <div className="w-full h-full flex items-center justify-center relative">
+            <img
+              src={getCurrentImage()}
+              alt="Product image"
+              className="max-w-full max-h-full object-contain"
+              style={{
+                maxWidth: '100vw',
+                maxHeight: '100vh',
+                width: 'auto',
+                height: 'auto'
+              }}
+            />
 
-              {/* Navigation Arrows - Only show if multiple images */}
-              {product.images && product.images.length > 1 && (
-                <>
-                  {/* Previous Button */}
-                  <button
-                    onClick={previousImage}
-                    className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 md:p-3 rounded-full transition-colors z-10"
-                  >
-                    <Icon name="chevron-left" size="lg" />
-                  </button>
-
-                  {/* Next Button */}
-                  <button
-                    onClick={nextImage}
-                    className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 md:p-3 rounded-full transition-colors z-10"
-                  >
-                    <Icon name="chevron-right" size="lg" />
-                  </button>
-                </>
-              )}
-            </div>
-
-
-            {/* Mobile Exit Banner - Above bottom nav */}
-            <div className="md:hidden absolute left-0 right-0" style={{ bottom: 'calc(4rem + max(1rem, env(safe-area-inset-bottom)))' }}>
-              <button
-                onClick={closeGallery}
-                className="w-full bg-black bg-opacity-70 backdrop-blur-sm text-white py-4 text-center text-lg font-medium hover:bg-opacity-90 transition-colors border-t border-white border-opacity-20"
-              >
-                ✕ Tap to Exit Gallery
-              </button>
-            </div>
+            {/* Navigation Arrows for Multiple Images */}
+            {product.images && product.images.length > 1 && (
+              <>
+                <button
+                  onClick={previousImage}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black bg-opacity-50 hover:bg-opacity-70 rounded-full text-white text-xl transition-colors z-10"
+                >
+                  ‹
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black bg-opacity-50 hover:bg-opacity-70 rounded-full text-white text-xl transition-colors z-10"
+                >
+                  ›
+                </button>
+              </>
+            )}
           </div>
+
+          {/* Mobile Exit Banner */}
+          <div className="md:hidden absolute bottom-0 left-0 right-0 z-20">
+            <button
+              onClick={closeGallery}
+              className="w-full bg-black bg-opacity-80 text-white py-4 text-lg font-medium"
+              style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px) + 4rem)' }}
+            >
+              ✕ Tap to Exit Gallery
+            </button>
+          </div>
+
+          {/* Image Counter */}
+          {product.images && product.images.length > 1 && (
+            <div className="absolute top-4 left-4 z-20 bg-black bg-opacity-50 text-white px-3 py-1 rounded text-sm">
+              {selectedImageIndex + 1} / {product.images.length}
+            </div>
+          )}
         </div>
       )}
     </div>
