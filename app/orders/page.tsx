@@ -392,20 +392,6 @@ export default function OrdersPage() {
                     </div>
                   )}
 
-                  {/* Payment Info */}
-                  {(order.transaction_hash || order.payment_hash) && (
-                    <div className="mt-2">
-                      <p className="text-xs text-gray-400">Transaction:</p>
-                      <a
-                        href={`https://basescan.org/tx/${order.transaction_hash || order.payment_hash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-blue-400 hover:text-blue-300 font-mono"
-                      >
-                        {(order.transaction_hash || order.payment_hash)?.slice(0, 10)}...{(order.transaction_hash || order.payment_hash)?.slice(-8)} →
-                      </a>
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
