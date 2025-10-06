@@ -278,40 +278,33 @@ export default function ProductDetailPage() {
 
         {/* Product Card */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-          {/* Single Product Image - Click to Open Gallery */}
-          <div className="w-full relative">
-            <button
-              onClick={openGallery}
-              className="w-full relative overflow-hidden rounded-t-lg"
-            >
-              <Image
-                src={getFirstImage()}
-                alt={product.title}
-                width={600}
-                height={400}
-                className="w-full h-80 object-cover"
-              />
-
-              {/* Overlay with expand icon */}
-              <div className="absolute inset-0 bg-black bg-opacity-10 flex items-center justify-center">
-                <div className="bg-white bg-opacity-90 rounded-full p-3">
-                  <Icon name="expand" size="lg" className="text-gray-700" />
-                </div>
-              </div>
-            </button>
-
-            {/* Multiple images indicator */}
-            {product.images && product.images.length > 1 && (
-              <div className="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
-                {product.images.length} photos
-              </div>
-            )}
-
-            {/* Click hint - always visible */}
-            <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
-              Click to {product.images && product.images.length > 1 ? 'view gallery' : 'expand'}
-            </div>
+          {/* Main Product Image - Standalone */}
+          <div className="w-full">
+            <Image
+              src={getFirstImage()}
+              alt={product.title}
+              width={600}
+              height={400}
+              className="w-full h-80 object-cover rounded-t-lg"
+            />
           </div>
+
+          {/* Gallery Section */}
+          {product.images && product.images.length > 1 && (
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <button
+                onClick={openGallery}
+                className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+              >
+                <div className="flex items-center space-x-3">
+                  <Icon name="expand" size="md" className="text-gray-600 dark:text-gray-400" />
+                  <span className="text-gray-900 dark:text-gray-100 font-medium">View Gallery</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">({product.images.length} photos)</span>
+                </div>
+                <Icon name="chevron-right" size="sm" className="text-gray-400" />
+              </button>
+            </div>
+          )}
 
           {/* Product Info */}
           <div className="p-6 space-y-6">
