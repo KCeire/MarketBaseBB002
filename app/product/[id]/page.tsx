@@ -159,16 +159,29 @@ export default function ProductDetailPage() {
 
   // Get the current image to display with proper fallback logic
   const getCurrentImage = () => {
-    if (!product) return '';
+    if (!product) return '/placeholder-image.jpg'; // Fallback placeholder
 
     // If we have images array and it's populated
     if (product.images && product.images.length > 0) {
-      // Return the selected image, or first image if selected index is out of bounds
-      return product.images[selectedImageIndex] || product.images[0];
+      // Ensure selectedImageIndex is within bounds
+      const validIndex = Math.max(0, Math.min(selectedImageIndex, product.images.length - 1));
+      const selectedImage = product.images[validIndex];
+      if (selectedImage && selectedImage.trim() !== '') {
+        return selectedImage;
+      }
+      // Try first image
+      if (product.images[0] && product.images[0].trim() !== '') {
+        return product.images[0];
+      }
     }
 
     // Fallback to the main product image
-    return product.image || '';
+    if (product.image && product.image.trim() !== '') {
+      return product.image;
+    }
+
+    // Ultimate fallback
+    return '/placeholder-image.jpg';
   };
 
   // Handle keyboard navigation in gallery
@@ -279,12 +292,14 @@ export default function ProductDetailPage() {
                     className="w-full relative overflow-hidden rounded-t-lg"
                   >
                     <Image
+                      key={`main-${product.id}-${selectedImageIndex}`}
                       src={getCurrentImage()}
                       alt={`${product.title} - Image ${selectedImageIndex + 1}`}
                       width={600}
                       height={400}
                       className="w-full h-80 object-cover transition-transform duration-300 group-hover:scale-105"
                       priority
+                      unoptimized={getCurrentImage().includes('placeholder')}
                     />
                     {/* Overlay with expand icon */}
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
@@ -366,12 +381,14 @@ export default function ProductDetailPage() {
                   className="w-full relative overflow-hidden rounded-t-lg"
                 >
                   <Image
+                    key={`fallback-${product.id}-${selectedImageIndex}`}
                     src={getCurrentImage()}
                     alt={product.title}
                     width={600}
                     height={400}
                     className="w-full h-80 object-cover transition-transform duration-300 group-hover:scale-105"
                     priority
+                    unoptimized={getCurrentImage().includes('placeholder')}
                   />
                   {/* Overlay with expand icon */}
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
@@ -587,17 +604,11 @@ export default function ProductDetailPage() {
       {isGalleryOpen && product && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-95">
           <div className="h-full w-full flex flex-col safe-area-inset">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between text-white p-4 pt-safe flex-shrink-0 bg-black bg-opacity-30" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
-              <div className="flex items-center space-x-4">
-                <h2 className="text-lg md:text-xl font-semibold truncate">{product.title}</h2>
-                <span className="text-sm opacity-75 flex-shrink-0">
-                  {selectedImageIndex + 1} of {product.images?.length || 1}
-                </span>
-              </div>
+            {/* Minimal Header - Desktop close button only */}
+            <div className="hidden md:flex justify-end text-white p-4 flex-shrink-0" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
               <button
                 onClick={closeGallery}
-                className="p-3 md:p-2 hover:bg-white hover:bg-opacity-20 rounded-full transition-colors flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                className="p-2 hover:bg-white hover:bg-opacity-20 rounded-full transition-colors flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
               >
                 <Icon name="x" size="lg" className="text-white" />
               </button>
@@ -638,51 +649,12 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* Bottom Section with Thumbnails and Instructions */}
-            <div className="flex-shrink-0 bg-black bg-opacity-30 p-4">
-              {/* Thumbnail Strip - Only show if multiple images */}
-              {product.images && product.images.length > 1 && (
-                <div className="mb-4">
-                  <div className="flex justify-center">
-                    <div className="flex gap-2 overflow-x-auto scrollbar-hide max-w-full">
-                      {product.images.map((image, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setSelectedImageIndex(index)}
-                          className={`flex-shrink-0 w-12 h-12 md:w-16 md:h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                            selectedImageIndex === index
-                              ? 'border-white ring-2 ring-white ring-opacity-50'
-                              : 'border-gray-500 hover:border-gray-300'
-                          }`}
-                        >
-                          <Image
-                            src={image}
-                            alt={`${product.title} thumbnail ${index + 1}`}
-                            width={64}
-                            height={64}
-                            className="w-full h-full object-cover"
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
 
-              {/* Instructions */}
-              <div className="text-center text-white text-xs md:text-sm opacity-75">
-                {product.images && product.images.length > 1 && (
-                  <span className="hidden md:inline">Use arrow keys or click arrows to navigate • </span>
-                )}
-                <span>Press ESC to close</span>
-              </div>
-            </div>
-
-            {/* Mobile Exit Banner */}
-            <div className="md:hidden absolute bottom-0 left-0 right-0 pb-safe" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
+            {/* Mobile Exit Banner - Above bottom nav */}
+            <div className="md:hidden absolute left-0 right-0" style={{ bottom: 'calc(4rem + max(1rem, env(safe-area-inset-bottom)))' }}>
               <button
                 onClick={closeGallery}
-                className="w-full bg-black bg-opacity-60 backdrop-blur-sm text-white py-4 text-center text-lg font-medium hover:bg-opacity-80 transition-colors"
+                className="w-full bg-black bg-opacity-70 backdrop-blur-sm text-white py-4 text-center text-lg font-medium hover:bg-opacity-90 transition-colors border-t border-white border-opacity-20"
               >
                 ✕ Tap to Exit Gallery
               </button>
