@@ -256,7 +256,7 @@ export function GreenOasisHomeStorefront() {
                               )}
                             </div>
                             <div className="text-xs text-green-200">
-                              dispatched by Green Oasis Home & Garden
+                              sold by Green Oasis Home & Garden
                             </div>
                           </div>
 
@@ -331,24 +331,24 @@ export function GreenOasisHomeStorefront() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
-                <Icon name="leaf" size="lg" className="text-green-400" />
+                <Icon name="shield-check" size="lg" className="text-green-400" />
               </div>
-              <h3 className="text-xl font-bold text-white">Eco-Friendly</h3>
-              <p className="text-green-100">Sustainably sourced materials and environmentally conscious products.</p>
+              <h3 className="text-xl font-bold text-white">Quality Products</h3>
+              <p className="text-green-100">Carefully selected home and garden products for modern living.</p>
             </div>
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
-                <Icon name="truck" size="lg" className="text-green-400" />
+                <Icon name="star" size="lg" className="text-green-400" />
               </div>
-              <h3 className="text-xl font-bold text-white">Free Delivery</h3>
-              <p className="text-green-100">Free white-glove delivery and setup on all furniture orders.</p>
+              <h3 className="text-xl font-bold text-white">Customer Focused</h3>
+              <p className="text-green-100">Dedicated to providing an excellent shopping experience for our customers.</p>
             </div>
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
-                <Icon name="award" size="lg" className="text-green-400" />
+                <Icon name="check" size="lg" className="text-green-400" />
               </div>
-              <h3 className="text-xl font-bold text-white">Quality Guarantee</h3>
-              <p className="text-green-100">30-day satisfaction guarantee on all purchases.</p>
+              <h3 className="text-xl font-bold text-white">Trusted Platform</h3>
+              <p className="text-green-100">Secure crypto payments and reliable service you can count on.</p>
             </div>
           </div>
         </div>

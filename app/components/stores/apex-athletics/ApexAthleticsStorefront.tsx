@@ -254,7 +254,7 @@ export function ApexAthleticsStorefront() {
                               )}
                             </div>
                             <div className="text-xs text-orange-200">
-                              dispatched by Apex Athletics
+                              sold by Apex Athletics
                             </div>
                           </div>
 
@@ -329,24 +329,24 @@ export function ApexAthleticsStorefront() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto">
-                <Icon name="award" size="lg" className="text-orange-400" />
+                <Icon name="shield-check" size="lg" className="text-orange-400" />
               </div>
-              <h3 className="text-xl font-bold text-white">Professional Grade</h3>
-              <p className="text-orange-100">Equipment trusted by professional athletes and sports teams worldwide.</p>
+              <h3 className="text-xl font-bold text-white">Quality Products</h3>
+              <p className="text-orange-100">Carefully selected sports and outdoor equipment for all skill levels.</p>
             </div>
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto">
-                <Icon name="truck" size="lg" className="text-orange-400" />
+                <Icon name="star" size="lg" className="text-orange-400" />
               </div>
-              <h3 className="text-xl font-bold text-white">Fast Shipping</h3>
-              <p className="text-orange-100">Express delivery available. Get your gear fast so you never miss a workout.</p>
+              <h3 className="text-xl font-bold text-white">Customer Focused</h3>
+              <p className="text-orange-100">Dedicated to providing an excellent shopping experience for our customers.</p>
             </div>
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto">
-                <Icon name="refresh-cw" size="lg" className="text-orange-400" />
+                <Icon name="check" size="lg" className="text-orange-400" />
               </div>
-              <h3 className="text-xl font-bold text-white">Lifetime Support</h3>
-              <p className="text-orange-100">Comprehensive warranty and lifetime customer support for all products.</p>
+              <h3 className="text-xl font-bold text-white">Trusted Platform</h3>
+              <p className="text-orange-100">Secure crypto payments and reliable service you can count on.</p>
             </div>
           </div>
         </div>

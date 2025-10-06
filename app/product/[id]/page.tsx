@@ -9,6 +9,7 @@ import { Icon } from '@/app/components/ui/Icon';
 import { toast } from '@/app/components/ui/Toast';
 import { QuantitySelector } from '@/app/components/product/QuantitySelector';
 import { ShareButton } from '@/app/components/product/ShareButton';
+import Link from 'next/link';
 import Image from 'next/image';
 
 interface CartItem {
@@ -31,6 +32,8 @@ export default function ProductDetailPage() {
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [addingToCart, setAddingToCart] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   const productId = params.id as string;
 
@@ -110,6 +113,59 @@ export default function ProductDetailPage() {
     router.back();
   };
 
+  // Simple function to get store URL from vendor name
+  const getStoreUrl = (vendor: string) => {
+    const vendorLower = vendor.toLowerCase();
+    if (vendorLower.includes('techwave')) return '/store/techwave-electronics';
+    if (vendorLower.includes('apex')) return '/store/apex-athletics';
+    if (vendorLower.includes('pawsome')) return '/store/pawsome-pets';
+    if (vendorLower.includes('radiant')) return '/store/radiant-beauty';
+    if (vendorLower.includes('green') || vendorLower.includes('oasis')) return '/store/green-oasis-home';
+    return null; // No store page available
+  };
+
+  const openGallery = () => {
+    setIsGalleryOpen(true);
+  };
+
+  const closeGallery = () => {
+    setIsGalleryOpen(false);
+  };
+
+  const nextImage = () => {
+    if (product && product.images.length > 0) {
+      setSelectedImageIndex((prev) => (prev + 1) % product.images.length);
+    }
+  };
+
+  const previousImage = () => {
+    if (product && product.images.length > 0) {
+      setSelectedImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
+    }
+  };
+
+  // Handle keyboard navigation in gallery
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isGalleryOpen) return;
+
+      switch (event.key) {
+        case 'Escape':
+          closeGallery();
+          break;
+        case 'ArrowLeft':
+          previousImage();
+          break;
+        case 'ArrowRight':
+          nextImage();
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isGalleryOpen]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background dark:bg-gray-900 p-4">
@@ -169,16 +225,101 @@ export default function ProductDetailPage() {
 
         {/* Product Card */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-          {/* Product Image */}
+          {/* Product Image Gallery */}
           <div className="w-full">
-            <Image 
-              src={product.image} 
-              alt={product.title}
-              width={600}
-              height={400}
-              className="w-full h-80 object-cover"
-              priority
-            />
+            {product.images && product.images.length > 0 ? (
+              <div className="space-y-4">
+                {/* Main Image */}
+                <div className="w-full relative group">
+                  <button
+                    onClick={openGallery}
+                    className="w-full relative overflow-hidden rounded-t-lg"
+                  >
+                    <Image
+                      src={product.images[selectedImageIndex] || product.image}
+                      alt={`${product.title} - Image ${selectedImageIndex + 1}`}
+                      width={600}
+                      height={400}
+                      className="w-full h-80 object-cover transition-transform duration-300 group-hover:scale-105"
+                      priority
+                    />
+                    {/* Overlay with expand icon */}
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
+                      <div className="bg-white bg-opacity-90 rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <Icon name="expand" size="lg" className="text-gray-700" />
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Click hint */}
+                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    Click to expand
+                  </div>
+                </div>
+
+                {/* Thumbnail Gallery - Only show if multiple images */}
+                {product.images.length > 1 && (
+                  <div className="px-6 pb-4">
+                    <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+                      {product.images.map((image, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setSelectedImageIndex(index)}
+                          className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                            selectedImageIndex === index
+                              ? 'border-blue-500 ring-2 ring-blue-200 dark:ring-blue-800'
+                              : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                          }`}
+                        >
+                          <Image
+                            src={image}
+                            alt={`${product.title} thumbnail ${index + 1}`}
+                            width={64}
+                            height={64}
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Image counter */}
+                    <div className="text-center mt-2">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        Image {selectedImageIndex + 1} of {product.images.length}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Fallback for single image */
+              <div className="w-full relative group">
+                <button
+                  onClick={openGallery}
+                  className="w-full relative overflow-hidden rounded-t-lg"
+                >
+                  <Image
+                    src={product.image}
+                    alt={product.title}
+                    width={600}
+                    height={400}
+                    className="w-full h-80 object-cover transition-transform duration-300 group-hover:scale-105"
+                    priority
+                  />
+                  {/* Overlay with expand icon */}
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300 flex items-center justify-center">
+                    <div className="bg-white bg-opacity-90 rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <Icon name="expand" size="lg" className="text-gray-700" />
+                    </div>
+                  </div>
+                </button>
+
+                {/* Click hint */}
+                <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  Click to expand
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Product Info */}
@@ -186,6 +327,28 @@ export default function ProductDetailPage() {
             <div className="space-y-4">
               <div>
                 <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">{product.title}</h1>
+
+                {/* Sold By Vendor Information */}
+                {product.vendor && (
+                  <div className="mb-3">
+                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                      <span>Sold by</span>
+                      {getStoreUrl(product.vendor) ? (
+                        <Link
+                          href={getStoreUrl(product.vendor)!}
+                          className="ml-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors font-medium"
+                        >
+                          {product.vendor}
+                        </Link>
+                      ) : (
+                        <span className="ml-1 font-medium text-gray-900 dark:text-gray-100">
+                          {product.vendor}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex items-center space-x-3 mb-4">
                   <span className="text-3xl font-bold text-blue-600">
                     ${((parseFloat(product.variants[selectedVariant]?.price || product.price) * quantity).toFixed(2))}
@@ -352,6 +515,104 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Fullscreen Gallery Modal */}
+      {isGalleryOpen && product && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-95">
+          <div className="h-full w-full flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between text-white p-4 flex-shrink-0 bg-black bg-opacity-30">
+              <div className="flex items-center space-x-4">
+                <h2 className="text-lg md:text-xl font-semibold truncate">{product.title}</h2>
+                <span className="text-sm opacity-75 flex-shrink-0">
+                  {selectedImageIndex + 1} of {product.images?.length || 1}
+                </span>
+              </div>
+              <button
+                onClick={closeGallery}
+                className="p-2 hover:bg-white hover:bg-opacity-20 rounded-full transition-colors flex-shrink-0"
+              >
+                <Icon name="x" size="lg" className="text-white" />
+              </button>
+            </div>
+
+            {/* Main Image Container - Takes remaining space */}
+            <div className="flex-1 relative flex items-center justify-center min-h-0">
+              <div className="relative w-full h-full flex items-center justify-center p-4">
+                <Image
+                  src={product.images?.[selectedImageIndex] || product.image}
+                  alt={`${product.title} - Image ${selectedImageIndex + 1}`}
+                  fill
+                  className="object-contain"
+                  sizes="100vw"
+                  priority
+                />
+              </div>
+
+              {/* Navigation Arrows - Only show if multiple images */}
+              {product.images && product.images.length > 1 && (
+                <>
+                  {/* Previous Button */}
+                  <button
+                    onClick={previousImage}
+                    className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 md:p-3 rounded-full transition-colors z-10"
+                  >
+                    <Icon name="chevron-left" size="lg" />
+                  </button>
+
+                  {/* Next Button */}
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 md:p-3 rounded-full transition-colors z-10"
+                  >
+                    <Icon name="chevron-right" size="lg" />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Bottom Section with Thumbnails and Instructions */}
+            <div className="flex-shrink-0 bg-black bg-opacity-30 p-4">
+              {/* Thumbnail Strip - Only show if multiple images */}
+              {product.images && product.images.length > 1 && (
+                <div className="mb-4">
+                  <div className="flex justify-center">
+                    <div className="flex gap-2 overflow-x-auto scrollbar-hide max-w-full">
+                      {product.images.map((image, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setSelectedImageIndex(index)}
+                          className={`flex-shrink-0 w-12 h-12 md:w-16 md:h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                            selectedImageIndex === index
+                              ? 'border-white ring-2 ring-white ring-opacity-50'
+                              : 'border-gray-500 hover:border-gray-300'
+                          }`}
+                        >
+                          <Image
+                            src={image}
+                            alt={`${product.title} thumbnail ${index + 1}`}
+                            width={64}
+                            height={64}
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Instructions */}
+              <div className="text-center text-white text-xs md:text-sm opacity-75">
+                {product.images && product.images.length > 1 && (
+                  <span className="hidden md:inline">Use arrow keys or click arrows to navigate • </span>
+                )}
+                <span>Press ESC to close</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

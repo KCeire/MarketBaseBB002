@@ -257,7 +257,7 @@ export function PawsomePetsStorefront() {
                               )}
                             </div>
                             <div className="text-xs text-purple-200">
-                              dispatched by Pawsome Pet Paradise
+                              sold by Pawsome Pet Paradise
                             </div>
                           </div>
 
@@ -332,24 +332,24 @@ export function PawsomePetsStorefront() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto">
-                <Icon name="heart" size="lg" className="text-purple-400" />
+                <Icon name="shield-check" size="lg" className="text-purple-400" />
               </div>
-              <h3 className="text-xl font-bold text-white">Pet-First Quality</h3>
-              <p className="text-purple-100">All products are tested and approved by veterinarians and pet experts.</p>
+              <h3 className="text-xl font-bold text-white">Quality Products</h3>
+              <p className="text-purple-100">Carefully selected pet products and accessories for your furry friends.</p>
             </div>
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto">
-                <Icon name="truck" size="lg" className="text-purple-400" />
+                <Icon name="star" size="lg" className="text-purple-400" />
               </div>
-              <h3 className="text-xl font-bold text-white">Fast Delivery</h3>
-              <p className="text-purple-100">Free shipping on orders over $35. Same-day delivery available in select areas.</p>
+              <h3 className="text-xl font-bold text-white">Customer Focused</h3>
+              <p className="text-purple-100">Dedicated to providing an excellent shopping experience for our customers.</p>
             </div>
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto">
-                <Icon name="phone" size="lg" className="text-purple-400" />
+                <Icon name="check" size="lg" className="text-purple-400" />
               </div>
-              <h3 className="text-xl font-bold text-white">Expert Support</h3>
-              <p className="text-purple-100">Talk to our pet care experts for personalized advice and recommendations.</p>
+              <h3 className="text-xl font-bold text-white">Trusted Platform</h3>
+              <p className="text-purple-100">Secure crypto payments and reliable service you can count on.</p>
             </div>
           </div>
         </div>

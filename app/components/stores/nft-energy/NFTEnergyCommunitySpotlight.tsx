@@ -22,11 +22,11 @@ const communityProjects: CommunityProject[] = [
     id: 'pigeons-ny',
     name: 'Pigeons of New York',
     description: 'Beyond the art, Pigeons of New York have held events all around the USA creating true value to members of their community. Join the COOP!',
-    image: '/nft-energy/community/pigeons-ny.jpg',
+    image: 'https://nftenergydrinks.com/wp-content/uploads/2024/03/12.png',
     socialLinks: {
-      twitter: '#',
-      discord: '#',
-      website: '#'
+      twitter: 'https://twitter.com/pigeonsofny_nft',
+      discord: 'https://discord.gg/BUMXRpegZm',
+      website: 'https://pigeonsofnewyork.io/'
     }
   },
   // More projects will be added later
@@ -64,14 +64,18 @@ export function NFTEnergyCommunitySpotlight() {
 
         {/* Community Spotlight Carousel */}
         <div className="relative max-w-4xl mx-auto">
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
-            <div className="aspect-[4/3] relative">
+          <div className="bg-black/30 backdrop-blur-sm rounded-2xl border border-white/20 overflow-hidden">
+            <div className="aspect-[4/3] md:aspect-[4/3] min-h-[500px] md:min-h-0 relative">
               {/* Info Slide */}
               {currentSlide === 0 && (
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-purple-700 to-fuchsia-600 flex items-center justify-center p-8">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-800 via-purple-900 to-fuchsia-800 flex items-center justify-center p-8">
                   <div className="text-center space-y-6">
-                    <div className="w-20 h-20 bg-white/10 rounded-2xl mx-auto flex items-center justify-center">
-                      <span className="text-white font-bold text-2xl">NE</span>
+                    <div className="w-20 h-20 bg-white/10 rounded-2xl mx-auto flex items-center justify-center p-3">
+                      <img
+                        src="/stores/NFTEnergyDrinks/NFTEnergyDrinksLogo.png"
+                        alt="NFT Energy Logo"
+                        className="w-full h-full object-contain"
+                      />
                     </div>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
@@ -91,15 +95,15 @@ export function NFTEnergyCommunitySpotlight() {
 
               {/* Community Project Slides */}
               {hasProjects && currentSlide > 0 && (
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-purple-700 to-fuchsia-600 flex items-center justify-center p-8">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-800 via-purple-900 to-fuchsia-800 flex items-center justify-center p-4 md:p-8">
                   {(() => {
                     const project = communityProjects[currentSlide - 1];
                     if (!project) return null;
-                    
+
                     return (
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center w-full max-w-4xl">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 items-center w-full max-w-4xl h-full">
                         {/* Project Info */}
-                        <div className="space-y-6">
+                        <div className="space-y-4 md:space-y-6 flex-1">
                           <div className="flex items-center justify-between">
                             <span className="text-white/60 text-sm">
                               0{currentSlide + 1}
@@ -111,15 +115,15 @@ export function NFTEnergyCommunitySpotlight() {
                           
                           <div className="w-20 h-20 bg-gradient-to-r from-fuchsia-400 to-pink-400 rounded-full mx-auto lg:mx-0 flex items-center justify-center">
                             <span className="text-white font-bold text-lg">
-                              {project.name.split(' ').map(word => word[0]).join('').slice(0, 2)}
+                              {project.id === 'pigeons-ny' ? 'PoNY' : project.name.split(' ').map(word => word[0]).join('').slice(0, 2)}
                             </span>
                           </div>
                           
                           <div className="text-center lg:text-left">
-                            <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                            <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-white mb-3 md:mb-4">
                               {project.name.toUpperCase()}
                             </h3>
-                            <p className="text-white/80 leading-relaxed mb-6">
+                            <p className="text-white/80 leading-relaxed mb-4 md:mb-6 text-sm md:text-base">
                               {project.description}
                             </p>
                             
@@ -152,19 +156,21 @@ export function NFTEnergyCommunitySpotlight() {
                                   rel="noopener noreferrer"
                                   className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
                                 >
-                                  <span className="text-white text-xs font-bold">DC</span>
+                                  <Icon name="discord" size="sm" className="text-white" />
                                 </a>
                               )}
                             </div>
                           </div>
                         </div>
 
-                        {/* Product Image Placeholder */}
-                        <div className="flex justify-center">
-                          <div className="w-64 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-lg flex items-center justify-center">
-                            <span className="text-white/40 text-center">
-                              NFT Energy Can<br />Featuring<br />{project.name}
-                            </span>
+                        {/* Product Image */}
+                        <div className="flex justify-center lg:order-2">
+                          <div className="w-48 h-60 md:w-64 md:h-80 rounded-lg overflow-hidden">
+                            <img
+                              src={project.image}
+                              alt={`NFT Energy Can featuring ${project.name}`}
+                              className="w-full h-full object-contain bg-gradient-to-br from-blue-400/20 to-purple-400/20"
+                            />
                           </div>
                         </div>
                       </div>

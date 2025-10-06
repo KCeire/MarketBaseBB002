@@ -259,7 +259,7 @@ export function RadiantBeautyStorefront() {
                               )}
                             </div>
                             <div className="text-xs text-pink-200">
-                              dispatched by Radiant Beauty Co.
+                              sold by Radiant Beauty Co.
                             </div>
                           </div>
 
@@ -334,24 +334,24 @@ export function RadiantBeautyStorefront() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-pink-500/20 rounded-full flex items-center justify-center mx-auto">
-                <Icon name="leaf" size="lg" className="text-pink-400" />
+                <Icon name="shield-check" size="lg" className="text-pink-400" />
               </div>
-              <h3 className="text-xl font-bold text-white">Clean Beauty</h3>
-              <p className="text-pink-100">All products are cruelty-free and made with natural, sustainable ingredients.</p>
+              <h3 className="text-xl font-bold text-white">Quality Products</h3>
+              <p className="text-pink-100">Carefully selected beauty and health products for your lifestyle needs.</p>
             </div>
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-pink-500/20 rounded-full flex items-center justify-center mx-auto">
-                <Icon name="award" size="lg" className="text-pink-400" />
+                <Icon name="star" size="lg" className="text-pink-400" />
               </div>
-              <h3 className="text-xl font-bold text-white">Expert Curated</h3>
-              <p className="text-pink-100">Products selected by beauty professionals and dermatologists for effectiveness.</p>
+              <h3 className="text-xl font-bold text-white">Customer Focused</h3>
+              <p className="text-pink-100">Dedicated to providing an excellent shopping experience for our customers.</p>
             </div>
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-pink-500/20 rounded-full flex items-center justify-center mx-auto">
-                <Icon name="heart" size="lg" className="text-pink-400" />
+                <Icon name="check" size="lg" className="text-pink-400" />
               </div>
-              <h3 className="text-xl font-bold text-white">Satisfaction Guarantee</h3>
-              <p className="text-pink-100">30-day money-back guarantee if you&apos;re not completely satisfied.</p>
+              <h3 className="text-xl font-bold text-white">Trusted Platform</h3>
+              <p className="text-pink-100">Secure crypto payments and reliable service you can count on.</p>
             </div>
           </div>
         </div>

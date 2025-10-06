@@ -818,14 +818,8 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            // For NFT Energy products, go to product page, not store page
-                            if (product.isStoreProduct && product.storeInfo?.slug === 'nft-energy') {
-                              navigateToProduct(product.id, product);
-                            } else if (product.isStoreProduct && product.storeInfo) {
-                              router.push(product.storeInfo.url);
-                            } else {
-                              navigateToProduct(product.id, product);
-                            }
+                            // All products should go to their individual product page
+                            navigateToProduct(product.id, product);
                           }}
                           icon={<Icon name="eye" size="sm" />}
                         >
@@ -1064,14 +1058,8 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // For NFT Energy products, go to product page, not store page
-                      if (product.isStoreProduct && product.storeInfo?.slug === 'nft-energy') {
-                        navigateToProduct(product.id, product);
-                      } else if (product.isStoreProduct && product.storeInfo) {
-                        router.push(product.storeInfo.url);
-                      } else {
-                        navigateToProduct(product.id, product);
-                      }
+                      // All products should go to their individual product page
+                      navigateToProduct(product.id, product);
                     }}
                     icon={<Icon name="eye" size="sm" />}
                   >
