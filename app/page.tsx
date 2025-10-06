@@ -299,7 +299,7 @@ function AppContent() {
           {/* Quick Stats */}
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-white dark:bg-gray-800 rounded-xl p-3 text-center border border-gray-200 dark:border-gray-700">
-              <div className="text-lg font-bold text-blue-600 dark:text-blue-400">2</div>
+              <div className="text-lg font-bold text-blue-600 dark:text-blue-400">6</div>
               <div className="text-xs text-gray-600 dark:text-gray-400">Live Stores</div>
             </div>
             <div className="bg-white dark:bg-gray-800 rounded-xl p-3 text-center border border-gray-200 dark:border-gray-700">
