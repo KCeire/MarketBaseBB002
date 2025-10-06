@@ -259,11 +259,17 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
 
           if (result.affiliateProcessed) {
             console.log('💰 CHECKOUT: Affiliate rewards were processed for this order');
-            toast.success('Payment Complete', 'Your order is confirmed and affiliate rewards have been processed!');
           } else {
             console.log('ℹ️ CHECKOUT: No affiliate rewards processed (normal for non-affiliate orders)');
-            toast.success('Payment Complete', 'Your order is confirmed!');
           }
+
+          // Show single success message and redirect to orders
+          toast.success('Order Complete!', `Order ${orderRef} has been confirmed. Redirecting to your orders...`);
+
+          // Redirect to orders page after short delay
+          setTimeout(() => {
+            window.location.href = '/orders';
+          }, 2000);
 
           if (onSuccess) {
             onSuccess(orderRef);
@@ -288,11 +294,13 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       if (result.success && result.paymentStatus === 'completed') {
         setPaymentStep('success');
 
-        if (result.affiliateProcessed) {
-          toast.success('Payment Complete', 'Your order is confirmed and affiliate rewards have been processed!');
-        } else {
-          toast.success('Payment Complete', 'Your order is confirmed!');
-        }
+        // Show single success message and redirect to orders
+        toast.success('Order Complete!', `Order ${orderRef} has been confirmed. Redirecting to your orders...`);
+
+        // Redirect to orders page after short delay
+        setTimeout(() => {
+          window.location.href = '/orders';
+        }, 2000);
 
         if (onSuccess) {
           onSuccess(orderRef);
@@ -335,7 +343,6 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
         testnet: process.env.NODE_ENV !== 'production',
         timestamp: new Date().toISOString()
       });
-      toast.info('Processing Payment', 'Please complete payment in Base App');
 
       // Initiate Base Pay payment (shipping info already collected)
       const payment = await pay({
@@ -356,7 +363,6 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
 
       // Show confirmation page (shipping info already collected)
       setPaymentStep('form');
-      toast.success('Payment Authorized', 'Please review your order details');
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Payment failed';
@@ -381,8 +387,7 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       setOrderReference(orderRef);
       console.log('✅ CHECKOUT: Order created successfully:', orderRef);
 
-      // Show success message immediately (dismiss any pending payment toast)
-      toast.success('Order Created', `Order ${orderRef} created successfully`);
+      // Order creation completed
 
       // Start background payment verification with affiliate processing
       if (basePayData) {
@@ -391,7 +396,6 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
         startBackgroundVerification(orderRef, basePayData.id);
 
         // Move to confirming state
-        toast.info('Confirming Payment', 'Verifying payment on blockchain...');
       } else {
         const error = 'Payment data not available';
         console.error('❌ CHECKOUT: Missing Base Pay data:', { basePayData, paymentId });

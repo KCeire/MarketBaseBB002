@@ -310,7 +310,7 @@ function AppContent() {
               <div className="text-xs text-gray-600 dark:text-gray-400">Payments</div>
             </div>
             <div className="bg-white dark:bg-gray-800 rounded-xl p-3 text-center border border-gray-200 dark:border-gray-700">
-              <div className="text-lg font-bold" style={{ color: '#0000FF' }}>Base</div>
+              <div className="text-lg font-bold" style={{ color: '#FFFFFF' }}>Base</div>
               <div className="text-xs text-gray-600 dark:text-gray-400">Network</div>
             </div>
           </div>

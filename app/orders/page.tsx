@@ -335,7 +335,7 @@ export default function OrdersPage() {
                         >
                           {item.title}
                         </a>
-                        <p className="text-xs text-gray-400">{item.variant} • SKU: {item.sku || 'N/A'}</p>
+                        <p className="text-xs text-gray-400">{item.variant}</p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-100">x{item.quantity}</p>
@@ -393,16 +393,16 @@ export default function OrdersPage() {
                   )}
 
                   {/* Payment Info */}
-                  {order.payment_hash && (
+                  {(order.transaction_hash || order.payment_hash) && (
                     <div className="mt-2">
                       <p className="text-xs text-gray-400">Transaction:</p>
                       <a
-                        href={`https://basescan.org/tx/${order.payment_hash}`}
+                        href={`https://basescan.org/tx/${order.transaction_hash || order.payment_hash}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs text-blue-400 hover:text-blue-300 font-mono"
                       >
-                        {order.payment_hash.slice(0, 10)}...{order.payment_hash.slice(-8)} →
+                        {(order.transaction_hash || order.payment_hash)?.slice(0, 10)}...{(order.transaction_hash || order.payment_hash)?.slice(-8)} →
                       </a>
                     </div>
                   )}

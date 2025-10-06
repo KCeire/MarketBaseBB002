@@ -427,13 +427,10 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
 
 
   const handleCheckoutSuccess = (orderReference: string) => {
-    toast.paymentSuccess(orderReference);
-    // Clear cart on successful order
+    // Clear cart on successful order (no toast - handled by BasePayCheckout)
     setCart([]);
     saveCartToStorage([]);
-    if (onBackToShop) {
-      onBackToShop();
-    }
+    // Don't redirect to home - BasePayCheckout handles redirect to orders
   };
 
   const handleCheckoutError = (error: string) => {
@@ -658,20 +655,13 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
           {/* Search Bar with Sort Button */}
           <div className="relative border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
             <div className="flex items-center">
-              {/* Search Icon */}
-              <Icon
-                name="search"
-                size="sm"
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10"
-              />
-
               {/* Search Input */}
               <input
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 px-3 py-2 pl-9 pr-16 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none text-sm"
+                className="flex-1 px-3 py-2 pr-16 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none text-sm"
               />
 
               {/* Sort Button */}

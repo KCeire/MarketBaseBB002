@@ -31,10 +31,20 @@ async function getPaymentStatus({ id, testnet = false }: { id: string; testnet?:
 
     console.log('💳 Base Pay status response:', status);
 
+    // Extract the actual blockchain transaction hash from Base Pay response
+    // Base Pay should provide the actual transaction hash in the response
+    const actualTransactionHash = status.transactionHash || status.txHash || status.hash || status.transaction?.hash;
+
+    console.log('🔍 Extracted transaction hash details:', {
+      providedId: id,
+      actualTransactionHash,
+      fullStatus: status
+    });
+
     // Map Base Pay response to our expected format
     return {
       status: status.status, // 'completed', 'pending', 'failed', etc.
-      transactionHash: id,
+      transactionHash: actualTransactionHash || id, // Use actual blockchain hash if available
       completedAt: status.status === 'completed' ? new Date().toISOString() : undefined
     };
   } catch (error) {
