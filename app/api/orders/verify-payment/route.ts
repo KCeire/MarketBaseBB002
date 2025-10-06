@@ -33,13 +33,13 @@ async function getPaymentStatus({ id, testnet = false }: { id: string; testnet?:
 
     // Extract the actual blockchain transaction hash from Base Pay response
     // Base Pay should provide the actual transaction hash in the response
-    // Safely access potentially undefined properties using bracket notation
-    const statusObj = status as Record<string, unknown>;
+    // Use unknown type first, then cast to access potentially undefined properties
+    const statusObj = status as unknown as Record<string, unknown>;
     const actualTransactionHash =
-      (statusObj.transactionHash as string) ||
-      (statusObj.txHash as string) ||
-      (statusObj.hash as string) ||
-      ((statusObj.transaction as Record<string, unknown>)?.hash as string);
+      (statusObj?.transactionHash as string) ||
+      (statusObj?.txHash as string) ||
+      (statusObj?.hash as string) ||
+      ((statusObj?.transaction as Record<string, unknown>)?.hash as string);
 
     console.log('🔍 Extracted transaction hash details:', {
       providedId: id,
