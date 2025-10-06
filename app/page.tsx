@@ -81,30 +81,27 @@ function AppContent() {
     return (
       <div className="flex flex-col min-h-screen font-sans text-[var(--app-foreground)] mini-app-theme from-[var(--app-background)] to-[var(--app-gray)]">
         <div className="w-full max-w-md mx-auto px-4 py-3 main-content-with-bottom-nav">
-          <header className="flex justify-between items-start mb-3 h-auto min-h-[44px]">
-            <div className="flex flex-col space-y-2">
-              <div className="flex items-center space-x-2">
-                <Wallet className="z-10">
-                  <ConnectWallet>
-                    <Name className="text-inherit" />
-                  </ConnectWallet>
-                  <WalletDropdown>
-                    <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-                      <Avatar />
-                      <Name />
-                      <Address />
-                      <EthBalance />
-                    </Identity>
-                    <WalletDropdownDisconnect />
-                  </WalletDropdown>
-                </Wallet>
-              </div>
-              <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+          <header className="flex justify-between items-center mb-3 h-auto min-h-[44px]">
+            <div className="flex items-center space-x-2">
+              <Wallet className="z-10">
+                <ConnectWallet>
+                  <Name className="text-inherit" />
+                </ConnectWallet>
+                <WalletDropdown>
+                  <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+                    <Avatar />
+                    <Name />
+                    <Address />
+                    <EthBalance />
+                  </Identity>
+                  <WalletDropdownDisconnect />
+                </WalletDropdown>
+              </Wallet>
+            </div>
+            <div className="flex-shrink-0 mr-3">
+              <div className="text-sm text-blue-600 dark:text-blue-400 font-semibold">
                 Shop → Share → Earn
               </div>
-            </div>
-            <div className="flex-shrink-0">
-              {/* Space for cart button or other right-aligned items */}
             </div>
           </header>
 
@@ -126,29 +123,26 @@ function AppContent() {
     <div className="flex flex-col min-h-screen font-sans text-[var(--app-foreground)] mini-app-theme from-[var(--app-background)] to-[var(--app-gray)]">
       <div className="w-full max-w-md mx-auto px-4 py-3 main-content-with-bottom-nav">
         <header className="flex justify-between items-center mb-6">
-          <div className="flex flex-col space-y-2">
-            <div className="flex items-center space-x-2">
-              <Wallet className="z-10">
-                <ConnectWallet>
-                  <Name className="text-inherit" />
-                </ConnectWallet>
-                <WalletDropdown>
-                  <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-                    <Avatar />
-                    <Name />
-                    <Address />
-                    <EthBalance />
-                  </Identity>
-                  <WalletDropdownDisconnect />
-                </WalletDropdown>
-              </Wallet>
-            </div>
-            <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+          <div className="flex items-center space-x-2">
+            <Wallet className="z-10">
+              <ConnectWallet>
+                <Name className="text-inherit" />
+              </ConnectWallet>
+              <WalletDropdown>
+                <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+                  <Avatar />
+                  <Name />
+                  <Address />
+                  <EthBalance />
+                </Identity>
+                <WalletDropdownDisconnect />
+              </WalletDropdown>
+            </Wallet>
+          </div>
+          <div className="flex-shrink-0 mr-3">
+            <div className="text-sm text-blue-600 dark:text-blue-400 font-semibold">
               Shop → Share → Earn
             </div>
-          </div>
-          <div className="flex-shrink-0">
-            {/* Space for cart button or other right-aligned items */}
           </div>
         </header>
 
@@ -276,10 +270,12 @@ function AppContent() {
             >
               <div className="relative z-10 text-white">
                 <div className="flex items-center space-x-3 mb-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 p-0.5">
-                    <div className="w-full h-full bg-slate-900 rounded-lg flex items-center justify-center">
-                      <span className="text-cyan-300 font-bold text-lg">NE</span>
-                    </div>
+                  <div className="w-12 h-12 rounded-xl bg-white p-1">
+                    <img
+                      src="/stores/NFTEnergyDrinks/NFTEnergyDrinksLogo.png"
+                      alt="NFT Energy Drinks Logo"
+                      className="w-full h-full object-contain rounded-lg"
+                    />
                   </div>
                   <div>
                     <h3 className="font-bold text-cyan-100">NFT Energy Drinks</h3>

@@ -57,7 +57,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [selectedVariants, setSelectedVariants] = useState<Record<string, number>>({});
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'name' | 'newest'>('newest');
+  const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'newest'>('newest');
 
   // Suppress unused variable warning
   void setActiveTab;
@@ -252,8 +252,6 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
           return getPrice(a) - getPrice(b);
         case 'price-desc':
           return getPrice(b) - getPrice(a);
-        case 'name':
-          return a.title.localeCompare(b.title);
         case 'newest':
         default:
           // For newest, prioritize store products and maintain original order
@@ -641,23 +639,9 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     ];
 
     return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shop by Category</h2>
-          {onBackToShop && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onBackToShop}
-              icon={<Icon name="arrow-left" size="sm" />}
-            >
-              Back to Home
-            </Button>
-          )}
-        </div>
-
-        {/* Search and Filter Controls */}
-        <div className="space-y-3">
+      <div className="space-y-3">
+        {/* Condensed Search and Filter Controls */}
+        <div className="space-y-2">
           {/* Search Bar */}
           <div className="relative">
             <input
@@ -665,7 +649,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
               placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-3 pl-10 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 pl-9 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             />
             <Icon
               name="search"
@@ -674,38 +658,28 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
             />
           </div>
 
-          {/* Category Filter Dropdown */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Filter by Category:
-            </label>
+          {/* Inline Category and Sort Controls */}
+          <div className="grid grid-cols-2 gap-2">
             <select
               value={selectedCategory}
               onChange={(e) => handleCategorySelect(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
               {categories.map((category) => (
                 <option key={category.slug} value={category.slug}>
-                  {category.name} ({category.count} items)
+                  {category.name} ({category.count})
                 </option>
               ))}
             </select>
-          </div>
 
-          {/* Sort Dropdown */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Sort by:
-            </label>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'price-asc' | 'price-desc' | 'name' | 'newest')}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={(e) => setSortBy(e.target.value as 'price-asc' | 'price-desc' | 'newest')}
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             >
               <option value="newest">Newest First</option>
               <option value="price-asc">Price: Low to High</option>
               <option value="price-desc">Price: High to Low</option>
-              <option value="name">Name A-Z</option>
             </select>
           </div>
 
@@ -739,16 +713,13 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
 
         {/* Products Grid */}
         <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Products {selectedCategory !== 'all-products' && `in ${categories.find(c => c.slug === selectedCategory)?.name}`}
-            </h3>
-            {cart.length > 0 && (
+          {cart.length > 0 && (
+            <div className="text-right">
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 {getCartItemCount()} item{getCartItemCount() !== 1 ? 's' : ''} in cart
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 gap-4">
@@ -977,13 +948,12 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
           </label>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as 'price-asc' | 'price-desc' | 'name' | 'newest')}
+            onChange={(e) => setSortBy(e.target.value as 'price-asc' | 'price-desc' | 'newest')}
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="newest">Newest First</option>
             <option value="price-asc">Price: Low to High</option>
             <option value="price-desc">Price: High to Low</option>
-            <option value="name">Name A-Z</option>
           </select>
         </div>
         <div className="text-sm text-gray-600 dark:text-gray-400">
