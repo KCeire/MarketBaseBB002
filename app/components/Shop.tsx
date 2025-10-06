@@ -1,7 +1,7 @@
 // app/components/Shop.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { MarketplaceProduct } from '@/types/shopify';
 import { Button } from './ui/Button';
@@ -58,6 +58,8 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
   const [selectedVariants, setSelectedVariants] = useState<Record<string, number>>({});
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<'price-asc' | 'price-desc' | 'newest'>('newest');
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
 
   // Suppress unused variable warning
   void setActiveTab;
@@ -75,6 +77,20 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     applyFilters();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [products, selectedCategory, searchQuery, sortBy]);
+
+  // Close sort dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
+        setIsSortDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const fetchProducts = async () => {
     try {
@@ -640,47 +656,100 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
 
     return (
       <div className="space-y-3">
-        {/* Condensed Search and Filter Controls */}
-        <div className="space-y-2">
-          {/* Search Bar */}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-2 pl-9 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-            />
-            <Icon
-              name="search"
-              size="sm"
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-            />
-          </div>
+        {/* Enhanced Search Bar with Sort Button */}
+        <div className="space-y-2" ref={sortDropdownRef}>
+          {/* Search Bar with Sort Button */}
+          <div className="relative border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
+            <div className="flex items-center">
+              {/* Search Icon */}
+              <Icon
+                name="search"
+                size="sm"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10"
+              />
 
-          {/* Inline Category and Sort Controls */}
-          <div className="grid grid-cols-2 gap-2">
-            <select
-              value={selectedCategory}
-              onChange={(e) => handleCategorySelect(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-            >
-              {categories.map((category) => (
-                <option key={category.slug} value={category.slug}>
-                  {category.name} ({category.count})
-                </option>
-              ))}
-            </select>
+              {/* Search Input */}
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 px-3 py-2 pl-9 pr-16 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none text-sm"
+              />
 
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'price-asc' | 'price-desc' | 'newest')}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-            >
-              <option value="newest">Newest First</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-            </select>
+              {/* Sort Button */}
+              <button
+                onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                className="absolute right-2 px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors flex items-center space-x-1"
+              >
+                <span>Sort</span>
+                <Icon
+                  name={isSortDropdownOpen ? "chevron-up" : "chevron-down"}
+                  size="sm"
+                />
+              </button>
+            </div>
+
+            {/* Sort Dropdown Menu */}
+            {isSortDropdownOpen && (
+              <div className="absolute top-full right-0 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50">
+                <div className="p-2 space-y-1">
+                  {/* Sort Options */}
+                  <div className="px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    Sort By
+                  </div>
+                  {[
+                    { value: 'newest', label: 'Newest First' },
+                    { value: 'price-asc', label: 'Price: Low to High' },
+                    { value: 'price-desc', label: 'Price: High to Low' }
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        setSortBy(option.value as 'price-asc' | 'price-desc' | 'newest');
+                        setIsSortDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-2 py-2 text-sm rounded-md transition-colors ${
+                        sortBy === option.value
+                          ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+
+                  {/* Divider */}
+                  <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+
+                  {/* Category Filter */}
+                  <div className="px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    Category
+                  </div>
+                  {categories.map((category) => (
+                    <button
+                      key={category.slug}
+                      onClick={() => {
+                        handleCategorySelect(category.slug);
+                        setIsSortDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-2 py-2 text-sm rounded-md transition-colors ${
+                        selectedCategory === category.slug
+                          ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span>{category.name}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {category.count}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Active Filters Display */}
@@ -713,13 +782,6 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
 
         {/* Products Grid */}
         <div className="space-y-3">
-          {cart.length > 0 && (
-            <div className="text-right">
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                {getCartItemCount()} item{getCartItemCount() !== 1 ? 's' : ''} in cart
-              </div>
-            </div>
-          )}
 
           {filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 gap-4">
@@ -930,11 +992,6 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
 
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shop</h2>
-        {cart.length > 0 && (
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            {getCartItemCount()} item{getCartItemCount() !== 1 ? 's' : ''} in cart
-          </div>
-        )}
       </div>
 
       {/* Category Grid - Show on main shop view */}
