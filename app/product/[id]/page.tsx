@@ -559,15 +559,25 @@ export default function ProductDetailPage() {
             <Icon name="x" size="lg" className="text-white" />
           </button>
 
+          {/* Mobile Exit Text - Above Image */}
+          <div className="md:hidden absolute top-16 left-0 right-0 z-20 text-center">
+            <button
+              onClick={closeGallery}
+              className="bg-black bg-opacity-60 text-white px-4 py-2 text-sm font-medium rounded mx-auto"
+            >
+              Click Here to Exit Gallery
+            </button>
+          </div>
+
           {/* Current Image Display */}
-          <div className="w-full h-full flex items-center justify-center relative">
+          <div className="w-full h-full flex items-center justify-center relative pt-16 pb-20 md:pt-0 md:pb-0">
             <img
               src={getCurrentImage()}
               alt="Product image"
               className="max-w-full max-h-full object-contain"
               style={{
                 maxWidth: '100vw',
-                maxHeight: '100vh',
+                maxHeight: 'calc(100vh - 8rem)',
                 width: 'auto',
                 height: 'auto'
               }}
@@ -590,17 +600,6 @@ export default function ProductDetailPage() {
                 </button>
               </>
             )}
-          </div>
-
-          {/* Mobile Exit Banner */}
-          <div className="md:hidden absolute bottom-0 left-0 right-0 z-20">
-            <button
-              onClick={closeGallery}
-              className="w-full bg-black bg-opacity-80 text-white py-4 text-lg font-medium"
-              style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px) + 4rem)' }}
-            >
-              ✕ Click Here to Exit Gallery
-            </button>
           </div>
 
           {/* Image Counter */}
