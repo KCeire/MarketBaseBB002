@@ -426,7 +426,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
   };
 
 
-  const handleCheckoutSuccess = (orderReference: string) => {
+  const handleCheckoutSuccess = () => {
     // Clear cart on successful order (no toast - handled by BasePayCheckout)
     setCart([]);
     saveCartToStorage([]);

@@ -36,7 +36,7 @@ interface CustomerFormData {
 interface BasePayCheckoutProps {
   cart: CartItem[];
   total: string;
-  onSuccess?: (orderReference: string) => void;
+  onSuccess?: (orderReference?: string) => void;
   onError?: (error: string) => void;
 }
 
