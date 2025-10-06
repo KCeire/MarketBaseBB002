@@ -133,21 +133,21 @@ export default function ProductDetailPage() {
     setIsGalleryOpen(true);
   };
 
-  const closeGallery = () => {
+  const closeGallery = useCallback(() => {
     setIsGalleryOpen(false);
-  };
+  }, []);
 
-  const nextImage = () => {
+  const nextImage = useCallback(() => {
     if (product && product.images.length > 0) {
       setSelectedImageIndex((prev) => (prev + 1) % product.images.length);
     }
-  };
+  }, [product]);
 
-  const previousImage = () => {
+  const previousImage = useCallback(() => {
     if (product && product.images.length > 0) {
       setSelectedImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
     }
-  };
+  }, [product]);
 
   // Reset selected image when product changes
   useEffect(() => {

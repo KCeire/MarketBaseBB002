@@ -49,4 +49,7 @@ supabase/.branches/
 supabase/.git/
 .supabase/
 
+# private documentation
+PROJECT-DOCUMENTATION.md
+
 
