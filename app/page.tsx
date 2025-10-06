@@ -19,6 +19,7 @@ import {
 import { useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Shop } from "./components/Shop";
+import Image from "next/image";
 
 function AppContent() {
   const { setFrameReady, isFrameReady } = useMiniKit();
@@ -271,9 +272,11 @@ function AppContent() {
               <div className="relative z-10 text-white">
                 <div className="flex items-center space-x-3 mb-3">
                   <div className="w-12 h-12 rounded-xl bg-white p-1">
-                    <img
+                    <Image
                       src="/stores/NFTEnergyDrinks/NFTEnergyDrinksLogo.png"
                       alt="NFT Energy Drinks Logo"
+                      width={48}
+                      height={48}
                       className="w-full h-full object-contain rounded-lg"
                     />
                   </div>
@@ -307,7 +310,7 @@ function AppContent() {
               <div className="text-xs text-gray-600 dark:text-gray-400">Payments</div>
             </div>
             <div className="bg-white dark:bg-gray-800 rounded-xl p-3 text-center border border-gray-200 dark:border-gray-700">
-              <div className="text-lg font-bold text-purple-600 dark:text-purple-400">Base</div>
+              <div className="text-lg font-bold" style={{ color: '#0000FF' }}>Base</div>
               <div className="text-xs text-gray-600 dark:text-gray-400">Network</div>
             </div>
           </div>

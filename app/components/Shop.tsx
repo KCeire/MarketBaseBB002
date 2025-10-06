@@ -425,9 +425,6 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     }, 0).toFixed(2);
   };
 
-  const getCartItemCount = () => {
-    return cart.reduce((count, item) => count + item.quantity, 0);
-  };
 
   const handleCheckoutSuccess = (orderReference: string) => {
     toast.paymentSuccess(orderReference);

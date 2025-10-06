@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { Icon } from '@/app/components/ui/Icon';
+import Image from 'next/image';
 
 interface CommunityProject {
   id: string;
@@ -71,9 +72,11 @@ export function NFTEnergyCommunitySpotlight() {
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-800 via-purple-900 to-fuchsia-800 flex items-center justify-center p-8">
                   <div className="text-center space-y-6">
                     <div className="w-20 h-20 bg-white/10 rounded-2xl mx-auto flex items-center justify-center p-3">
-                      <img
+                      <Image
                         src="/stores/NFTEnergyDrinks/NFTEnergyDrinksLogo.png"
                         alt="NFT Energy Logo"
+                        width={64}
+                        height={64}
                         className="w-full h-full object-contain"
                       />
                     </div>
@@ -166,9 +169,11 @@ export function NFTEnergyCommunitySpotlight() {
                         {/* Product Image */}
                         <div className="flex justify-center lg:order-2">
                           <div className="w-48 h-60 md:w-64 md:h-80 rounded-lg overflow-hidden">
-                            <img
+                            <Image
                               src={project.image}
                               alt={`NFT Energy Can featuring ${project.name}`}
+                              width={256}
+                              height={320}
                               className="w-full h-full object-contain bg-gradient-to-br from-blue-400/20 to-purple-400/20"
                             />
                           </div>

@@ -2,6 +2,7 @@
 "use client";
 
 import { toast } from '../components/ui/Toast';
+import Image from 'next/image';
 
 export default function SellPage() {
   return (
@@ -114,9 +115,11 @@ export default function SellPage() {
               className="w-full flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
             >
               <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200 dark:border-gray-600">
-                <img
+                <Image
                   src="/stores/NFTEnergyDrinks/NFTEnergyDrinksLogo.png"
                   alt="NFT Energy Drinks Logo"
+                  width={32}
+                  height={32}
                   className="w-8 h-8 object-contain"
                 />
               </div>

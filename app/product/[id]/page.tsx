@@ -216,7 +216,7 @@ export default function ProductDetailPage() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isGalleryOpen]);
+  }, [isGalleryOpen, nextImage, previousImage, closeGallery]);
 
 
   if (loading) {

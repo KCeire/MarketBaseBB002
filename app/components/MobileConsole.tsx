@@ -75,7 +75,7 @@ export function MobileConsole() {
       console.warn = originalWarn;
       console.info = originalInfo;
     };
-  }, []);
+  }, [MOBILE_CONSOLE_ENABLED]);
 
   // Auto-scroll to bottom when new logs arrive
   useEffect(() => {
