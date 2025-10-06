@@ -615,15 +615,18 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Main Image Container - Takes remaining space */}
-            <div className="flex-1 relative flex items-center justify-center min-h-0">
-              <div className="relative w-full h-full flex items-center justify-center p-4">
+            <div className="flex-1 relative flex items-center justify-center min-h-0 p-4">
+              <div className="relative max-w-full max-h-full">
                 <Image
-                  src={product.images?.[selectedImageIndex] || product.image}
+                  key={`gallery-${product.id}-${selectedImageIndex}`}
+                  src={getCurrentImage()}
                   alt={`${product.title} - Image ${selectedImageIndex + 1}`}
-                  fill
-                  className="object-contain"
-                  sizes="100vw"
+                  width={1200}
+                  height={800}
+                  className="max-w-full max-h-full object-contain"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 80vw"
                   priority
+                  unoptimized={getCurrentImage().includes('placeholder')}
                 />
               </div>
 
