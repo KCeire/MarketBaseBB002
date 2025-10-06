@@ -31,26 +31,21 @@ async function getPaymentStatus({ id, testnet = false }: { id: string; testnet?:
 
     console.log('💳 Base Pay status response:', status);
 
-    // Extract the actual blockchain transaction hash from Base Pay response
-    // Base Pay should provide the actual transaction hash in the response
-    // Use unknown type first, then cast to access potentially undefined properties
-    const statusObj = status as unknown as Record<string, unknown>;
-    const actualTransactionHash =
-      (statusObj?.transactionHash as string) ||
-      (statusObj?.txHash as string) ||
-      (statusObj?.hash as string) ||
-      ((statusObj?.transaction as Record<string, unknown>)?.hash as string);
-
-    console.log('🔍 Extracted transaction hash details:', {
+    // Based on Base Pay docs, getPaymentStatus only returns { status }
+    // The payment id itself might be the transaction hash, or we need to handle differently
+    // For now, we'll use the id as the transaction hash and log everything for debugging
+    console.log('🔍 Payment verification details:', {
       providedId: id,
-      actualTransactionHash,
-      fullStatus: status
+      statusResponse: status,
+      statusType: typeof status,
+      statusKeys: Object.keys(status || {}),
+      timestamp: new Date().toISOString()
     });
 
     // Map Base Pay response to our expected format
     return {
       status: status.status, // 'completed', 'pending', 'failed', etc.
-      transactionHash: actualTransactionHash || id, // Use actual blockchain hash if available
+      transactionHash: id, // Use the payment ID as transaction hash for now
       completedAt: status.status === 'completed' ? new Date().toISOString() : undefined
     };
   } catch (error) {
