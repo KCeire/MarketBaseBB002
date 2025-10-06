@@ -61,11 +61,40 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const supabase = supabaseAdmin;
 
     // Get affiliate stats for this FID
+    console.log(`🔍 AFFILIATE EARNINGS DEBUG: Fetching earnings for FID: ${fid}`);
+
     const { data: earnings, error } = await supabase
       .from('affiliate_earnings')
       .select('*')
       .eq('referrer_fid', fid)
       .single();
+
+    console.log(`📊 AFFILIATE EARNINGS DEBUG: Raw earnings data:`, {
+      fid,
+      earnings,
+      error: error?.message,
+      errorCode: error?.code
+    });
+
+    // Also fetch raw affiliate_clicks data for comparison
+    const { data: rawClicks, error: clicksError } = await supabase
+      .from('affiliate_clicks')
+      .select('*')
+      .eq('referrer_fid', fid);
+
+    console.log(`🔗 AFFILIATE EARNINGS DEBUG: Raw clicks data for FID ${fid}:`, {
+      totalClicks: rawClicks?.length || 0,
+      convertedClicks: rawClicks?.filter(click => click.converted).length || 0,
+      clicksWithCommission: rawClicks?.filter(click => click.commission_amount > 0).length || 0,
+      totalCommissionFromClicks: rawClicks?.reduce((sum, click) => sum + (parseFloat(click.commission_amount || 0)), 0) || 0,
+      clicksData: rawClicks?.map(click => ({
+        click_id: click.click_id,
+        converted: click.converted,
+        commission_amount: click.commission_amount,
+        commission_earned_at: click.commission_earned_at
+      })) || [],
+      clicksError: clicksError?.message
+    });
 
     if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows found"
       console.error('Error fetching affiliate earnings:', error);
@@ -75,16 +104,39 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }, { status: 500 });
     }
 
+    // Test the debug function if available
+    let debugInfo = null;
+    try {
+      const { data: debugData, error: debugError } = await supabase
+        .rpc('debug_affiliate_earnings', { p_referrer_fid: fid });
+
+      if (!debugError && debugData && debugData.length > 0) {
+        debugInfo = debugData[0].debug_info;
+        console.log(`🐛 AFFILIATE EARNINGS DEBUG: Debug function result:`, debugInfo);
+      }
+    } catch (debugError) {
+      console.log(`⚠️ AFFILIATE EARNINGS DEBUG: Debug function not available (likely migration not run yet):`, debugError);
+    }
+
+    const finalStats = earnings || {
+      referrer_fid: fid,
+      total_clicks: 0,
+      conversions: 0,
+      total_earned: 0,
+      avg_commission: 0,
+      last_earning_date: null
+    };
+
+    console.log(`📈 AFFILIATE EARNINGS DEBUG: Final stats being returned:`, {
+      originalEarnings: earnings,
+      finalStats,
+      debugInfo
+    });
+
     return NextResponse.json({
       success: true,
-      affiliateStats: earnings || {
-        referrer_fid: fid,
-        total_clicks: 0,
-        conversions: 0,
-        total_earned: 0,
-        avg_commission: 0,
-        last_earning_date: null
-      }
+      affiliateStats: finalStats,
+      debug: debugInfo  // Include debug info in response for testing
     });
 
   } catch (error) {

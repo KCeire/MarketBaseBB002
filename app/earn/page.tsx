@@ -27,6 +27,7 @@ export default function EarnPage() {
   const [affiliateStats, setAffiliateStats] = useState<AffiliateStats | null>(null);
   const [recentActivity, setRecentActivity] = useState<AffiliateClick[]>([]);
   const [loading, setLoading] = useState(true);
+  const [debugInfo, setDebugInfo] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -56,6 +57,14 @@ export default function EarnPage() {
       if (statsResponse.ok) {
         const statsData = await statsResponse.json();
         setAffiliateStats(statsData.affiliateStats);
+
+        // Store debug information for troubleshooting
+        setDebugInfo(statsData.debug);
+        console.log('🔍 EARN PAGE DEBUG: Affiliate stats received:', {
+          affiliateStats: statsData.affiliateStats,
+          debug: statsData.debug,
+          fullResponse: statsData
+        });
       }
 
       // Fetch recent activity (we'll need to create this endpoint)
@@ -190,6 +199,30 @@ export default function EarnPage() {
             </div>
           </div>
         </div>
+
+        {/* Debug Section - Temporary for troubleshooting */}
+        {debugInfo && process.env.NODE_ENV === 'development' && (
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4">
+            <div className="text-center mb-3">
+              <h3 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">Debug Info</h3>
+            </div>
+            <div className="text-xs text-yellow-700 dark:text-yellow-300 space-y-2 max-h-40 overflow-auto">
+              <div>FID: {userFid}</div>
+              <div>Total Clicks: {(debugInfo.total_clicks as number) || 0}</div>
+              <div>Converted: {(debugInfo.converted_clicks as number) || 0}</div>
+              <div>Commission Sum: ${(debugInfo.total_commission_sum as number) || 0}</div>
+              <div>Total Earned: ${(debugInfo.total_earned_calculation as number) || 0}</div>
+              {!!debugInfo.clicks_detail && (
+                <details className="mt-2">
+                  <summary className="cursor-pointer font-medium">Click Details</summary>
+                  <div className="mt-1 pl-4 text-xs">
+                    <pre>{JSON.stringify(debugInfo.clicks_detail, null, 2)}</pre>
+                  </div>
+                </details>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Call to Action */}
         <div className="text-center space-y-3">
