@@ -599,7 +599,7 @@ export default function ProductDetailPage() {
               className="w-full bg-black bg-opacity-80 text-white py-4 text-lg font-medium"
               style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px) + 4rem)' }}
             >
-              ✕ Tap to Exit Gallery
+              ✕ Click Here to Exit Gallery
             </button>
           </div>
 
