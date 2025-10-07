@@ -266,15 +266,6 @@ export default function ProductDetailPage() {
           </Button>
         </div>
 
-        {/* Demo Warning Banner */}
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 rounded">
-          <p className="text-yellow-800 text-sm font-semibold text-center">
-            ⚠️ DEMO VERSION - DO NOT PURCHASE ⚠️
-          </p>
-          <p className="text-yellow-700 text-xs text-center mt-1">
-            This is a development version for testing only
-          </p>
-        </div>
 
         {/* Product Card */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">

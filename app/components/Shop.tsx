@@ -778,15 +778,6 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
                   className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3 cursor-pointer hover:shadow-md dark:hover:shadow-lg hover:shadow-gray-200 dark:hover:shadow-black/20 transition-all duration-200 bg-white dark:bg-gray-800"
                   onClick={() => navigateToProduct(product.id, product)}
                 >
-                  {/* Demo Warning Banner */}
-                  <div className="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 dark:border-yellow-400 p-3 rounded">
-                    <p className="text-yellow-800 dark:text-yellow-200 text-sm font-semibold text-center">
-                      ⚠️ DEMO VERSION - DO NOT PURCHASE ⚠️
-                    </p>
-                    <p className="text-yellow-700 dark:text-yellow-300 text-xs text-center mt-1">
-                      This is a development version for testing only
-                    </p>
-                  </div>
 
                   <Image
                     src={product.image}
@@ -1012,15 +1003,6 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
             className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3 cursor-pointer hover:shadow-md dark:hover:shadow-lg hover:shadow-gray-200 dark:hover:shadow-black/20 transition-all duration-200 bg-white dark:bg-gray-800"
             onClick={() => navigateToProduct(product.id, product)}
           >
-            {/* Demo Warning Banner */}
-            <div className="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 dark:border-yellow-400 p-3 rounded">
-              <p className="text-yellow-800 dark:text-yellow-200 text-sm font-semibold text-center">
-                ⚠️ DEMO VERSION - DO NOT PURCHASE ⚠️
-              </p>
-              <p className="text-yellow-700 dark:text-yellow-300 text-xs text-center mt-1">
-                This is a development version for testing only
-              </p>
-            </div>
             
             <Image 
               src={product.image} 
