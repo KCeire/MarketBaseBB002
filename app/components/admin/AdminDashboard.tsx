@@ -214,7 +214,7 @@ export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
 
     setExporting(true);
     try {
-      const response = await fetch('/api/admin/export/cj', {
+      const response = await fetch('/api/admin/export/ordersync', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
