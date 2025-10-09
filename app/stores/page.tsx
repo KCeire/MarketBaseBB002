@@ -194,12 +194,12 @@ export default function StoresPage() {
     <div className="w-full max-w-6xl mx-auto px-4 py-6 main-content-with-bottom-nav">
       <div className="space-y-8">
         {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+        <div className="text-center space-y-3 md:space-y-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
             Thriving Marketplace
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Join a vibrant community of successful sellers. Each store processes secure USDC payments 
+          <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto px-2">
+            Join a vibrant community of successful sellers. Each store processes secure USDC payments
             on Base with instant settlement and global reach.
           </p>
         </div>
@@ -217,7 +217,7 @@ export default function StoresPage() {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
               {liveStores.map((store) => (
                 <div
                   key={store.id}
@@ -349,10 +349,10 @@ export default function StoresPage() {
                   </div>
 
                   {/* Store Info */}
-                  <div className="p-6 space-y-4">
+                  <div className="p-3 md:p-6 space-y-2 md:space-y-4">
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                        <h3 className="text-sm md:text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
                           {store.name}
                         </h3>
                         <Icon 
@@ -361,26 +361,29 @@ export default function StoresPage() {
                           className="text-gray-400 group-hover:text-blue-600 transition-colors" 
                         />
                       </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                      <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mb-1 md:mb-2">
                         {store.category}
                       </p>
-                      <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                      <p className="text-gray-600 dark:text-gray-300 text-xs md:text-sm leading-relaxed line-clamp-2 md:line-clamp-none">
                         {store.description}
                       </p>
                     </div>
 
                     {store.stats && (
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center space-x-4">
+                      <div className="flex items-center justify-between text-xs md:text-sm">
+                        <div className="flex items-center space-x-2 md:space-x-4">
                           <div className="flex items-center space-x-1 text-gray-500">
                             <Icon name="package" size="sm" />
-                            <span>
+                            <span className="hidden sm:inline">
                               {loading ? '...' : (actualProductCounts[store.id] || 0)} products
+                            </span>
+                            <span className="sm:hidden">
+                              {loading ? '...' : (actualProductCounts[store.id] || 0)}
                             </span>
                           </div>
                         </div>
                         <div className="text-xs text-green-600 font-medium">
-                          📈 Growing
+                          📈
                         </div>
                       </div>
                     )}
@@ -389,10 +392,11 @@ export default function StoresPage() {
                       <Button
                         variant="primary"
                         size="sm"
-                        className="w-full"
+                        className="w-full text-xs md:text-sm py-2 md:py-3"
                         icon={<Icon name="shopping-cart" size="sm" />}
                       >
-                        Visit Store
+                        <span className="hidden sm:inline">Visit Store</span>
+                        <span className="sm:hidden">Visit</span>
                       </Button>
                     </div>
                   </div>
