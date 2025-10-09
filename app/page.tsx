@@ -205,7 +205,7 @@ function AppContent() {
               <div className="absolute inset-0 bg-black/20"></div>
               <div className="relative z-10 h-full flex flex-col justify-end text-left">
                 <div>
-                  <h3 className="text-lg font-bold mb-1">Trade</h3>
+                  <h3 className="text-lg font-bold mb-1">Shop</h3>
                   <p className="text-white/90 text-xs">Browse products</p>
                 </div>
               </div>

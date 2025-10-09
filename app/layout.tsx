@@ -58,7 +58,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: "MarketBase - Web3 Commerce Platform",
-    description: "Trade the latest products on Base blockchain. Multiple marketplaces, secure payments, and Web3 integration.",
+    description: "Shop the latest products on Base blockchain. Multiple marketplaces, secure payments, and Web3 integration.",
     icons: {
       icon: '/icon.png',
       shortcut: '/icon.png',
@@ -70,7 +70,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     openGraph: {
       title: "MarketBase - Web3 Commerce Platform",
-      description: "Trade the latest products on Base blockchain. Multiple marketplaces, secure payments, and Web3 integration.",
+      description: "Shop the latest products on Base blockchain. Multiple marketplaces, secure payments, and Web3 integration.",
       images: process.env.NEXT_PUBLIC_APP_HERO_IMAGE ? [process.env.NEXT_PUBLIC_APP_HERO_IMAGE] : [`${URL}/hero-image.png`],
     },
     other: {

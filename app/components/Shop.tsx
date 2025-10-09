@@ -441,7 +441,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Trade</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shop</h2>
         </div>
         <div className="flex justify-center py-8">
           <div className="text-gray-500 dark:text-gray-400">Loading products...</div>
@@ -454,7 +454,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Trade</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shop</h2>
         </div>
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-800">Error: {error}</p>
@@ -483,7 +483,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
               onClick={onBackToShop}
               icon={<Icon name="arrow-left" size="sm" />}
             >
-              Back to Trade
+              Back to Shop
             </Button>
           )}
         </div>
@@ -969,7 +969,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
       )}
 
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Trade</h2>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shop</h2>
       </div>
 
       {/* Category Grid - Show on main trade view */}
