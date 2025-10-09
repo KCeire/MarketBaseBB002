@@ -90,7 +90,7 @@ export async function GET(
     image: '/stores/NFTEnergyDrinks/NFTEnergyDrink12Pack.jpeg'
   };
 
-  const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://store.lkforge.xyz';
+  const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://marketbase.lkforge.xyz';
   const miniappUrl = `${baseUrl}/nft-energy/product/${sku}${referrerId ? `?ref=${referrerId}` : ''}`;
 
   // Ensure absolute URL

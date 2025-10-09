@@ -24,7 +24,7 @@ export async function GET(
     fullUrl: request.url
   });
 
-  const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://store.lkforge.xyz';
+  const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://marketbase.lkforge.xyz';
 
   // Fetch product data from ProductHub API with timeout
   let product: Product | null = null;

@@ -22,7 +22,7 @@ export const viewport: Viewport = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const URL = process.env.NEXT_PUBLIC_URL || "https://store.lkforge.xyz";
+  const URL = process.env.NEXT_PUBLIC_URL || "https://marketbase.lkforge.xyz";
 
   // Frame configuration optimized for both platforms
   const frameConfig = {

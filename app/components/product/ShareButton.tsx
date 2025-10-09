@@ -36,7 +36,8 @@ export function ShareButton({
   const { composeCast } = useComposeCast();
 
   const generateFrameUrl = (product: Product, userFid?: string): string => {
-    const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://store.lkforge.xyz';
+    const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://marketbase.lkforge.xyz';
+    console.log('BASE_URL for frame generation:', baseUrl);
 
     // Create frame URL path - use SKU if available, otherwise use product ID
     let frameUrl: string;
@@ -50,6 +51,7 @@ export function ShareButton({
     const refValue = userFid || 'none';
     frameUrl += `?ref=${refValue}`;
 
+    console.log('Generated frame URL:', frameUrl);
     return frameUrl;
   };
 
@@ -96,6 +98,12 @@ export function ShareButton({
       // Improved cast text
       const castText = `${product.title}\n$${product.price}\n\nGet yours on MarketBase!`;
       console.log('Cast text:', castText);
+
+      // Debug the composeCast call
+      console.log('About to call composeCast with:', {
+        text: castText,
+        embeds: [frameUrl]
+      });
 
       await composeCast({
         text: castText,
