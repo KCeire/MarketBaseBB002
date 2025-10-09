@@ -94,7 +94,7 @@ export function ShareButton({
       }
 
       // Improved cast text
-      const castText = `${product.title}\n$${product.price}\n\nGet yours on Base Shop!`;
+      const castText = `${product.title}\n$${product.price}\n\nGet yours on MarketBase!`;
       console.log('Cast text:', castText);
 
       await composeCast({
@@ -161,7 +161,7 @@ export function ShareButton({
       
       // Use frame URL for fallback too
       const frameUrl = generateFrameUrl(product, userFid);
-      const castText = `${product.title}\n$${product.price}\n\nGet yours on Base Shop!`;
+      const castText = `${product.title}\n$${product.price}\n\nGet yours on MarketBase!`;
       const composeUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(castText)}&embeds[]=${encodeURIComponent(frameUrl)}`;
 
       return composeUrl;
