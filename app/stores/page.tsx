@@ -193,29 +193,10 @@ export default function StoresPage() {
   return (
     <div className="w-full max-w-6xl mx-auto px-4 py-6 main-content-with-bottom-nav">
       <div className="space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-3 md:space-y-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Thriving Marketplace
-          </h1>
-          <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto px-2">
-            Join a vibrant community of successful sellers. Each store processes secure USDC payments
-            on Base with instant settlement and global reach.
-          </p>
-        </div>
 
         {/* Featured Stores - Live */}
         {liveStores.length > 0 && (
           <section>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                Featured Stores
-              </h2>
-              <div className="flex items-center space-x-2 text-sm text-green-600">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span>All systems operational</span>
-              </div>
-            </div>
             
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
               {liveStores.map((store) => (
@@ -323,51 +304,15 @@ export default function StoresPage() {
                       </div>
                     )}
                     
-                    {/* Status Badge */}
-                    <div className="absolute top-3 right-3">
-                      <div className="bg-orange-500 text-white text-xs font-medium px-2 py-1 rounded-full flex items-center space-x-1">
-                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
-                        <span>BETA</span>
-                      </div>
-                    </div>
                     
-                    {store.featured && (
-                      <div className="absolute top-3 left-3">
-                        <div className="bg-yellow-500 text-white text-xs font-medium px-2 py-1 rounded-full">
-                          ⭐ Featured
-                        </div>
-                      </div>
-                    )}
 
-                    {/* Success indicators */}
-                    <div className="absolute bottom-3 left-3 flex items-center space-x-2">
-                      <div className="bg-green-500/90 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full flex items-center space-x-1">
-                        <span>🚀</span>
-                        <span>Early Access</span>
-                      </div>
-                    </div>
                   </div>
 
                   {/* Store Info */}
-                  <div className="p-3 md:p-6 space-y-2 md:space-y-4">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-sm md:text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
-                          {store.name}
-                        </h3>
-                        <Icon 
-                          name="arrow-right" 
-                          size="sm" 
-                          className="text-gray-400 group-hover:text-blue-600 transition-colors" 
-                        />
-                      </div>
-                      <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mb-1 md:mb-2">
-                        {store.category}
-                      </p>
-                      <p className="text-gray-600 dark:text-gray-300 text-xs md:text-sm leading-relaxed line-clamp-2 md:line-clamp-none">
-                        {store.description}
-                      </p>
-                    </div>
+                  <div className="p-2 md:p-6 space-y-2 md:space-y-4">
+                    <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
+                      {store.category}
+                    </p>
 
                     {store.stats && (
                       <div className="flex items-center justify-between text-xs md:text-sm">
