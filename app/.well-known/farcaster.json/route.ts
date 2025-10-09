@@ -20,7 +20,7 @@ export async function GET() {
     : ["0xE40b9f2A321715DF69EF67AD30BA7453A289BCeB"];
 
   return Response.json({
-    noindex: true,
+    
     accountAssociation: {
       header: process.env.FARCASTER_HEADER,
       payload: process.env.FARCASTER_PAYLOAD,
