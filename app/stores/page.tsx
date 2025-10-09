@@ -347,7 +347,7 @@ export default function StoresPage() {
 
                   {/* Store Info */}
                   <div className="p-2 md:p-6 space-y-2 md:space-y-4 mt-2">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-1 md:space-y-0">
                       <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
                         {store.category}
                       </p>
@@ -355,13 +355,13 @@ export default function StoresPage() {
                       {/* Shipping Info - show for all stores except NFT Energy */}
                       {store.id !== 'nft-energy' && (
                         <div className="flex items-center space-x-1 text-xs text-green-600 dark:text-green-400">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <rect x="1" y="3" width="15" height="13"></rect>
                             <polygon points="16,6 23,6 23,16 16,16"></polygon>
                             <circle cx="5.5" cy="18.5" r="2.5"></circle>
                             <circle cx="18.5" cy="18.5" r="2.5"></circle>
                           </svg>
-                          <span>Shipping Included</span>
+                          <span className="text-xs">Shipping Included</span>
                         </div>
                       )}
                     </div>
