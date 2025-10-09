@@ -253,7 +253,7 @@ export default function StoresPage() {
                   }`}></div>
 
                   {/* Store Image/Preview */}
-                  <div className="aspect-video relative overflow-hidden z-10">
+                  <div className="aspect-[4/3] md:aspect-video relative overflow-hidden z-10">
                     {store.id === 'nft-energy' ? (
                       <div className="relative z-10 flex items-center justify-center h-full pt-8">
                         <div className="text-center space-y-4">
@@ -346,7 +346,7 @@ export default function StoresPage() {
                   </div>
 
                   {/* Store Info */}
-                  <div className="p-2 md:p-6 space-y-2 md:space-y-4 mt-2">
+                  <div className="p-3 md:p-6 space-y-2 md:space-y-4 mt-2">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-1 md:space-y-0">
                       <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
                         {store.category}
