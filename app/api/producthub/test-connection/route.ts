@@ -1,45 +1,45 @@
-// app/api/shopify/test-shopify/route.ts
+// app/api/producthub/test-connection/route.ts
 import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    // Test basic connection to Shopify
-    const SHOPIFY_DOMAIN = process.env.SHOPIFY_DOMAIN;
-    const SHOPIFY_ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN;
-    const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION || '2025-07';
+    // Test basic connection to ProductHub
+    const PRODUCTHUB_DOMAIN = process.env.PRODUCTHUB_DOMAIN;
+    const PRODUCTHUB_ACCESS_TOKEN = process.env.PRODUCTHUB_ACCESS_TOKEN;
+    const PRODUCTHUB_API_VERSION = process.env.PRODUCTHUB_API_VERSION || '2025-07';
 
-    if (!SHOPIFY_DOMAIN || !SHOPIFY_ACCESS_TOKEN) {
-      return NextResponse.json({ 
-        error: 'Missing Shopify environment variables',
+    if (!PRODUCTHUB_DOMAIN || !PRODUCTHUB_ACCESS_TOKEN) {
+      return NextResponse.json({
+        error: 'Missing ProductHub environment variables',
         connected: false,
         environment: {
-          domain: SHOPIFY_DOMAIN,
-          hasToken: !!SHOPIFY_ACCESS_TOKEN,
-          apiVersion: SHOPIFY_API_VERSION
+          domain: PRODUCTHUB_DOMAIN,
+          hasToken: !!PRODUCTHUB_ACCESS_TOKEN,
+          apiVersion: PRODUCTHUB_API_VERSION
         }
       }, { status: 500 });
     }
 
-    const url = `https://${SHOPIFY_DOMAIN}/admin/api/${SHOPIFY_API_VERSION}/shop.json`;
+    const url = `https://${PRODUCTHUB_DOMAIN}/admin/api/${PRODUCTHUB_API_VERSION}/shop.json`;
     
-    console.log('Testing Shopify connection to:', url);
+    console.log('Testing ProductHub connection to:', url);
     
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'X-Shopify-Access-Token': SHOPIFY_ACCESS_TOKEN,
+        'X-ProductHub-Access-Token': PRODUCTHUB_ACCESS_TOKEN,
         'Content-Type': 'application/json',
       },
     });
 
     if (!response.ok) {
       return NextResponse.json({ 
-        error: `Shopify API error: ${response.status} ${response.statusText}`,
+        error: `ProductHub API error: ${response.status} ${response.statusText}`,
         connected: false,
         environment: {
-          domain: SHOPIFY_DOMAIN,
-          hasToken: !!SHOPIFY_ACCESS_TOKEN,
-          apiVersion: SHOPIFY_API_VERSION
+          domain: PRODUCTHUB_DOMAIN,
+          hasToken: !!PRODUCTHUB_ACCESS_TOKEN,
+          apiVersion: PRODUCTHUB_API_VERSION
         }
       }, { status: 500 });
     }
@@ -47,11 +47,11 @@ export async function GET() {
     const shopData = await response.json();
     
     // Now test products endpoint
-    const productsUrl = `https://${SHOPIFY_DOMAIN}/admin/api/${SHOPIFY_API_VERSION}/products.json?limit=5`;
+    const productsUrl = `https://${PRODUCTHUB_DOMAIN}/admin/api/${PRODUCTHUB_API_VERSION}/products.json?limit=5`;
     const productsResponse = await fetch(productsUrl, {
       method: 'GET',
       headers: {
-        'X-Shopify-Access-Token': SHOPIFY_ACCESS_TOKEN,
+        'X-ProductHub-Access-Token': PRODUCTHUB_ACCESS_TOKEN,
         'Content-Type': 'application/json',
       },
     });
@@ -72,26 +72,26 @@ export async function GET() {
       connected: true,
       shopConnected: true,
       productsConnected: true,
-      message: 'Shopify API connection successful',
+      message: 'ProductHub API connection successful',
       shop: shopData.shop?.name || 'Unknown',
       productCount: productsData.products?.length || 0,
       sampleProduct: productsData.products?.[0] || null,
       environment: {
-        domain: SHOPIFY_DOMAIN,
-        hasToken: !!SHOPIFY_ACCESS_TOKEN,
-        apiVersion: SHOPIFY_API_VERSION
+        domain: PRODUCTHUB_DOMAIN,
+        hasToken: !!PRODUCTHUB_ACCESS_TOKEN,
+        apiVersion: PRODUCTHUB_API_VERSION
       }
     });
   } catch (error) {
-    console.error('Shopify API test error:', error);
+    console.error('ProductHub API test error:', error);
     
     return NextResponse.json({
       connected: false,
       error: error instanceof Error ? error.message : 'Unknown error',
       environment: {
-        domain: process.env.SHOPIFY_DOMAIN,
-        hasToken: !!process.env.SHOPIFY_ACCESS_TOKEN,
-        apiVersion: process.env.SHOPIFY_API_VERSION || '2025-07'
+        domain: process.env.PRODUCTHUB_DOMAIN,
+        hasToken: !!process.env.PRODUCTHUB_ACCESS_TOKEN,
+        apiVersion: process.env.PRODUCTHUB_API_VERSION || '2025-07'
       }
     }, { status: 500 });
   }

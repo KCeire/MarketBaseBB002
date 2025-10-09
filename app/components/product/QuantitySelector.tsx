@@ -6,7 +6,7 @@ import { Icon } from '../ui/Icon';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/Button';
 import { toast } from '../ui/Toast';
-import { MarketplaceProduct } from '@/types/shopify';
+import { MarketplaceProduct } from '@/types/producthub';
 
 interface CartItem {
   productId: number;

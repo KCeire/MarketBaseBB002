@@ -36,7 +36,7 @@ export interface OrderItem {
   sku: string; // ADDED SKU FIELD - This was missing!
 }
 
-export interface CJExportData {
+export interface OrderSyncExportData {
   'Order Number': string;
   'SKU': string;
   'Quantity': number;
@@ -117,15 +117,15 @@ export function decryptOrderForAdmin(encryptedOrder: {
   }
 }
 
-    export function convertOrdersToCJFormat(orders: DecryptedOrder[]): CJExportData[] {
-        const cjData: CJExportData[] = [];
+    export function convertToOrderSyncFormat(orders: DecryptedOrder[]): OrderSyncExportData[] {
+        const orderSyncData: OrderSyncExportData[] = [];
 
         orders.forEach(order => {
         console.log('Processing order:', order.order_reference);
         order.order_items.forEach(item => {
         console.log('Item SKU:', item.sku, 'Product:', item.title);
         
-      cjData.push({
+      orderSyncData.push({
         'Order Number': order.order_reference,
         'SKU': item.sku, // ✅ FIXED - Use real SKU from order item instead of generating fake one
         'Quantity': item.quantity,
@@ -148,7 +148,7 @@ export function decryptOrderForAdmin(encryptedOrder: {
     });
   });
 
-  return cjData;
+  return orderSyncData;
 }
 
 export function filterOrders(orders: DecryptedOrder[], filters: OrderFilters): DecryptedOrder[] {

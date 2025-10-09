@@ -29,10 +29,10 @@ export async function generateMetadata(): Promise<Metadata> {
     version: "1",
     imageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE || `${URL}/hero-image.png`,
     button: {
-      title: "Shop Base Shop 🛍️",
+      title: "Shop MarketBase 🛍️",
       action: {
         type: "launch_miniapp",
-        name: "Base Shop",
+        name: "MarketBase",
         url: URL,
         splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE || `${URL}/splash.png`,
         splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR || "#000000",
@@ -45,10 +45,10 @@ export async function generateMetadata(): Promise<Metadata> {
     version: "next",
     imageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE || `${URL}/hero-image.png`,
     button: {
-      title: "Shop Base Shop 🛍️",
+      title: "Shop MarketBase 🛍️",
       action: {
         type: "launch_miniapp",
-        name: "Base Shop",
+        name: "MarketBase",
         url: URL,
         splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE || `${URL}/splash.png`,
         splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR || "#000000",
@@ -57,16 +57,16 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 
   return {
-    title: "Base Shop - Web3 Commerce Platform",
-    description: "Shop the latest products on Base blockchain. Multiple stores, secure payments, and Web3 integration.",
+    title: "MarketBase - Web3 Commerce Platform",
+    description: "Trade the latest products on Base blockchain. Multiple marketplaces, secure payments, and Web3 integration.",
     icons: {
       icon: '/favicon.ico',
       shortcut: '/favicon.ico',
       apple: '/favicon.ico',
     },
     openGraph: {
-      title: "Base Shop - Web3 Commerce Platform",
-      description: "Shop the latest products on Base blockchain. Multiple stores, secure payments, and Web3 integration.",
+      title: "MarketBase - Web3 Commerce Platform",
+      description: "Trade the latest products on Base blockchain. Multiple marketplaces, secure payments, and Web3 integration.",
       images: process.env.NEXT_PUBLIC_APP_HERO_IMAGE ? [process.env.NEXT_PUBLIC_APP_HERO_IMAGE] : [`${URL}/hero-image.png`],
     },
     other: {

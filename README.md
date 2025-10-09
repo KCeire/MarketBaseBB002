@@ -1,11 +1,26 @@
-# MiniKit Template
+# MarketBase
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-onchain --mini`](), configured with:
+A Web3 marketplace platform built on Base blockchain, enabling decentralized trading with secure payments and social commerce features.
 
-- [MiniKit](https://docs.base.org/builderkits/minikit/overview)
-- [OnchainKit](https://www.base.org/builders/onchainkit)
-- [Tailwind CSS](https://tailwindcss.com)
-- [Next.js](https://nextjs.org/docs)
+## Features
+
+- 🔗 **Base Blockchain Integration** - Built on Base for fast, low-cost transactions
+- 💳 **Secure Payments** - USDC payments with Base Pay integration
+- 🌐 **Multi-Marketplace Support** - Multiple specialized trading hubs
+- 🔗 **Social Commerce** - Farcaster integration for social sharing and affiliate marketing
+- 📱 **Mobile-First Design** - Optimized for mobile trading experience
+- 🎯 **Affiliate System** - Automatic commission tracking and payouts
+- 🛡️ **Admin Dashboard** - Order management and analytics
+- 📊 **Real-time Analytics** - Order tracking and fulfillment management
+
+## Tech Stack
+
+- **Frontend**: Next.js 15.5.3, TypeScript, Tailwind CSS
+- **Blockchain**: Base (Ethereum L2), OnchainKit, Wagmi
+- **Database**: Supabase with Row Level Security
+- **Payments**: Base Pay, USDC
+- **Social**: Farcaster miniapp integration
+- **Deployment**: Vercel
 
 ## Getting Started
 

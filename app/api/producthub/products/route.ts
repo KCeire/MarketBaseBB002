@@ -1,6 +1,6 @@
-// app/api/shopify/products/route.ts
+// app/api/producthub/products/route.ts
 import { NextResponse } from 'next/server';
-import { getAllProducts } from '@/lib/shopify/api';
+import { getAllProducts } from '@/lib/producthub/api';
 
 export async function GET() {
   try {

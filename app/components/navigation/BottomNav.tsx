@@ -89,22 +89,59 @@ export function BottomNav() {
     return pathname.startsWith(path);
   };
 
+  const handleBack = () => {
+    window.history.back();
+  };
+
+  const handleForward = () => {
+    window.history.forward();
+  };
+
   return (
     <>
       <nav className={cn(
         "fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-50 safe-area-inset-bottom transition-all duration-300 ease-in-out",
         isMinimized ? "transform translate-y-12" : "transform translate-y-0"
       )}>
+        {/* Navigation Controls */}
+        <div className="absolute -top-6 left-6 flex items-center gap-1">
+          {/* Back Button */}
+          <button
+            onClick={handleBack}
+            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-t-lg px-2 py-1 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            aria-label="Go back"
+          >
+            <Icon
+              name="chevron-left"
+              size="sm"
+              className="text-gray-600 dark:text-gray-400"
+            />
+          </button>
+
+          {/* Forward Button */}
+          <button
+            onClick={handleForward}
+            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-t-lg px-2 py-1 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            aria-label="Go forward"
+          >
+            <Icon
+              name="chevron-right"
+              size="sm"
+              className="text-gray-600 dark:text-gray-400"
+            />
+          </button>
+        </div>
+
         {/* Minimize/Expand Button */}
         <button
           onClick={() => setIsMinimized(!isMinimized)}
           className="absolute -top-6 right-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-t-lg px-3 py-1 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           aria-label={isMinimized ? "Expand navigation" : "Minimize navigation"}
         >
-          <Icon 
-            name={isMinimized ? "chevron-up" : "chevron-down"} 
-            size="sm" 
-            className="text-gray-600 dark:text-gray-400" 
+          <Icon
+            name={isMinimized ? "chevron-up" : "chevron-down"}
+            size="sm"
+            className="text-gray-600 dark:text-gray-400"
           />
         </button>
 

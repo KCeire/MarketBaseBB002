@@ -6,7 +6,7 @@ import { useAccount } from 'wagmi';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { toast } from '../ui/Toast';
-import type { MarketplaceProduct } from '../../../types/shopify';
+import type { MarketplaceProduct } from '../../../types/producthub';
 
 // Client-side interfaces (no encryption utilities needed)
 interface CustomerData {
@@ -516,7 +516,7 @@ export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
         {/* Export Section */}
         {confirmedOrders.length > 0 && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-            <h2 className="text-lg font-semibold mb-4">CJ Dropshipping Export</h2>
+            <h2 className="text-lg font-semibold mb-4">OrderSync Export</h2>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <label className="flex items-center space-x-2">
@@ -541,7 +541,7 @@ export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
                 loading={exporting}
                 icon={<Icon name="arrow-right" size="sm" />}
               >
-                Export to CJ (.xlsx)
+                Export to OrderSync (.xlsx)
               </Button>
             </div>
           </div>
@@ -683,7 +683,7 @@ export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Product Categorization System</h2>
                 <p className="text-gray-600 mt-1">
-                  Automatically categorizes CJ dropshipping products into your 5 stores based on existing product patterns.
+                  Automatically categorizes OrderSync products into your 5 stores based on existing product patterns.
                 </p>
               </div>
               <div className="flex space-x-4">
@@ -844,7 +844,7 @@ export function AdminDashboard({ initialOrders = [] }: AdminDashboardProps) {
                       </h3>
                       <ul className="text-blue-800 text-sm space-y-1">
                         <li>✓ Product categorization system is active</li>
-                        <li>✓ All new CJ products will be automatically categorized</li>
+                        <li>✓ All new OrderSync products will be automatically categorized</li>
                         <li>• Use /api/products/categorize to categorize new products</li>
                         <li>• Each store shows only relevant products</li>
                         <li>• NFT Energy store remains separate and manually managed</li>

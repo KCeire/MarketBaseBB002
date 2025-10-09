@@ -26,20 +26,20 @@ export async function GET(
 
   const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://store.lkforge.xyz';
 
-  // Fetch product data from Shopify API with timeout
+  // Fetch product data from ProductHub API with timeout
   let product: Product | null = null;
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
     
-    const shopifyResponse = await fetch(`${baseUrl}/api/shopify/products`, {
+    const productHubResponse = await fetch(`${baseUrl}/api/producthub/products`, {
       signal: controller.signal
     });
     clearTimeout(timeoutId);
     
-    if (shopifyResponse.ok) {
-      const shopifyData = await shopifyResponse.json();
-      product = shopifyData.products?.find((p: Product) => p.id.toString() === productId) || null;
+    if (productHubResponse.ok) {
+      const productHubData = await productHubResponse.json();
+      product = productHubData.products?.find((p: Product) => p.id.toString() === productId) || null;
     }
   } catch (error) {
     console.error('Error fetching product:', error);

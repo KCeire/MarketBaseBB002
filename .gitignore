@@ -51,5 +51,9 @@ supabase/.git/
 
 # private documentation
 PROJECT-DOCUMENTATION.md
+VERCEL_ENV_MAPPING.md
 
 
+
+# environment files with credentials
+.env.marketbase

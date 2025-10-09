@@ -1,5 +1,5 @@
 // lib/cart-utils.ts
-import { MarketplaceProduct } from '@/types/shopify';
+import { MarketplaceProduct } from '@/types/producthub';
 import { toast } from '@/app/components/ui/Toast';
 
 interface CartItem {

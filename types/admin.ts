@@ -49,9 +49,9 @@ export interface AdminStats {
   revenueThisMonth: number;
 }
 
-export interface CJOrderStatus {
+export interface OrderSyncFulfillmentStatus {
   orderId: string;
-  cjOrderId?: string;
+  orderSyncOrderId?: string;
   status: 'exported' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   trackingNumber?: string;
   trackingUrl?: string;

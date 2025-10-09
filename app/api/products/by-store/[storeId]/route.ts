@@ -1,6 +1,6 @@
 // app/api/products/by-store/[storeId]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllProducts } from '@/lib/shopify/api';
+import { getAllProducts } from '@/lib/producthub/api';
 import { categorizeProduct, initializeStorePatterns, getStoreInfo } from '@/lib/store-assignment';
 
 const VALID_STORE_IDS = [

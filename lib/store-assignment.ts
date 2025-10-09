@@ -1,5 +1,5 @@
 // lib/store-assignment.ts
-import { MarketplaceProduct } from '@/types/shopify';
+import { MarketplaceProduct } from '@/types/producthub';
 import { analyzeExistingProducts, StorePattern } from './product-analysis';
 
 let storePatterns: StorePattern[] | null = null;

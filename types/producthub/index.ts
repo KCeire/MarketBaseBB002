@@ -1,6 +1,6 @@
-// types/shopify/index.ts
+// types/producthub/index.ts
 
-export interface ShopifyImage {
+export interface ProductHubImage {
   id: number;
   product_id: number;
   position: number;
@@ -14,7 +14,7 @@ export interface ShopifyImage {
   admin_graphql_api_id: string;
 }
 
-export interface ShopifyVariant {
+export interface ProductHubVariant {
   id: number;
   product_id: number;
   title: string;
@@ -43,7 +43,7 @@ export interface ShopifyVariant {
   image_id: number | null;
 }
 
-export interface ShopifyProductOption {
+export interface ProductHubProductOption {
   id: number;
   product_id: number;
   name: string;
@@ -51,7 +51,7 @@ export interface ShopifyProductOption {
   values: string[];
 }
 
-export interface ShopifyProduct {
+export interface ProductHubItem {
   id: number;
   title: string;
   body_html: string;
@@ -66,17 +66,17 @@ export interface ShopifyProduct {
   tags: string;
   status: string;
   admin_graphql_api_id: string;
-  variants: ShopifyVariant[];
-  options: ShopifyProductOption[];
-  images: ShopifyImage[];
-  image: ShopifyImage | null;
+  variants: ProductHubVariant[];
+  options: ProductHubProductOption[];
+  images: ProductHubImage[];
+  image: ProductHubImage | null;
 }
 
-export interface ShopifyProductsResponse {
-  products: ShopifyProduct[];
+export interface ProductHubResponse {
+  products: ProductHubItem[];
 }
 
-export interface ShopifyError {
+export interface ProductHubError {
   message: string;
   status: number;
 }

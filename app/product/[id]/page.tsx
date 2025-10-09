@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { MarketplaceProduct } from '@/types/shopify';
+import { MarketplaceProduct } from '@/types/producthub';
 import { Button } from '@/app/components/ui/Button';
 import { Icon } from '@/app/components/ui/Icon';
 import { toast } from '@/app/components/ui/Toast';
@@ -40,7 +40,7 @@ export default function ProductDetailPage() {
   const fetchProduct = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/shopify/products');
+      const response = await fetch('/api/producthub/products');
       if (!response.ok) {
         throw new Error('Failed to fetch products');
       }

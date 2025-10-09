@@ -1,8 +1,8 @@
-// app/api/admin/export/cj/route.ts - FINAL FIXED VERSION
+// app/api/admin/export/ordersync/route.ts - FINAL FIXED VERSION
 import { NextRequest, NextResponse } from 'next/server';
 import ExcelJS from 'exceljs';
 import { supabaseAdmin } from '@/lib/supabase/client';
-import { decryptOrderForAdmin, convertOrdersToCJFormat, validateOrdersForExport, DecryptedOrder } from '@/lib/admin/utils';
+import { decryptOrderForAdmin, convertToOrderSyncFormat, validateOrdersForExport, DecryptedOrder } from '@/lib/admin/utils';
 
 // Admin wallet addresses from environment variables
 const ADMIN_ADDRESSES = process.env.ADMIN_WALLET_ADDRESSES?.split(',').map(addr => addr.trim()) || [];
@@ -20,13 +20,13 @@ ADMIN_ADDRESSES.forEach(addr => {
 });
 
 
-interface CJExportRequest {
+interface OrderSyncExportRequest {
   adminWallet: string;
   orderIds: string[];
   markAsProcessing?: boolean;
 }
 
-interface CJExportResponse {
+interface OrderSyncExportResponse {
   success: boolean;
   fileName?: string;
   validOrders?: number;
@@ -42,9 +42,9 @@ function validateAdminAccess(walletAddress: string): boolean {
   );
 }
 
-export async function POST(request: NextRequest): Promise<NextResponse<CJExportResponse>> {
+export async function POST(request: NextRequest): Promise<NextResponse<OrderSyncExportResponse>> {
   try {
-    const body: CJExportRequest = await request.json();
+    const body: OrderSyncExportRequest = await request.json();
     const { adminWallet, orderIds, markAsProcessing = false } = body;
 
     // Validate admin access
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<CJExportR
       );
     }
 
-    console.log('CJ Export request:', {
+    console.log('OrderSync Export request:', {
       adminWallet: `${adminWallet.slice(0, 6)}...${adminWallet.slice(-4)}`,
       orderCount: orderIds.length,
       markAsProcessing
@@ -129,14 +129,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<CJExportR
       );
     }
 
-    // Convert to CJ format
-    const cjData = convertOrdersToCJFormat(valid);
+    // Convert to OrderSync format
+    const orderSyncData = convertToOrderSyncFormat(valid);
 
     // Create Excel workbook using ExcelJS (secure alternative to xlsx)
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('CJ Orders');
+    const worksheet = workbook.addWorksheet('OrderSync Orders');
 
-    // Define headers matching CJ format with Farcaster data
+    // Define headers matching OrderSync format with Farcaster data
     const headers = [
       'Order Number',
       'SKU',
@@ -171,7 +171,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<CJExportR
     };
 
     // Add data rows - Updated with Farcaster data
-    cjData.forEach((row: {
+    orderSyncData.forEach((row: {
       'Order Number': string;
       'SKU': string;
       'Quantity': number;
@@ -260,13 +260,13 @@ export async function POST(request: NextRequest): Promise<NextResponse<CJExportR
 
     // Generate filename with timestamp
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    const fileName = `BaseShop_CJ_Export_${timestamp}.xlsx`;
+    const fileName = `BaseShop_OrderSync_Export_${timestamp}.xlsx`;
 
     // Log successful export
-    console.log('CJ export completed:', {
+    console.log('OrderSync export completed:', {
       validOrders: valid.length,
       invalidOrders: invalid.length,
-      totalItems: cjData.length,
+      totalItems: orderSyncData.length,
       fileName
     });
 
@@ -281,7 +281,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<CJExportR
     });
 
   } catch (error) {
-    console.error('CJ export API error:', error);
+    console.error('OrderSync export API error:', error);
     
     return NextResponse.json(
       { 
@@ -366,7 +366,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<{
     });
 
   } catch (exportError) {
-      console.error('CJ export validation error:', exportError);
+      console.error('OrderSync export validation error:', exportError);
       
       return NextResponse.json(
         { 

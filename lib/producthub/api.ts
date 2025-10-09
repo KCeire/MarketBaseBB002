@@ -1,47 +1,47 @@
-// lib/shopify/api.ts
+// lib/producthub/api.ts
 
 import {
-  ShopifyProduct,
-  ShopifyProductsResponse,
+  ProductHubItem,
+  ProductHubResponse,
   MarketplaceProduct
-} from '@/types/shopify';
+} from '@/types/producthub';
 import { categorizeProduct, initializeStorePatterns } from '../store-assignment';
 
-const SHOPIFY_DOMAIN = process.env.SHOPIFY_DOMAIN;
-const SHOPIFY_ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN;
-const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION || '2025-07';
+const PRODUCTHUB_DOMAIN = process.env.PRODUCTHUB_DOMAIN;
+const PRODUCTHUB_ACCESS_TOKEN = process.env.PRODUCTHUB_ACCESS_TOKEN;
+const PRODUCTHUB_API_VERSION = process.env.PRODUCTHUB_API_VERSION || '2025-07';
 
-if (!SHOPIFY_DOMAIN || !SHOPIFY_ACCESS_TOKEN) {
-  throw new Error('Missing required Shopify environment variables');
+if (!PRODUCTHUB_DOMAIN || !PRODUCTHUB_ACCESS_TOKEN) {
+  throw new Error('Missing required ProductHub environment variables');
 }
 
-const SHOPIFY_API_URL = `https://${SHOPIFY_DOMAIN}/admin/api/${SHOPIFY_API_VERSION}`;
+const PRODUCTHUB_API_URL = `https://${PRODUCTHUB_DOMAIN}/admin/api/${PRODUCTHUB_API_VERSION}`;
 
-class ShopifyApiError extends Error {
+class ProductHubApiError extends Error {
   status: number;
   
   constructor(message: string, status: number) {
     super(message);
-    this.name = 'ShopifyApiError';
+    this.name = 'ProductHubApiError';
     this.status = status;
   }
 }
 
-async function shopifyFetch<T>(endpoint: string): Promise<T> {
-  const url = `${SHOPIFY_API_URL}${endpoint}`;
+async function productHubFetch<T>(endpoint: string): Promise<T> {
+  const url = `${PRODUCTHUB_API_URL}${endpoint}`;
   
   try {
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'X-Shopify-Access-Token': SHOPIFY_ACCESS_TOKEN!,
+        'X-Shopify-Access-Token': PRODUCTHUB_ACCESS_TOKEN!,
         'Content-Type': 'application/json',
       },
     });
 
     if (!response.ok) {
-      throw new ShopifyApiError(
-        `Shopify API error: ${response.statusText}`, 
+      throw new ProductHubApiError(
+        `ProductHub API error: ${response.statusText}`,
         response.status
       );
     }
@@ -49,11 +49,11 @@ async function shopifyFetch<T>(endpoint: string): Promise<T> {
     const data = await response.json();
     return data as T;
   } catch (error) {
-    if (error instanceof ShopifyApiError) {
+    if (error instanceof ProductHubApiError) {
       throw error;
     }
-    throw new ShopifyApiError(
-      `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`, 
+    throw new ProductHubApiError(
+      `Network error: ${error instanceof Error ? error.message : 'Unknown error'}`,
       500
     );
   }
@@ -61,11 +61,11 @@ async function shopifyFetch<T>(endpoint: string): Promise<T> {
 
 export async function getAllProducts(): Promise<MarketplaceProduct[]> {
   try {
-    const response = await shopifyFetch<ShopifyProductsResponse>(
+    const response = await productHubFetch<ProductHubResponse>(
       '/products.json?status=active&limit=250'
     );
     
-    return response.products.map(transformShopifyProduct);
+    return response.products.map(transformProductHubItem);
   } catch (error) {
     console.error('Failed to fetch products:', error);
     throw error;
@@ -74,13 +74,13 @@ export async function getAllProducts(): Promise<MarketplaceProduct[]> {
 
 export async function getProductById(id: number): Promise<MarketplaceProduct | null> {
   try {
-    const response = await shopifyFetch<{ product: ShopifyProduct }>(
+    const response = await productHubFetch<{ product: ProductHubItem }>(
       `/products/${id}.json`
     );
     
-    return transformShopifyProduct(response.product);
+    return transformProductHubItem(response.product);
   } catch (error) {
-    if (error instanceof ShopifyApiError && error.status === 404) {
+    if (error instanceof ProductHubApiError && error.status === 404) {
       return null;
     }
     console.error(`Failed to fetch product ${id}:`, error);
@@ -90,13 +90,13 @@ export async function getProductById(id: number): Promise<MarketplaceProduct | n
 
 export async function getProductByHandle(handle: string): Promise<MarketplaceProduct | null> {
   try {
-    const response = await shopifyFetch<{ product: ShopifyProduct }>(
+    const response = await productHubFetch<{ product: ProductHubItem }>(
       `/products/${handle}.json`
     );
     
-    return transformShopifyProduct(response.product);
+    return transformProductHubItem(response.product);
   } catch (error) {
-    if (error instanceof ShopifyApiError && error.status === 404) {
+    if (error instanceof ProductHubApiError && error.status === 404) {
       return null;
     }
     console.error(`Failed to fetch product ${handle}:`, error);
@@ -104,7 +104,7 @@ export async function getProductByHandle(handle: string): Promise<MarketplacePro
   }
 }
 
-function transformShopifyProduct(product: ShopifyProduct): MarketplaceProduct {
+function transformProductHubItem(product: ProductHubItem): MarketplaceProduct {
   // Extract images from the official images array
   const productImages = product.images.map(img => img.src);
 
@@ -198,12 +198,12 @@ export async function getProductsByStore(): Promise<Record<string, MarketplacePr
 }
 
 // Test API connection
-export async function testShopifyConnection(): Promise<boolean> {
+export async function testProductHubConnection(): Promise<boolean> {
   try {
-    await shopifyFetch<{ shop: unknown }>('/shop.json');
+    await productHubFetch<{ shop: unknown }>('/shop.json');
     return true;
   } catch (error) {
-    console.error('Shopify connection test failed:', error);
+    console.error('ProductHub connection test failed:', error);
     return false;
   }
 }

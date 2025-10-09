@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/app/components/ui/Button';
 import { Icon } from '@/app/components/ui/Icon';
-import type { MarketplaceProduct } from '@/types/shopify';
+import type { MarketplaceProduct } from '@/types/producthub';
 import { addProductToCart } from '@/lib/cart-utils';
 import { ShareButton } from '@/app/components/product/ShareButton';
 import { QuantitySelector } from '@/app/components/product/QuantitySelector';

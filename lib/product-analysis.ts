@@ -1,6 +1,6 @@
 // lib/product-analysis.ts
-import { getAllProducts } from './shopify/api';
-import { MarketplaceProduct } from '@/types/shopify';
+import { getAllProducts } from './producthub/api';
+import { MarketplaceProduct } from '@/types/producthub';
 
 export interface ProductPattern {
   keywords: string[];

@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { MarketplaceProduct } from '@/types/shopify';
+import { MarketplaceProduct } from '@/types/producthub';
 import { Button } from './ui/Button';
 import { Icon } from './ui/Icon';
 import { BasePayCheckout } from './BasePayCheckout';
@@ -38,7 +38,7 @@ const dispatchCartUpdate = () => {
   window.dispatchEvent(new CustomEvent('cartUpdated'));
 };
 
-// Union type for all products (Shopify + Store products)
+// Union type for all products (ProductHub + Store products)
 type UnifiedProduct = Omit<MarketplaceProduct, 'id'> & {
   id: number | string; // Allow both number and string IDs
   storeInfo?: { name: string; slug: string; url: string; };
@@ -96,13 +96,13 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     try {
       setLoading(true);
 
-      // Fetch Shopify products
-      const shopifyProducts: UnifiedProduct[] = [];
+      // Fetch ProductHub products
+      const productHubProducts: UnifiedProduct[] = [];
       try {
-        const response = await fetch('/api/shopify/products');
+        const response = await fetch('/api/producthub/products');
         if (response.ok) {
           const data = await response.json();
-          // Map Shopify products to stores based on vendor or product characteristics
+          // Map ProductHub products to stores based on vendor or product characteristics
           const mappedProducts = (data.products || []).map((product: MarketplaceProduct) => {
             let storeInfo = undefined;
 
@@ -150,10 +150,10 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
             };
           });
 
-          shopifyProducts.push(...mappedProducts);
+          productHubProducts.push(...mappedProducts);
         }
       } catch (err) {
-        console.warn('Failed to fetch Shopify products:', err);
+        console.warn('Failed to fetch ProductHub products:', err);
       }
 
       // Get local store products
@@ -178,7 +178,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
       });
 
       // Combine all products
-      const allProducts = [...shopifyProducts, ...storeProducts];
+      const allProducts = [...productHubProducts, ...storeProducts];
       setProducts(allProducts);
       setFilteredProducts(allProducts);
     } catch (err) {
@@ -414,7 +414,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
       const sku = getNFTEnergySKU(idToMap);
       router.push(`/nft-energy/product/${sku}`);
     } else {
-      // Navigate to regular Shopify product page
+      // Navigate to regular ProductHub product page
       router.push(`/product/${productId}`);
     }
   };
@@ -441,7 +441,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shop</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Trade</h2>
         </div>
         <div className="flex justify-center py-8">
           <div className="text-gray-500 dark:text-gray-400">Loading products...</div>
@@ -454,7 +454,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shop</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Trade</h2>
         </div>
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-800">Error: {error}</p>
@@ -475,7 +475,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shopping Cart</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Trading Cart</h2>
           {onBackToShop && (
             <Button
               variant="ghost"
@@ -483,7 +483,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
               onClick={onBackToShop}
               icon={<Icon name="arrow-left" size="sm" />}
             >
-              Back to Shop
+              Back to Trade
             </Button>
           )}
         </div>
@@ -774,7 +774,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
             <div className="grid grid-cols-1 gap-4">
               {filteredProducts.map((product, index) => (
                 <div
-                  key={`${product.isStoreProduct ? 'store' : 'shopify'}-${product.id}-${index}`}
+                  key={`${product.isStoreProduct ? 'store' : 'producthub'}-${product.id}-${index}`}
                   className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3 cursor-pointer hover:shadow-md dark:hover:shadow-lg hover:shadow-gray-200 dark:hover:shadow-black/20 transition-all duration-200 bg-white dark:bg-gray-800"
                   onClick={() => navigateToProduct(product.id, product)}
                 >
@@ -969,10 +969,10 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
       )}
 
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shop</h2>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Trade</h2>
       </div>
 
-      {/* Category Grid - Show on main shop view */}
+      {/* Category Grid - Show on main trade view */}
       <CategoryGrid onCategorySelect={handleCategorySelect} className="mb-6" />
 
       {/* Sort Controls */}
@@ -999,7 +999,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
       <div className="grid grid-cols-1 gap-4">
         {filteredProducts.map((product, index) => (
           <div
-            key={`main-${product.isStoreProduct ? 'store' : 'shopify'}-${product.id}-${index}`}
+            key={`main-${product.isStoreProduct ? 'store' : 'producthub'}-${product.id}-${index}`}
             className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3 cursor-pointer hover:shadow-md dark:hover:shadow-lg hover:shadow-gray-200 dark:hover:shadow-black/20 transition-all duration-200 bg-white dark:bg-gray-800"
             onClick={() => navigateToProduct(product.id, product)}
           >

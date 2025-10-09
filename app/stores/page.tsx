@@ -8,7 +8,7 @@ import { Icon } from '@/app/components/ui/Icon';
 import Image from 'next/image';
 import { getAllStoreProducts } from '@/lib/stores';
 import '@/lib/stores/nft-energy'; // Import to register NFT Energy store
-import type { MarketplaceProduct } from '@/types/shopify';
+import type { MarketplaceProduct } from '@/types/producthub';
 
 interface Store {
   id: string;
@@ -132,9 +132,9 @@ export default function StoresPage() {
         // Get store products from registered stores (like NFT Energy)
         const storeProducts = getAllStoreProducts();
 
-        // Get Shopify products and map them to stores
-        const shopifyResponse = await fetch('/api/shopify/products');
-        const shopifyData = shopifyResponse.ok ? await shopifyResponse.json() : { products: [] };
+        // Get ProductHub products and map them to stores
+        const productHubResponse = await fetch('/api/producthub/products');
+        const productHubData = productHubResponse.ok ? await productHubResponse.json() : { products: [] };
 
         const counts: Record<string, number> = {};
 
@@ -145,8 +145,8 @@ export default function StoresPage() {
           console.log('Store product:', product.title, 'mapped to store:', storeSlug);
         });
 
-        // Count Shopify products mapped to stores
-        (shopifyData.products || []).forEach((product: MarketplaceProduct) => {
+        // Count ProductHub products mapped to stores
+        (productHubData.products || []).forEach((product: MarketplaceProduct) => {
           const vendor = product.vendor.toLowerCase();
           const title = product.title.toLowerCase();
           const productType = product.productType.toLowerCase();

@@ -73,11 +73,11 @@ function AppContent() {
     handleReferralParams();
   }, [searchParams, router]);
 
-  const handleBackToShop = useCallback(() => {
+  const handleBackToTrade = useCallback(() => {
     window.history.replaceState({}, '', '/');
   }, []);
 
-  // If showing cart or categories, use the existing Shop component
+  // If showing cart or categories, use the existing Trade component
   if (showCart || showCategories) {
     return (
       <div className="flex flex-col min-h-screen font-sans text-[var(--app-foreground)] mini-app-theme from-[var(--app-background)] to-[var(--app-gray)]">
@@ -101,7 +101,7 @@ function AppContent() {
             </div>
             <div className="flex-shrink-0 mr-3">
               <div className="text-sm text-blue-600 dark:text-blue-400 font-semibold">
-                Shop → Share → Earn
+                Trade → Share → Earn
               </div>
             </div>
           </header>
@@ -111,7 +111,7 @@ function AppContent() {
               setActiveTab={() => {}} 
               showCart={showCart}
               showCategories={showCategories}
-              onBackToShop={handleBackToShop}
+              onBackToShop={handleBackToTrade}
             />
           </main>
         </div>
@@ -142,7 +142,7 @@ function AppContent() {
           </div>
           <div className="flex-shrink-0 mr-3">
             <div className="text-sm text-blue-600 dark:text-blue-400 font-semibold">
-              Shop → Share → Earn
+              Trade → Share → Earn
             </div>
           </div>
         </header>
@@ -157,9 +157,9 @@ function AppContent() {
               }}
             ></div>
             {/* Text commented out - will be added back with final images */}
-            {/* 
+            {/*
             <div className="relative z-10 text-center space-y-3">
-              <h1 className="text-2xl font-bold">Base Shop</h1>
+              <h1 className="text-2xl font-bold">MarketBase</h1>
               <p className="text-blue-100 text-sm">
                 Your gateway to decentralized commerce
               </p>
@@ -185,13 +185,13 @@ function AppContent() {
               <div className="absolute inset-0 bg-black/20"></div>
               <div className="relative z-10 h-full flex flex-col justify-end text-left">
                 <div>
-                  <h3 className="text-lg font-bold mb-1">Stores</h3>
+                  <h3 className="text-lg font-bold mb-1">Marketplaces</h3>
                   <p className="text-white/90 text-xs">Browse sellers</p>
                 </div>
               </div>
             </button>
 
-            {/* Shop Card */}
+            {/* Trade Card */}
             <button
               onClick={() => router.push('/?view=categories')}
               className="aspect-square rounded-2xl p-4 text-white relative overflow-hidden group active:scale-95 transition-transform"
@@ -205,7 +205,7 @@ function AppContent() {
               <div className="absolute inset-0 bg-black/20"></div>
               <div className="relative z-10 h-full flex flex-col justify-end text-left">
                 <div>
-                  <h3 className="text-lg font-bold mb-1">Shop</h3>
+                  <h3 className="text-lg font-bold mb-1">Trade</h3>
                   <p className="text-white/90 text-xs">Browse products</p>
                 </div>
               </div>
@@ -226,7 +226,7 @@ function AppContent() {
               <div className="relative z-10 h-full flex flex-col justify-end text-left">
                 <div>
                   <h3 className="text-lg font-bold mb-1">Sell</h3>
-                  <p className="text-white/90 text-xs">Open store</p>
+                  <p className="text-white/90 text-xs">Open marketplace</p>
                 </div>
               </div>
             </button>
@@ -286,7 +286,7 @@ function AppContent() {
                   </div>
                 </div>
                 <p className="text-cyan-200 text-sm mb-3">
-                  Where Web3 meets real energy. Get official NFT Energy drinks and exclusive merch.
+                  Where Web3 meets real energy. Get official NFT Energy drinks and exclusive merchandise.
                 </p>
                 <div className="flex items-center space-x-4 text-xs text-cyan-300">
                   <span>• 6 Products</span>
@@ -303,7 +303,7 @@ function AppContent() {
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-white dark:bg-gray-800 rounded-xl p-3 text-center border border-gray-200 dark:border-gray-700">
               <div className="text-lg font-bold text-blue-600 dark:text-blue-400">6</div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">Live Stores</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">Live Marketplaces</div>
             </div>
             <div className="bg-white dark:bg-gray-800 rounded-xl p-3 text-center border border-gray-200 dark:border-gray-700">
               <div className="text-lg font-bold text-green-600 dark:text-green-400">USDC</div>
