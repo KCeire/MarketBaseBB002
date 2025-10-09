@@ -10,13 +10,13 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: process.env.NEXT_PUBLIC_CDN_DOMAIN || 'cdn.producthub.example',
+        hostname: 'cdn.shopify.com',
         port: '',
         pathname: '/s/files/**',
       },
       {
         protocol: 'https',
-        hostname: process.env.NEXT_PUBLIC_ORDERSYNC_CDN || 'api.ordersync.example',
+        hostname: 'cf.cjdropshipping.com',
         port: '',
         pathname: '/**',
       },
