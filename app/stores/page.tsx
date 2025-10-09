@@ -124,6 +124,7 @@ const stores: Store[] = [
 export default function StoresPage() {
   const router = useRouter();
   const [actualProductCounts, setActualProductCounts] = useState<Record<string, number>>({});
+  const [storeProductImages, setStoreProductImages] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -137,11 +138,18 @@ export default function StoresPage() {
         const productHubData = productHubResponse.ok ? await productHubResponse.json() : { products: [] };
 
         const counts: Record<string, number> = {};
+        const productImages: Record<string, string> = {};
 
-        // Count store products
+        // Count store products and collect first product image for each store
         storeProducts.forEach(product => {
           const storeSlug = product.storeInfo.slug;
           counts[storeSlug] = (counts[storeSlug] || 0) + 1;
+
+          // Store the first product image for each store if not already set
+          if (!productImages[storeSlug] && product.image) {
+            productImages[storeSlug] = product.image;
+          }
+
           console.log('Store product:', product.title, 'mapped to store:', storeSlug);
         });
 
@@ -167,11 +175,18 @@ export default function StoresPage() {
 
           if (storeSlug) {
             counts[storeSlug] = (counts[storeSlug] || 0) + 1;
+
+            // Store the first product image for each store if not already set
+            if (!productImages[storeSlug] && product.images && product.images.length > 0) {
+              productImages[storeSlug] = product.images[0];
+            }
           }
         });
 
         console.log('Final product counts:', counts);
+        console.log('Store product images:', productImages);
         setActualProductCounts(counts);
+        setStoreProductImages(productImages);
       } catch (error) {
         console.error('Error calculating product counts:', error);
       } finally {
@@ -203,101 +218,123 @@ export default function StoresPage() {
                 <div
                   key={store.id}
                   onClick={() => handleStoreClick(store)}
-                  className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer group"
+                  className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer group relative"
                 >
+                  {/* Product Image Background - covers 70% of entire card */}
+                  {storeProductImages[store.id] && (
+                    <div className="absolute inset-x-0 top-0 h-[70%] z-0">
+                      <Image
+                        src={storeProductImages[store.id]}
+                        alt="Store product"
+                        fill
+                        className="object-cover"
+                      />
+                      <div className={`absolute inset-0 ${
+                        store.id === 'nft-energy' ? 'bg-gradient-to-br from-slate-900/60 via-blue-900/50 to-cyan-900/60' :
+                        store.id === 'techwave-electronics' ? 'bg-gradient-to-br from-blue-500/60 via-blue-600/50 to-indigo-700/60' :
+                        store.id === 'green-oasis-home' ? 'bg-gradient-to-br from-green-500/60 via-emerald-600/50 to-teal-700/60' :
+                        store.id === 'pawsome-pets' ? 'bg-gradient-to-br from-purple-500/60 via-violet-600/50 to-purple-700/60' :
+                        store.id === 'radiant-beauty' ? 'bg-gradient-to-br from-pink-500/60 via-rose-500/50 to-pink-600/60' :
+                        store.id === 'apex-athletics' ? 'bg-gradient-to-br from-orange-500/60 via-red-500/50 to-orange-600/60' :
+                        'bg-gradient-to-br from-gray-500/60 via-gray-600/50 to-gray-700/60'
+                      }`}></div>
+                    </div>
+                  )}
+
+                  {/* Gradient Background Fallback - covers entire card */}
+                  <div className={`absolute inset-0 -z-10 ${
+                    store.id === 'nft-energy' ? 'bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-900' :
+                    store.id === 'techwave-electronics' ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700' :
+                    store.id === 'green-oasis-home' ? 'bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700' :
+                    store.id === 'pawsome-pets' ? 'bg-gradient-to-br from-purple-500 via-violet-600 to-purple-700' :
+                    store.id === 'radiant-beauty' ? 'bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600' :
+                    store.id === 'apex-athletics' ? 'bg-gradient-to-br from-orange-500 via-red-500 to-orange-600' :
+                    'bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700'
+                  }`}></div>
+
                   {/* Store Image/Preview */}
-                  <div className="aspect-video relative overflow-hidden">
+                  <div className="aspect-video relative overflow-hidden z-10">
                     {store.id === 'nft-energy' ? (
-                      <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-900">
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="text-center space-y-4">
-                            {store.logo && (
-                              <div className="w-16 h-16 mx-auto flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-2xl p-2">
-                                <Image 
-                                  src={store.logo}
-                                  alt={`${store.name} logo`}
-                                  width={48}
-                                  height={48}
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                            )}
-                            <p className="text-white/80 text-sm font-medium">
-                              {store.name}
-                            </p>
-                          </div>
+                      <div className="relative z-10 flex items-center justify-center h-full pt-8">
+                        <div className="text-center space-y-4">
+                          {store.logo && (
+                            <div className="w-16 h-16 mx-auto flex items-center justify-center bg-white/20 backdrop-blur-md rounded-2xl p-2 border border-white/30">
+                              <Image
+                                src={store.logo}
+                                alt={`${store.name} logo`}
+                                width={48}
+                                height={48}
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                          )}
+                          <p className="text-white text-sm font-bold drop-shadow-2xl" style={{textShadow: '0 0 10px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.6)'}}>
+                            {store.name}
+                          </p>
                         </div>
                       </div>
                     ) : (
-                      <div className={`
-                        ${store.id === 'techwave-electronics' ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700' : ''}
-                        ${store.id === 'green-oasis-home' ? 'bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700' : ''}
-                        ${store.id === 'pawsome-pets' ? 'bg-gradient-to-br from-purple-500 via-violet-600 to-purple-700' : ''}
-                        ${store.id === 'radiant-beauty' ? 'bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600' : ''}
-                        ${store.id === 'apex-athletics' ? 'bg-gradient-to-br from-orange-500 via-red-500 to-orange-600' : ''}
-                      `}>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="text-center space-y-2">
-                            <div className="w-16 h-16 bg-white/15 rounded-2xl mx-auto flex items-center justify-center backdrop-blur-sm border border-white/20">
-                              {/* Custom logos for each store */}
-                              {store.id === 'techwave-electronics' && (
-                                <div className="text-white text-2xl">
-                                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                    <rect x="4" y="8" width="24" height="16" rx="2" stroke="currentColor" strokeWidth="2"/>
-                                    <circle cx="16" cy="16" r="3" fill="currentColor"/>
-                                    <path d="M8 12h2M8 20h2M22 12h2M22 20h2" stroke="currentColor" strokeWidth="2"/>
-                                  </svg>
-                                </div>
-                              )}
-                              {store.id === 'green-oasis-home' && (
-                                <div className="text-white text-2xl">
-                                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                    <path d="M16 4L28 14v14H20v-8h-8v8H4V14L16 4z" fill="currentColor"/>
-                                    <circle cx="22" cy="10" r="3" fill="#4ade80"/>
-                                    <circle cx="26" cy="14" r="2" fill="#4ade80"/>
-                                    <circle cx="24" cy="6" r="2" fill="#4ade80"/>
-                                  </svg>
-                                </div>
-                              )}
-                              {store.id === 'pawsome-pets' && (
-                                <div className="text-white text-2xl">
-                                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                    <ellipse cx="12" cy="12" rx="3" ry="4" fill="currentColor"/>
-                                    <ellipse cx="20" cy="12" rx="3" ry="4" fill="currentColor"/>
-                                    <ellipse cx="8" cy="18" rx="2" ry="3" fill="currentColor"/>
-                                    <ellipse cx="24" cy="18" rx="2" ry="3" fill="currentColor"/>
-                                    <ellipse cx="16" cy="22" rx="4" ry="3" fill="currentColor"/>
-                                  </svg>
-                                </div>
-                              )}
-                              {store.id === 'radiant-beauty' && (
-                                <div className="text-white text-2xl">
-                                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                    <circle cx="16" cy="16" r="8" stroke="currentColor" strokeWidth="2"/>
-                                    <path d="M16 8v16M8 16h16" stroke="currentColor" strokeWidth="1"/>
-                                    <circle cx="16" cy="16" r="3" fill="#fbbf24"/>
-                                    <circle cx="12" cy="12" r="1" fill="currentColor"/>
-                                    <circle cx="20" cy="12" r="1" fill="currentColor"/>
-                                    <circle cx="12" cy="20" r="1" fill="currentColor"/>
-                                    <circle cx="20" cy="20" r="1" fill="currentColor"/>
-                                  </svg>
-                                </div>
-                              )}
-                              {store.id === 'apex-athletics' && (
-                                <div className="text-white text-2xl">
-                                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                    <path d="M6 16L16 6l10 10-10 10L6 16z" fill="currentColor"/>
-                                    <path d="M12 10l8 8M20 10l-8 8" stroke="white" strokeWidth="2"/>
-                                  </svg>
-                                </div>
-                              )}
-                            </div>
-                            <p className="text-white/90 text-sm font-medium">
-                              {store.name}
-                            </p>
+                      <div className="relative z-10 flex items-center justify-center h-full pt-8">
+                        <div className="text-center space-y-2">
+                          <div className="w-16 h-16 bg-white/25 rounded-2xl mx-auto flex items-center justify-center backdrop-blur-md border border-white/40">
+                            {/* Custom logos for each store */}
+                            {store.id === 'techwave-electronics' && (
+                              <div className="text-white text-2xl">
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                                  <rect x="4" y="8" width="24" height="16" rx="2" stroke="currentColor" strokeWidth="2"/>
+                                  <circle cx="16" cy="16" r="3" fill="currentColor"/>
+                                  <path d="M8 12h2M8 20h2M22 12h2M22 20h2" stroke="currentColor" strokeWidth="2"/>
+                                </svg>
+                              </div>
+                            )}
+                            {store.id === 'green-oasis-home' && (
+                              <div className="text-white text-2xl">
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                                  <path d="M16 4L28 14v14H20v-8h-8v8H4V14L16 4z" fill="currentColor"/>
+                                  <circle cx="22" cy="10" r="3" fill="#4ade80"/>
+                                  <circle cx="26" cy="14" r="2" fill="#4ade80"/>
+                                  <circle cx="24" cy="6" r="2" fill="#4ade80"/>
+                                </svg>
+                              </div>
+                            )}
+                            {store.id === 'pawsome-pets' && (
+                              <div className="text-white text-2xl">
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                                  <ellipse cx="12" cy="12" rx="3" ry="4" fill="currentColor"/>
+                                  <ellipse cx="20" cy="12" rx="3" ry="4" fill="currentColor"/>
+                                  <ellipse cx="8" cy="18" rx="2" ry="3" fill="currentColor"/>
+                                  <ellipse cx="24" cy="18" rx="2" ry="3" fill="currentColor"/>
+                                  <ellipse cx="16" cy="22" rx="4" ry="3" fill="currentColor"/>
+                                </svg>
+                              </div>
+                            )}
+                            {store.id === 'radiant-beauty' && (
+                              <div className="text-white text-2xl">
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                                  <circle cx="16" cy="16" r="8" stroke="currentColor" strokeWidth="2"/>
+                                  <path d="M16 8v16M8 16h16" stroke="currentColor" strokeWidth="1"/>
+                                  <circle cx="16" cy="16" r="3" fill="#fbbf24"/>
+                                  <circle cx="12" cy="12" r="1" fill="currentColor"/>
+                                  <circle cx="20" cy="12" r="1" fill="currentColor"/>
+                                  <circle cx="12" cy="20" r="1" fill="currentColor"/>
+                                  <circle cx="20" cy="20" r="1" fill="currentColor"/>
+                                </svg>
+                              </div>
+                            )}
+                            {store.id === 'apex-athletics' && (
+                              <div className="text-white text-2xl">
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                                  <path d="M6 16L16 6l10 10-10 10L6 16z" fill="currentColor"/>
+                                  <path d="M12 10l8 8M20 10l-8 8" stroke="white" strokeWidth="2"/>
+                                </svg>
+                              </div>
+                            )}
                           </div>
+                          <p className="text-white text-sm font-bold drop-shadow-2xl" style={{textShadow: '0 0 10px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.6)'}}>
+                            {store.name}
+                          </p>
                         </div>
-                        
+
                         {/* Background decoration */}
                         <div className="absolute top-2 right-2 w-20 h-20 bg-white/5 rounded-full blur-2xl"></div>
                         <div className="absolute bottom-2 left-2 w-16 h-16 bg-white/10 rounded-full blur-xl"></div>
@@ -309,29 +346,25 @@ export default function StoresPage() {
                   </div>
 
                   {/* Store Info */}
-                  <div className="p-2 md:p-6 space-y-2 md:space-y-4">
-                    <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
-                      {store.category}
-                    </p>
+                  <div className="p-2 md:p-6 space-y-2 md:space-y-4 mt-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
+                        {store.category}
+                      </p>
 
-                    {store.stats && (
-                      <div className="flex items-center justify-between text-xs md:text-sm">
-                        <div className="flex items-center space-x-2 md:space-x-4">
-                          <div className="flex items-center space-x-1 text-gray-500">
-                            <Icon name="package" size="sm" />
-                            <span className="hidden sm:inline">
-                              {loading ? '...' : (actualProductCounts[store.id] || 0)} products
-                            </span>
-                            <span className="sm:hidden">
-                              {loading ? '...' : (actualProductCounts[store.id] || 0)}
-                            </span>
-                          </div>
+                      {/* Shipping Info - show for all stores except NFT Energy */}
+                      {store.id !== 'nft-energy' && (
+                        <div className="flex items-center space-x-1 text-xs text-green-600 dark:text-green-400">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="1" y="3" width="15" height="13"></rect>
+                            <polygon points="16,6 23,6 23,16 16,16"></polygon>
+                            <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                            <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                          </svg>
+                          <span>Shipping Included</span>
                         </div>
-                        <div className="text-xs text-green-600 font-medium">
-                          📈
-                        </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
 
                     <div className="relative">
                       <Button
