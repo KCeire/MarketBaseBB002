@@ -160,11 +160,11 @@ function AppContent() {
               <h1 className="text-4xl md:text-5xl font-black tracking-[0.15em]"
                   style={{
                     color: '#ffffff',
-                    WebkitTextStroke: '3px #000000',
-                    fontFamily: '"Bebas Neue", "Oswald", "Roboto Condensed", "Arial Narrow", sans-serif',
+                    WebkitTextStroke: '2px #000000',
+                    fontFamily: '"Arial Black", "Helvetica", sans-serif',
                     fontWeight: '900',
-                    textShadow: '2px 2px 0px rgba(0,0,0,0.5)',
-                    letterSpacing: '0.15em'
+                    textShadow: '3px 3px 0px rgba(0,0,0,0.8)',
+                    letterSpacing: '0.1em'
                   }}>
                 MarketBase
               </h1>
