@@ -230,13 +230,13 @@ export default function StoresPage() {
                         className="object-cover"
                       />
                       <div className={`absolute inset-0 ${
-                        store.id === 'nft-energy' ? 'bg-gradient-to-br from-slate-900/60 via-blue-900/50 to-cyan-900/60' :
-                        store.id === 'techwave-electronics' ? 'bg-gradient-to-br from-blue-500/60 via-blue-600/50 to-indigo-700/60' :
-                        store.id === 'green-oasis-home' ? 'bg-gradient-to-br from-green-500/60 via-emerald-600/50 to-teal-700/60' :
-                        store.id === 'pawsome-pets' ? 'bg-gradient-to-br from-purple-500/60 via-violet-600/50 to-purple-700/60' :
-                        store.id === 'radiant-beauty' ? 'bg-gradient-to-br from-pink-500/60 via-rose-500/50 to-pink-600/60' :
-                        store.id === 'apex-athletics' ? 'bg-gradient-to-br from-orange-500/60 via-red-500/50 to-orange-600/60' :
-                        'bg-gradient-to-br from-gray-500/60 via-gray-600/50 to-gray-700/60'
+                        store.id === 'nft-energy' ? 'bg-gradient-to-br from-slate-900/40 via-blue-900/30 to-cyan-900/40' :
+                        store.id === 'techwave-electronics' ? 'bg-gradient-to-br from-blue-500/40 via-blue-600/30 to-indigo-700/40' :
+                        store.id === 'green-oasis-home' ? 'bg-gradient-to-br from-green-500/40 via-emerald-600/30 to-teal-700/40' :
+                        store.id === 'pawsome-pets' ? 'bg-gradient-to-br from-purple-500/40 via-violet-600/30 to-purple-700/40' :
+                        store.id === 'radiant-beauty' ? 'bg-gradient-to-br from-violet-500/40 via-purple-500/30 to-fuchsia-600/40' :
+                        store.id === 'apex-athletics' ? 'bg-gradient-to-br from-slate-700/40 via-gray-800/30 to-zinc-900/40' :
+                        'bg-gradient-to-br from-gray-500/40 via-gray-600/30 to-gray-700/40'
                       }`}></div>
                     </div>
                   )}
@@ -247,8 +247,8 @@ export default function StoresPage() {
                     store.id === 'techwave-electronics' ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700' :
                     store.id === 'green-oasis-home' ? 'bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700' :
                     store.id === 'pawsome-pets' ? 'bg-gradient-to-br from-purple-500 via-violet-600 to-purple-700' :
-                    store.id === 'radiant-beauty' ? 'bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600' :
-                    store.id === 'apex-athletics' ? 'bg-gradient-to-br from-orange-500 via-red-500 to-orange-600' :
+                    store.id === 'radiant-beauty' ? 'bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-600' :
+                    store.id === 'apex-athletics' ? 'bg-gradient-to-br from-slate-700 via-gray-800 to-zinc-900' :
                     'bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700'
                   }`}></div>
 
@@ -281,9 +281,11 @@ export default function StoresPage() {
                             {store.id === 'techwave-electronics' && (
                               <div className="text-white text-2xl">
                                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                  <rect x="4" y="8" width="24" height="16" rx="2" stroke="currentColor" strokeWidth="2"/>
-                                  <circle cx="16" cy="16" r="3" fill="currentColor"/>
-                                  <path d="M8 12h2M8 20h2M22 12h2M22 20h2" stroke="currentColor" strokeWidth="2"/>
+                                  <rect x="3" y="6" width="26" height="18" rx="2" stroke="currentColor" strokeWidth="2"/>
+                                  <rect x="5" y="8" width="22" height="12" fill="currentColor" opacity="0.3"/>
+                                  <circle cx="16" cy="27" r="1" fill="currentColor"/>
+                                  <path d="M12 27h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                  <path d="M10 30h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                 </svg>
                               </div>
                             )}
@@ -311,21 +313,23 @@ export default function StoresPage() {
                             {store.id === 'radiant-beauty' && (
                               <div className="text-white text-2xl">
                                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                  <circle cx="16" cy="16" r="8" stroke="currentColor" strokeWidth="2"/>
-                                  <path d="M16 8v16M8 16h16" stroke="currentColor" strokeWidth="1"/>
-                                  <circle cx="16" cy="16" r="3" fill="#fbbf24"/>
-                                  <circle cx="12" cy="12" r="1" fill="currentColor"/>
-                                  <circle cx="20" cy="12" r="1" fill="currentColor"/>
-                                  <circle cx="12" cy="20" r="1" fill="currentColor"/>
-                                  <circle cx="20" cy="20" r="1" fill="currentColor"/>
+                                  <rect x="8" y="12" width="16" height="12" rx="2" stroke="currentColor" strokeWidth="2"/>
+                                  <rect x="10" y="14" width="12" height="8" rx="1" fill="currentColor" opacity="0.3"/>
+                                  <circle cx="12" cy="18" r="1.5" fill="currentColor"/>
+                                  <circle cx="16" cy="18" r="1.5" fill="currentColor"/>
+                                  <circle cx="20" cy="18" r="1.5" fill="currentColor"/>
+                                  <rect x="14" y="6" width="4" height="8" rx="2" stroke="currentColor" strokeWidth="2"/>
+                                  <circle cx="16" cy="4" r="1" fill="currentColor"/>
                                 </svg>
                               </div>
                             )}
                             {store.id === 'apex-athletics' && (
                               <div className="text-white text-2xl">
                                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                  <path d="M6 16L16 6l10 10-10 10L6 16z" fill="currentColor"/>
-                                  <path d="M12 10l8 8M20 10l-8 8" stroke="white" strokeWidth="2"/>
+                                  <path d="M4 26L10 18L16 6L22 18L28 26" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                                  <path d="M6 22L12 16L16 10L20 16L26 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                                  <circle cx="16" cy="6" r="1.5" fill="currentColor"/>
+                                  <path d="M2 28H30" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                 </svg>
                               </div>
                             )}

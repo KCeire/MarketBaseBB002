@@ -156,15 +156,20 @@ function AppContent() {
                 backgroundImage: 'url(/AppMedia/topHomePageImage.jpg)'
               }}
             ></div>
-            {/* Text commented out - will be added back with final images */}
-            {/*
-            <div className="relative z-10 text-center space-y-3">
-              <h1 className="text-2xl font-bold">MarketBase</h1>
-              <p className="text-blue-100 text-sm">
-                Your gateway to decentralized commerce
-              </p>
+            <div className="relative z-10 flex items-center justify-center h-full" style={{paddingTop: '5%'}}>
+              <h1 className="text-4xl md:text-5xl font-black tracking-[0.15em]"
+                  style={{
+                    color: '#ffffff',
+                    WebkitTextStroke: '3px #000000',
+                    textStroke: '3px #000000',
+                    fontFamily: '"Bebas Neue", "Oswald", "Roboto Condensed", "Arial Narrow", sans-serif',
+                    fontWeight: '900',
+                    textShadow: '2px 2px 0px rgba(0,0,0,0.5)',
+                    letterSpacing: '0.15em'
+                  }}>
+                MarketBase
+              </h1>
             </div>
-            */}
             {/* Light overlay to slightly darken image if needed */}
             <div className="absolute inset-0 bg-black/10"></div>
           </div>
@@ -182,11 +187,11 @@ function AppContent() {
                   backgroundImage: 'url(/AppMedia/stores.png)'
                 }}
               ></div>
-              <div className="absolute inset-0 bg-black/20"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
               <div className="relative z-10 h-full flex flex-col justify-end text-left">
-                <div>
-                  <h3 className="text-lg font-bold mb-1">Stores</h3>
-                  <p className="text-white/90 text-xs">Browse sellers</p>
+                <div className="bg-black/40 backdrop-blur-sm rounded-lg p-2">
+                  <h3 className="text-xl font-black mb-1" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.8)'}}>Stores</h3>
+                  <p className="text-white text-sm font-medium" style={{textShadow: '1px 1px 2px rgba(0,0,0,0.8)'}}>Browse sellers</p>
                 </div>
               </div>
             </button>
@@ -202,11 +207,11 @@ function AppContent() {
                   backgroundImage: 'url(/AppMedia/categories.jpg)'
                 }}
               ></div>
-              <div className="absolute inset-0 bg-black/20"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
               <div className="relative z-10 h-full flex flex-col justify-end text-left">
-                <div>
-                  <h3 className="text-lg font-bold mb-1">Shop</h3>
-                  <p className="text-white/90 text-xs">Browse products</p>
+                <div className="bg-black/40 backdrop-blur-sm rounded-lg p-2">
+                  <h3 className="text-xl font-black mb-1" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.8)'}}>Shop</h3>
+                  <p className="text-white text-sm font-medium" style={{textShadow: '1px 1px 2px rgba(0,0,0,0.8)'}}>Browse products</p>
                 </div>
               </div>
             </button>
@@ -222,11 +227,11 @@ function AppContent() {
                   backgroundImage: 'url(/AppMedia/sell.png)'
                 }}
               ></div>
-              <div className="absolute inset-0 bg-black/20"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
               <div className="relative z-10 h-full flex flex-col justify-end text-left">
-                <div>
-                  <h3 className="text-lg font-bold mb-1">Sell</h3>
-                  <p className="text-white/90 text-xs">Open marketplace</p>
+                <div className="bg-black/40 backdrop-blur-sm rounded-lg p-2">
+                  <h3 className="text-xl font-black mb-1" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.8)'}}>Sell</h3>
+                  <p className="text-white text-sm font-medium" style={{textShadow: '1px 1px 2px rgba(0,0,0,0.8)'}}>Open marketplace</p>
                 </div>
               </div>
             </button>
@@ -242,11 +247,11 @@ function AppContent() {
                   backgroundImage: 'url(/AppMedia/earn.png)'
                 }}
               ></div>
-              <div className="absolute inset-0 bg-black/20"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
               <div className="relative z-10 h-full flex flex-col justify-end text-left">
-                <div>
-                  <h3 className="text-lg font-bold mb-1">Earn</h3>
-                  <p className="text-white/90 text-xs">Share & earn commission</p>
+                <div className="bg-black/40 backdrop-blur-sm rounded-lg p-2">
+                  <h3 className="text-xl font-black mb-1" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.8)'}}>Earn</h3>
+                  <p className="text-white text-sm font-medium" style={{textShadow: '1px 1px 2px rgba(0,0,0,0.8)'}}>Share & earn</p>
                 </div>
               </div>
             </button>
