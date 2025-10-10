@@ -157,14 +157,14 @@ function AppContent() {
               }}
             ></div>
             <div className="relative z-10 flex items-center justify-center h-full" style={{paddingTop: '5%'}}>
-              <h1 className="text-4xl md:text-5xl font-black tracking-[0.15em]"
+              <h1 className="text-3xl md:text-5xl font-black"
                   style={{
                     color: '#ffffff',
-                    WebkitTextStroke: '2px #000000',
-                    fontFamily: '"Arial Black", "Helvetica", sans-serif',
-                    fontWeight: '900',
-                    textShadow: '3px 3px 0px rgba(0,0,0,0.8)',
-                    letterSpacing: '0.1em'
+                    WebkitTextStroke: '1.5px #000000',
+                    fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
+                    fontWeight: '800',
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.9)',
+                    letterSpacing: '0.05em'
                   }}>
                 MarketBase
               </h1>
