@@ -161,7 +161,6 @@ function AppContent() {
                   style={{
                     color: '#ffffff',
                     WebkitTextStroke: '3px #000000',
-                    textStroke: '3px #000000',
                     fontFamily: '"Bebas Neue", "Oswald", "Roboto Condensed", "Arial Narrow", sans-serif',
                     fontWeight: '900',
                     textShadow: '2px 2px 0px rgba(0,0,0,0.5)',
