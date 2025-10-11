@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { MarketplaceProduct } from '@/types/producthub';
-import { useProducts } from '@/hooks/useProducts';
+import { useProducts } from '@/lib/hooks/useProducts';
 import { Button } from './ui/Button';
 import { Icon } from './ui/Icon';
 import { BasePayCheckout } from './BasePayCheckout';
@@ -50,7 +50,7 @@ type UnifiedProduct = Omit<MarketplaceProduct, 'id'> & {
 
 export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategories = false }: ShopProps) {
   const router = useRouter();
-  const { products: productHubProducts, isLoading: productsLoading, error: productsError } = useProducts();
+  const { products: productHubProducts, isLoading: productsLoading, error: productsError, mutate } = useProducts();
   const [products, setProducts] = useState<UnifiedProduct[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<UnifiedProduct[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all-products');
@@ -450,7 +450,7 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={fetchProducts}
+            onClick={() => mutate()}
             className="mt-2"
           >
             Try Again
