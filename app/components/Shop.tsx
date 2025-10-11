@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { MarketplaceProduct } from '@/types/producthub';
+import { useProducts } from '@/hooks/useProducts';
 import { Button } from './ui/Button';
 import { Icon } from './ui/Icon';
 import { BasePayCheckout } from './BasePayCheckout';
@@ -11,6 +12,7 @@ import { toast } from './ui/Toast';
 import { QuantitySelector } from './product/QuantitySelector';
 import { ShareButton } from './product/ShareButton';
 import { CategoryGrid } from './categories/CategoryGrid';
+import { ProductGridSkeleton } from './ui/ProductCardSkeleton';
 import { getAllStoreProducts } from '@/lib/stores';
 import '@/lib/stores/nft-energy'; // Import to register NFT Energy store
 import Image from 'next/image';
@@ -48,11 +50,12 @@ type UnifiedProduct = Omit<MarketplaceProduct, 'id'> & {
 
 export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategories = false }: ShopProps) {
   const router = useRouter();
+  const { products: productHubProducts, isLoading: productsLoading, error: productsError } = useProducts();
   const [products, setProducts] = useState<UnifiedProduct[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<UnifiedProduct[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all-products');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const loading = productsLoading;
+  const error = productsError;
   const [cart, setCart] = useState<CartItem[]>([]);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [selectedVariants, setSelectedVariants] = useState<Record<string, number>>({});
@@ -65,12 +68,15 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
   void setActiveTab;
 
   useEffect(() => {
-    const initializeShop = async () => {
-      await fetchProducts();
-      loadCartFromStorage();
-    };
-    initializeShop();
+    loadCartFromStorage();
   }, []);
+
+  // Process cached products when they're available
+  useEffect(() => {
+    if (productHubProducts.length > 0) {
+      processProducts(productHubProducts);
+    }
+  }, [productHubProducts]);
 
   // Apply filters when products, category, search query, or sort changes
   useEffect(() => {
@@ -92,69 +98,55 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
     };
   }, []);
 
-  const fetchProducts = async () => {
+  const processProducts = (productHubData: MarketplaceProduct[]) => {
     try {
-      setLoading(true);
+      // Map ProductHub products to stores based on vendor or product characteristics
+      const mappedProducts = productHubData.map((product: MarketplaceProduct) => {
+        let storeInfo = undefined;
 
-      // Fetch ProductHub products
-      const productHubProducts: UnifiedProduct[] = [];
-      try {
-        const response = await fetch('/api/producthub/products');
-        if (response.ok) {
-          const data = await response.json();
-          // Map ProductHub products to stores based on vendor or product characteristics
-          const mappedProducts = (data.products || []).map((product: MarketplaceProduct) => {
-            let storeInfo = undefined;
+        // Map products to stores based on vendor or product type
+        const vendor = product.vendor.toLowerCase();
+        const title = product.title.toLowerCase();
+        const productType = product.productType.toLowerCase();
 
-            // Map products to stores based on vendor or product type
-            const vendor = product.vendor.toLowerCase();
-            const title = product.title.toLowerCase();
-            const productType = product.productType.toLowerCase();
-
-            if (vendor.includes('apex') || title.includes('survival') || title.includes('tactical') || productType.includes('sports')) {
-              storeInfo = {
-                name: 'Apex Athletics',
-                slug: 'apex-athletics',
-                url: '/store/apex-athletics'
-              };
-            } else if (vendor.includes('techwave') || vendor.includes('tech') || productType.includes('electronics')) {
-              storeInfo = {
-                name: 'TechWave Electronics',
-                slug: 'techwave-electronics',
-                url: '/store/techwave-electronics'
-              };
-            } else if (vendor.includes('pawsome') || vendor.includes('pet') || productType.includes('pet')) {
-              storeInfo = {
-                name: 'Pawsome Pets',
-                slug: 'pawsome-pets',
-                url: '/store/pawsome-pets'
-              };
-            } else if (vendor.includes('radiant') || vendor.includes('beauty') || productType.includes('beauty')) {
-              storeInfo = {
-                name: 'Radiant Beauty',
-                slug: 'radiant-beauty',
-                url: '/store/radiant-beauty'
-              };
-            } else if (vendor.includes('green') || vendor.includes('oasis') || vendor.includes('home') || productType.includes('home')) {
-              storeInfo = {
-                name: 'Green Oasis Home',
-                slug: 'green-oasis-home',
-                url: '/store/green-oasis-home'
-              };
-            }
-
-            return {
-              ...product,
-              storeInfo,
-              isStoreProduct: !!storeInfo
-            };
-          });
-
-          productHubProducts.push(...mappedProducts);
+        if (vendor.includes('apex') || title.includes('survival') || title.includes('tactical') || productType.includes('sports')) {
+          storeInfo = {
+            name: 'Apex Athletics',
+            slug: 'apex-athletics',
+            url: '/store/apex-athletics'
+          };
+        } else if (vendor.includes('techwave') || vendor.includes('tech') || productType.includes('electronics')) {
+          storeInfo = {
+            name: 'TechWave Electronics',
+            slug: 'techwave-electronics',
+            url: '/store/techwave-electronics'
+          };
+        } else if (vendor.includes('pawsome') || vendor.includes('pet') || productType.includes('pet')) {
+          storeInfo = {
+            name: 'Pawsome Pets',
+            slug: 'pawsome-pets',
+            url: '/store/pawsome-pets'
+          };
+        } else if (vendor.includes('radiant') || vendor.includes('beauty') || productType.includes('beauty')) {
+          storeInfo = {
+            name: 'Radiant Beauty',
+            slug: 'radiant-beauty',
+            url: '/store/radiant-beauty'
+          };
+        } else if (vendor.includes('green') || vendor.includes('oasis') || vendor.includes('home') || productType.includes('home')) {
+          storeInfo = {
+            name: 'Green Oasis Home',
+            slug: 'green-oasis-home',
+            url: '/store/green-oasis-home'
+          };
         }
-      } catch (err) {
-        console.warn('Failed to fetch ProductHub products:', err);
-      }
+
+        return {
+          ...product,
+          storeInfo,
+          isStoreProduct: !!storeInfo
+        };
+      });
 
       // Get local store products
       const storeProducts: UnifiedProduct[] = getAllStoreProducts().map((product, productIndex) => {
@@ -178,15 +170,12 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
       });
 
       // Combine all products
-      const allProducts = [...productHubProducts, ...storeProducts];
+      const allProducts = [...mappedProducts, ...storeProducts];
       setProducts(allProducts);
       setFilteredProducts(allProducts);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load products';
-      setError(errorMessage);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to process products';
       toast.error('Failed to Load Products', errorMessage);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -770,7 +759,9 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
         {/* Products Grid */}
         <div className="space-y-3">
 
-          {filteredProducts.length > 0 ? (
+          {loading ? (
+            <ProductGridSkeleton count={6} />
+          ) : filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 gap-4">
               {filteredProducts.map((product, index) => (
                 <div

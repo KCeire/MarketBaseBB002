@@ -1,7 +1,7 @@
 // app/components/product/QuantitySelector.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { Icon } from '../ui/Icon';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/Button';
@@ -32,7 +32,7 @@ interface QuantitySelectorProps {
   showAddToCart?: boolean;
 }
 
-export function QuantitySelector({
+function QuantitySelectorComponent({
   value,
   onChange,
   min = 1,
@@ -209,3 +209,5 @@ export function QuantitySelector({
     </div>
   );
 }
+
+export const QuantitySelector = memo(QuantitySelectorComponent);

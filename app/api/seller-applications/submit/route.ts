@@ -44,11 +44,7 @@ export async function POST(request: NextRequest) {
   try {
     const body: SellerApplicationRequest = await request.json();
 
-    console.log('🚀 New seller application received:', {
-      businessName: body.businessName,
-      email: body.email,
-      timestamp: new Date().toISOString()
-    });
+    // Application received - logging removed for production performance
 
     // Validate required fields
     const requiredFields: (keyof SellerApplicationRequest)[] = [
@@ -149,11 +145,7 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    console.log('✅ Seller application submitted successfully:', {
-      applicationId: application.id,
-      businessName: application.business_name,
-      email: application.email
-    });
+    // Application submitted successfully - logging removed for production performance
 
     // Send email notification to admin team
     try {
@@ -199,7 +191,7 @@ export async function POST(request: NextRequest) {
         `
       });
 
-      console.log('📧 Admin notification email sent successfully');
+      // Admin notification email sent successfully
     } catch (emailError) {
       console.error('❌ Failed to send admin notification email:', emailError);
       // Don't fail the entire request if email fails
@@ -238,7 +230,7 @@ export async function POST(request: NextRequest) {
         `
       });
 
-      console.log('📧 Confirmation email sent to applicant successfully');
+      // Confirmation email sent to applicant successfully
     } catch (emailError) {
       console.error('❌ Failed to send confirmation email to applicant:', emailError);
       // Don't fail the entire request if email fails

@@ -1,7 +1,7 @@
 // app/components/product/ShareButton.tsx
 "use client";
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { useComposeCast } from "@coinbase/onchainkit/minikit";
 import sdk from '@farcaster/miniapp-sdk';
 import { Button } from '../ui/Button';
@@ -25,7 +25,7 @@ interface ShareButtonProps {
   showText?: boolean;
 }
 
-export function ShareButton({
+function ShareButtonComponent({
   product,
   variant = 'ghost',
   size = 'sm',
@@ -193,3 +193,5 @@ export function ShareButton({
     </Button>
   );
 }
+
+export const ShareButton = memo(ShareButtonComponent);

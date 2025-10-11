@@ -1,52 +1,6 @@
 "use client";
 
-import { useEffect } from 'react';
-
+// Eruda debug console - disabled for production performance
 export function ErudaInitializer() {
-  useEffect(() => {
-    // Temporary disable flag - set to false to disable eruda
-    const ERUDA_ENABLED = false;
-
-    if (!ERUDA_ENABLED) {
-      console.log('🔧 Eruda is temporarily disabled');
-      return;
-    }
-
-    // Load eruda in all environments for debugging
-    console.log('🔧 Attempting to load eruda mobile console...');
-
-    // Try multiple approaches to load eruda
-
-    // Method 1: Try npm package import first
-    import('eruda').then((eruda) => {
-      eruda.default.init();
-      console.log('✅ Eruda mobile console initialized via npm package');
-    }).catch((npmError) => {
-      console.warn('⚠️ Failed to load eruda via npm, trying CDN:', npmError);
-
-      // Method 2: Fall back to CDN script injection
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/eruda@3.0.1/eruda.min.js';
-      script.onload = () => {
-        try {
-          // @ts-expect-error - eruda will be available on window
-          if (window.eruda) {
-            // @ts-expect-error - eruda will be available on window
-            window.eruda.init();
-            console.log('✅ Eruda mobile console initialized via CDN');
-          } else {
-            console.error('❌ Eruda loaded but not available on window');
-          }
-        } catch (initError) {
-          console.error('❌ Failed to initialize eruda from CDN:', initError);
-        }
-      };
-      script.onerror = (scriptError) => {
-        console.error('❌ Failed to load eruda script from CDN:', scriptError);
-      };
-      document.head.appendChild(script);
-    });
-  }, []);
-
-  return null; // This component doesn't render anything
+  return null;
 }
