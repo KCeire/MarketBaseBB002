@@ -1,10 +1,22 @@
 // app/sell/page.tsx
 "use client";
 
+import { useState } from 'react';
 import { toast } from '../components/ui/Toast';
 import Image from 'next/image';
+import { SellerApplicationForm } from '../components/SellerApplicationForm';
 
 export default function SellPage() {
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
+
+  if (showApplicationForm) {
+    return (
+      <div className="w-full max-w-md mx-auto px-4 py-3 main-content-with-bottom-nav">
+        <SellerApplicationForm onBack={() => setShowApplicationForm(false)} />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-md mx-auto px-4 py-3 main-content-with-bottom-nav">
       <div className="space-y-6">
@@ -139,9 +151,7 @@ export default function SellPage() {
         {/* Call to Action */}
         <div className="space-y-3">
           <button
-            onClick={() => {
-              toast.info('Seller Applications Opening Soon', 'Contact lk@lkforge.xyz to register your interest');
-            }}
+            onClick={() => setShowApplicationForm(true)}
             className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
           >
             Apply to Become a Seller
