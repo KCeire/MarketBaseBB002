@@ -155,7 +155,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
       const result = await response.json();
 
       if (response.ok) {
-        toast.success('Application Submitted!', 'We&apos;ll review your application and get back to you within 2-3 business days');
+        toast.success('Application Submitted!', 'We\'ll review your application and get back to you within 2-3 business days');
         if (onBack) onBack();
         // Reset form
         setCurrentStep(1);
@@ -545,7 +545,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                     onChange={(e) => updateFormData('additionalInfo', e.target.value)}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    placeholder="Any additional information you&apos;d like to share..."
+                    placeholder="Any additional information you'd like to share..."
                   />
                 </div>
               </div>

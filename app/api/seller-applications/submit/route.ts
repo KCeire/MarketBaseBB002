@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
     // Send email notification to admin team
     try {
       await resend.emails.send({
-        from: 'Base Shop <noreply@lkforge.xyz>', // Using verified domain
+        from: 'MarketBase <noreply@lkforge.xyz>', // Using verified domain
         to: ['lk@lkforge.xyz'], // Replace with your admin email
         subject: `New Seller Application: ${application.business_name}`,
         html: `
@@ -197,15 +197,15 @@ export async function POST(request: NextRequest) {
     // Send confirmation email to applicant
     try {
       await resend.emails.send({
-        from: 'Base Shop <noreply@lkforge.xyz>', // Using verified domain
+        from: 'MarketBase <noreply@lkforge.xyz>', // Using verified domain
         to: [application.email],
-        subject: 'Application Received - Base Shop',
+        subject: 'Application Received - MarketBase',
         html: `
           <h2>Thank you for your seller application!</h2>
 
           <p>Dear ${application.contact_name},</p>
 
-          <p>We've received your application to become a seller on Base Shop. Here are the details we have on file:</p>
+          <p>We've received your application to become a seller on MarketBase. Here are the details we have on file:</p>
 
           <ul>
             <li><strong>Business Name:</strong> ${application.business_name}</li>
@@ -223,7 +223,7 @@ export async function POST(request: NextRequest) {
 
           <p>If you have any questions, please contact us at <a href="mailto:lk@lkforge.xyz">lk@lkforge.xyz</a>.</p>
 
-          <p>Best regards,<br>The Base Shop Team</p>
+          <p>Best regards,<br>The MarketBase Team</p>
         `
       });
 
