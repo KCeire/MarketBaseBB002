@@ -122,7 +122,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
   const validateStep = (step: number): boolean => {
     switch (step) {
       case 1:
-        return !!(formData.contactName && formData.email && formData.businessName && formData.businessType);
+        return !!(formData.contactName && formData.email && formData.phone && formData.businessName && formData.businessType);
       case 2:
         return !!(formData.businessDescription && formData.businessAddress && formData.productCategories.length > 0);
       case 3:
@@ -250,12 +250,12 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Full Name *
+                  Contact Name *
                 </label>
                 <input
                   type="text"
-                  value={formData.applicantName}
-                  onChange={(e) => updateFormData('applicantName', e.target.value)}
+                  value={formData.contactName}
+                  onChange={(e) => updateFormData('contactName', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
                   placeholder="Your full name"
                 />
@@ -267,8 +267,8 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                 </label>
                 <input
                   type="email"
-                  value={formData.applicantEmail}
-                  onChange={(e) => updateFormData('applicantEmail', e.target.value)}
+                  value={formData.email}
+                  onChange={(e) => updateFormData('email', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
                   placeholder="your@email.com"
                 />
@@ -305,14 +305,14 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Farcaster Username (Optional)
+                  Phone Number *
                 </label>
                 <input
-                  type="text"
-                  value={formData.farcasterUsername || ''}
-                  onChange={(e) => updateFormData('farcasterUsername', e.target.value)}
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => updateFormData('phone', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
-                  placeholder="@yourusername"
+                  placeholder="+1 (555) 123-4567"
                 />
               </div>
             </div>
@@ -338,14 +338,14 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Business Location *
+                  Business Address *
                 </label>
                 <input
                   type="text"
-                  value={formData.businessLocation}
-                  onChange={(e) => updateFormData('businessLocation', e.target.value)}
+                  value={formData.businessAddress}
+                  onChange={(e) => updateFormData('businessAddress', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
-                  placeholder="Country/Region where your business operates"
+                  placeholder="Full business address"
                 />
               </div>
 
@@ -355,8 +355,8 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                 </label>
                 <input
                   type="url"
-                  value={formData.businessWebsite || ''}
-                  onChange={(e) => updateFormData('businessWebsite', e.target.value)}
+                  value={formData.website || ''}
+                  onChange={(e) => updateFormData('website', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
                   placeholder="https://yourbusiness.com"
                 />
@@ -390,60 +390,83 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Primary Products *
+                  Average Order Value *
                 </label>
-                <textarea
-                  value={formData.primaryProducts}
-                  onChange={(e) => updateFormData('primaryProducts', e.target.value)}
-                  rows={3}
+                <select
+                  value={formData.averageOrderValue}
+                  onChange={(e) => updateFormData('averageOrderValue', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
-                  placeholder="Describe the main products you plan to sell"
-                />
+                >
+                  <option value="">Select average order value</option>
+                  <option value="$0-$50">$0 - $50</option>
+                  <option value="$50-$200">$50 - $200</option>
+                  <option value="$200-$500">$200 - $500</option>
+                  <option value="$500-$1000">$500 - $1,000</option>
+                  <option value="$1000+">$1,000+</option>
+                </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  E-commerce Experience *
+                  Monthly Volume *
                 </label>
-                <textarea
-                  value={formData.ecommerceExperience}
-                  onChange={(e) => updateFormData('ecommerceExperience', e.target.value)}
-                  rows={3}
+                <select
+                  value={formData.monthlyVolume}
+                  onChange={(e) => updateFormData('monthlyVolume', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
-                  placeholder="Describe your experience selling online, managing inventory, customer service, etc."
-                />
+                >
+                  <option value="">Select monthly volume</option>
+                  <option value="0-100">0 - 100 orders</option>
+                  <option value="100-500">100 - 500 orders</option>
+                  <option value="500-1000">500 - 1,000 orders</option>
+                  <option value="1000-5000">1,000 - 5,000 orders</option>
+                  <option value="5000+">5,000+ orders</option>
+                </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Estimated Monthly Sales Volume (Optional)
+                  Selling Experience *
                 </label>
-                <input
-                  type="number"
-                  value={formData.estimatedMonthlyVolume || ''}
-                  onChange={(e) => updateFormData('estimatedMonthlyVolume', e.target.value ? parseFloat(e.target.value) : undefined)}
+                <select
+                  value={formData.sellingExperience}
+                  onChange={(e) => updateFormData('sellingExperience', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
-                  placeholder="Expected monthly sales in USD"
-                />
+                >
+                  <option value="">Select your selling experience</option>
+                  <option value="none">No previous selling experience</option>
+                  <option value="less_than_1_year">Less than 1 year</option>
+                  <option value="1-3_years">1-3 years</option>
+                  <option value="3-5_years">3-5 years</option>
+                  <option value="5+_years">5+ years</option>
+                </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Previous Marketplace Experience (Optional)
+              <div className="space-y-3">
+                <label className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={formData.hasOnlineStore}
+                    onChange={(e) => updateFormData('hasOnlineStore', e.target.checked)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">I have an existing online store</span>
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {MARKETPLACE_PLATFORMS.map(platform => (
-                    <label key={platform} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={formData.marketplaceExperience.includes(platform)}
-                        onChange={() => toggleMarketplace(platform)}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">{platform}</span>
+
+                {formData.hasOnlineStore && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Online Store URL
                     </label>
-                  ))}
-                </div>
+                    <input
+                      type="url"
+                      value={formData.onlineStoreUrl || ''}
+                      onChange={(e) => updateFormData('onlineStoreUrl', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                      placeholder="https://youronlinestore.com"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -469,45 +492,43 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Base Network Familiarity *
+              <div className="space-y-3">
+                <label className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={formData.hasWallet}
+                    onChange={(e) => updateFormData('hasWallet', e.target.checked)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">I have a crypto wallet</span>
                 </label>
-                <textarea
-                  value={formData.baseNetworkFamiliarity}
-                  onChange={(e) => updateFormData('baseNetworkFamiliarity', e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
-                  placeholder="Are you familiar with Base network? Have you used USDC? Tell us about your experience."
-                />
+
+                {formData.hasWallet && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Wallet Address (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.walletAddress || ''}
+                      onChange={(e) => updateFormData('walletAddress', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                      placeholder="0x..."
+                    />
+                  </div>
+                )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Inventory Management (Optional)
+              <div className="space-y-3">
+                <label className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={formData.understands_basepay}
+                    onChange={(e) => updateFormData('understands_basepay', e.target.checked)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">I understand Base network and USDC payments *</span>
                 </label>
-                <input
-                  type="text"
-                  value={formData.inventoryManagementSystem || ''}
-                  onChange={(e) => updateFormData('inventoryManagementSystem', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
-                  placeholder="How do you currently track inventory? (spreadsheet, software, etc.)"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Preferred Contact Method
-                </label>
-                <select
-                  value={formData.preferredContactMethod}
-                  onChange={(e) => updateFormData('preferredContactMethod', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
-                >
-                  <option value="email">Email</option>
-                  <option value="farcaster">Farcaster</option>
-                  <option value="phone">Phone</option>
-                </select>
               </div>
             </div>
           )}
@@ -521,8 +542,8 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                 <label className="flex items-start space-x-3">
                   <input
                     type="checkbox"
-                    checked={formData.agreesToTerms}
-                    onChange={(e) => updateFormData('agreesToTerms', e.target.checked)}
+                    checked={formData.agreeToTerms}
+                    onChange={(e) => updateFormData('agreeToTerms', e.target.checked)}
                     className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -533,14 +554,27 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                 <label className="flex items-start space-x-3">
                   <input
                     type="checkbox"
-                    checked={formData.agreesToKyc}
-                    onChange={(e) => updateFormData('agreesToKyc', e.target.checked)}
+                    checked={formData.willingToComply}
+                    onChange={(e) => updateFormData('willingToComply', e.target.checked)}
                     className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300">
                     I understand that I may need to complete KYC verification and agree to provide additional documentation if required *
                   </span>
                 </label>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Additional Information (Optional)
+                  </label>
+                  <textarea
+                    value={formData.additionalInfo || ''}
+                    onChange={(e) => updateFormData('additionalInfo', e.target.value)}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                    placeholder="Any additional information you&apos;d like to share..."
+                  />
+                </div>
               </div>
 
               <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
