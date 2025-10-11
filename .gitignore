@@ -57,3 +57,8 @@ VERCEL_ENV_MAPPING.md
 
 # environment files with credentials
 .env.marketbase
+
+# debugging files (temporary - not for public repo)
+debug-and-fix.js
+debug-commissions.js
+backfill_commissions.sql

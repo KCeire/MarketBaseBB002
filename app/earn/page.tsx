@@ -133,7 +133,9 @@ export default function EarnPage() {
           <div className="grid grid-cols-3 gap-4">
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center">
               <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                ${affiliateStats ? affiliateStats.total_earned.toFixed(2) : '0.00'}
+                ${affiliateStats ? (affiliateStats.total_earned >= 0.01
+                  ? affiliateStats.total_earned.toFixed(2)
+                  : affiliateStats.total_earned.toFixed(4)) : '0.00'}
               </p>
               <p className="text-xs text-gray-600 dark:text-gray-400">Total Earned</p>
             </div>
