@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Validate required fields
-    const requiredFields = [
+    const requiredFields: (keyof SellerApplicationRequest)[] = [
       'businessName', 'contactName', 'email', 'phone',
       'businessType', 'businessDescription', 'businessAddress',
       'productCategories', 'averageOrderValue', 'monthlyVolume',
@@ -56,7 +56,8 @@ export async function POST(request: NextRequest) {
     ];
 
     for (const field of requiredFields) {
-      if (!body[field] || (Array.isArray(body[field]) && body[field].length === 0)) {
+      const value = body[field];
+      if (!value || (Array.isArray(value) && value.length === 0)) {
         return NextResponse.json({
           success: false,
           error: `Missing required field: ${field}`
