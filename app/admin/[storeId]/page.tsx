@@ -122,7 +122,7 @@ export default function StoreAdminPage() {
                     </h3>
                     <div className="mt-2 text-sm text-yellow-700">
                       <p>Your wallet ({address?.slice(0, 6)}...{address?.slice(-4)}) does not have administrative access to {storeConfig?.name || storeId}.</p>
-                      <p className="mt-2">If you believe this is an error, please contact the system administrator to add your wallet address to the store's admin list.</p>
+                      <p className="mt-2">If you believe this is an error, please contact the system administrator to add your wallet address to the store&apos;s admin list.</p>
                     </div>
                   </div>
                 </div>
