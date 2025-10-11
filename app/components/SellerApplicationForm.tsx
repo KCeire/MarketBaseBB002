@@ -122,15 +122,15 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
   const validateStep = (step: number): boolean => {
     switch (step) {
       case 1:
-        return !!(formData.applicantName && formData.applicantEmail && formData.businessName && formData.businessType);
+        return !!(formData.contactName && formData.email && formData.businessName && formData.businessType);
       case 2:
-        return !!(formData.businessDescription && formData.businessLocation && formData.productCategories.length > 0);
+        return !!(formData.businessDescription && formData.businessAddress && formData.productCategories.length > 0);
       case 3:
-        return !!(formData.primaryProducts && formData.ecommerceExperience);
+        return !!(formData.averageOrderValue && formData.monthlyVolume && formData.sellingExperience);
       case 4:
-        return !!(formData.cryptoExperience && formData.baseNetworkFamiliarity);
+        return !!(formData.cryptoExperience && formData.understands_basepay);
       case 5:
-        return formData.agreesToTerms && formData.agreesToKyc;
+        return formData.agreeToTerms && formData.willingToComply;
       default:
         return false;
     }
