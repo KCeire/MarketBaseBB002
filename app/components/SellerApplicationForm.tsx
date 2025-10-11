@@ -53,29 +53,7 @@ const BUSINESS_TYPES = [
   { value: 'other', label: 'Other' }
 ];
 
-const AVERAGE_ORDER_VALUES = [
-  { value: '$0-$50', label: '$0 - $50' },
-  { value: '$50-$200', label: '$50 - $200' },
-  { value: '$200-$500', label: '$200 - $500' },
-  { value: '$500-$1000', label: '$500 - $1,000' },
-  { value: '$1000+', label: '$1,000+' }
-];
-
-const MONTHLY_VOLUMES = [
-  { value: '0-100', label: '0 - 100 orders' },
-  { value: '100-500', label: '100 - 500 orders' },
-  { value: '500-1000', label: '500 - 1,000 orders' },
-  { value: '1000-5000', label: '1,000 - 5,000 orders' },
-  { value: '5000+', label: '5,000+ orders' }
-];
-
-const SELLING_EXPERIENCE_OPTIONS = [
-  { value: 'none', label: 'No previous selling experience' },
-  { value: 'less_than_1_year', label: 'Less than 1 year' },
-  { value: '1-3_years', label: '1-3 years' },
-  { value: '3-5_years', label: '3-5 years' },
-  { value: '5+_years', label: '5+ years' }
-];
+// Removed unused constants - will be added when form steps are implemented
 
 const PRODUCT_CATEGORIES = [
   'Electronics', 'Clothing & Fashion', 'Home & Garden', 'Health & Beauty',
@@ -126,7 +104,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
 
   const totalSteps = 5;
 
-  const updateFormData = (field: keyof SellerApplicationData, value: any) => {
+  const updateFormData = (field: keyof SellerApplicationData, value: string | boolean | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -139,14 +117,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
     }));
   };
 
-  const toggleMarketplace = (platform: string) => {
-    setFormData(prev => ({
-      ...prev,
-      marketplaceExperience: prev.marketplaceExperience.includes(platform)
-        ? prev.marketplaceExperience.filter(p => p !== platform)
-        : [...prev.marketplaceExperience, platform]
-    }));
-  };
+  // Removed unused toggleMarketplace function
 
   const validateStep = (step: number): boolean => {
     switch (step) {
@@ -194,7 +165,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
       const result = await response.json();
 
       if (response.ok) {
-        toast.success('Application Submitted!', 'We\'ll review your application and get back to you within 2-3 business days');
+        toast.success('Application Submitted!', 'We&apos;ll review your application and get back to you within 2-3 business days');
         if (onBack) onBack();
         // Reset form
         setCurrentStep(1);
@@ -575,9 +546,9 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
               <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                 <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">What happens next?</h4>
                 <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-                  <li>• We'll review your application within 2-3 business days</li>
-                  <li>• You'll receive an email with our decision</li>
-                  <li>• If approved, we'll guide you through store setup</li>
+                  <li>• We&apos;ll review your application within 2-3 business days</li>
+                  <li>• You&apos;ll receive an email with our decision</li>
+                  <li>• If approved, we&apos;ll guide you through store setup</li>
                   <li>• We may request additional information or documentation</li>
                 </ul>
               </div>
