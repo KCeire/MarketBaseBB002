@@ -1,6 +1,9 @@
 // app/api/seller-applications/submit/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/client';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface SellerApplicationRequest {
   // Basic Information
@@ -152,8 +155,94 @@ export async function POST(request: NextRequest) {
       email: application.email
     });
 
-    // TODO: Send email notification to admin team
-    // TODO: Send confirmation email to applicant
+    // Send email notification to admin team
+    try {
+      await resend.emails.send({
+        from: 'Base Shop <noreply@your-domain.com>', // Replace with your verified domain
+        to: ['lk@lkforge.xyz'], // Replace with your admin email
+        subject: `New Seller Application: ${application.business_name}`,
+        html: `
+          <h2>New Seller Application Submitted!</h2>
+
+          <h3>Business Information</h3>
+          <p><strong>Business Name:</strong> ${application.business_name}</p>
+          <p><strong>Contact Name:</strong> ${application.contact_name}</p>
+          <p><strong>Email:</strong> ${application.email}</p>
+          <p><strong>Phone:</strong> ${application.phone}</p>
+          <p><strong>Business Type:</strong> ${application.business_type}</p>
+          <p><strong>Website:</strong> ${application.website || 'Not provided'}</p>
+          <p><strong>Address:</strong> ${application.business_address}</p>
+
+          <h3>Business Details</h3>
+          <p><strong>Description:</strong> ${application.business_description}</p>
+          <p><strong>Product Categories:</strong> ${application.product_categories.join(', ')}</p>
+          <p><strong>Average Order Value:</strong> ${application.average_order_value}</p>
+          <p><strong>Monthly Volume:</strong> ${application.monthly_volume}</p>
+          <p><strong>Selling Experience:</strong> ${application.selling_experience}</p>
+
+          <h3>Technical Readiness</h3>
+          <p><strong>Crypto Experience:</strong> ${application.crypto_experience}</p>
+          <p><strong>Has Wallet:</strong> ${application.has_wallet ? 'Yes' : 'No'}</p>
+          <p><strong>Understands Base/USDC:</strong> ${application.understands_basepay ? 'Yes' : 'No'}</p>
+
+          <h3>Compliance</h3>
+          <p><strong>Agrees to Terms:</strong> ${application.agree_to_terms ? 'Yes' : 'No'}</p>
+          <p><strong>Willing to Comply:</strong> ${application.willing_to_comply ? 'Yes' : 'No'}</p>
+
+          ${application.additional_info ? `<h3>Additional Information</h3><p>${application.additional_info}</p>` : ''}
+
+          <hr>
+          <p><strong>Application ID:</strong> ${application.id}</p>
+          <p><strong>Submitted:</strong> ${new Date(application.created_at).toLocaleString()}</p>
+
+          <p>Review this application in your <a href="https://supabase.com">Supabase dashboard</a>.</p>
+        `
+      });
+
+      console.log('📧 Admin notification email sent successfully');
+    } catch (emailError) {
+      console.error('❌ Failed to send admin notification email:', emailError);
+      // Don't fail the entire request if email fails
+    }
+
+    // Send confirmation email to applicant
+    try {
+      await resend.emails.send({
+        from: 'Base Shop <noreply@your-domain.com>', // Replace with your verified domain
+        to: [application.email],
+        subject: 'Application Received - Base Shop',
+        html: `
+          <h2>Thank you for your seller application!</h2>
+
+          <p>Dear ${application.contact_name},</p>
+
+          <p>We've received your application to become a seller on Base Shop. Here are the details we have on file:</p>
+
+          <ul>
+            <li><strong>Business Name:</strong> ${application.business_name}</li>
+            <li><strong>Application ID:</strong> ${application.id}</li>
+            <li><strong>Submitted:</strong> ${new Date(application.created_at).toLocaleString()}</li>
+          </ul>
+
+          <h3>What's Next?</h3>
+          <ul>
+            <li>We'll review your application within 2-3 business days</li>
+            <li>You'll receive an email with our decision</li>
+            <li>If approved, we'll guide you through store setup</li>
+            <li>We may request additional information if needed</li>
+          </ul>
+
+          <p>If you have any questions, please contact us at <a href="mailto:lk@lkforge.xyz">lk@lkforge.xyz</a>.</p>
+
+          <p>Best regards,<br>The Base Shop Team</p>
+        `
+      });
+
+      console.log('📧 Confirmation email sent to applicant successfully');
+    } catch (emailError) {
+      console.error('❌ Failed to send confirmation email to applicant:', emailError);
+      // Don't fail the entire request if email fails
+    }
 
     return NextResponse.json({
       success: true,
