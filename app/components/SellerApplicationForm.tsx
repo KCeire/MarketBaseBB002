@@ -68,10 +68,7 @@ const CRYPTO_EXPERIENCE_OPTIONS = [
   { value: 'advanced', label: 'Advanced - Very comfortable with crypto' }
 ];
 
-const MARKETPLACE_PLATFORMS = [
-  'Amazon', 'eBay', 'Etsy', 'Shopify', 'WooCommerce', 'BigCommerce',
-  'Magento', 'OpenSea', 'Foundation', 'SuperRare', 'Other'
-];
+// Removed unused MARKETPLACE_PLATFORMS constant
 
 export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
