@@ -28,7 +28,6 @@ CREATE TABLE seller_applications (
   selling_experience TEXT NOT NULL, -- 'none', 'less_than_1_year', '1-3_years', etc.
 
   -- Technical Readiness
-  crypto_experience TEXT NOT NULL, -- 'none', 'basic', 'intermediate', 'advanced'
   has_wallet BOOLEAN NOT NULL DEFAULT FALSE,
   wallet_address TEXT,
   understands_basepay BOOLEAN NOT NULL DEFAULT FALSE,

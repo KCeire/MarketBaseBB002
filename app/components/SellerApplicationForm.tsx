@@ -29,7 +29,6 @@ interface SellerApplicationData {
   sellingExperience: string;
 
   // Technical Readiness
-  cryptoExperience: string;
   hasWallet: boolean;
   walletAddress?: string;
   understands_basepay: boolean;
@@ -61,12 +60,7 @@ const PRODUCT_CATEGORIES = [
   'Art & Crafts', 'Automotive', 'Pet Supplies', 'Digital Products', 'Other'
 ];
 
-const CRYPTO_EXPERIENCE_OPTIONS = [
-  { value: 'none', label: 'No crypto experience' },
-  { value: 'basic', label: 'Basic - Some crypto knowledge' },
-  { value: 'intermediate', label: 'Intermediate - Regular crypto user' },
-  { value: 'advanced', label: 'Advanced - Very comfortable with crypto' }
-];
+// Removed CRYPTO_EXPERIENCE_OPTIONS - no longer needed
 
 // Removed unused MARKETPLACE_PLATFORMS constant
 
@@ -90,7 +84,6 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
     hasOnlineStore: false,
     onlineStoreUrl: '',
     sellingExperience: '',
-    cryptoExperience: '',
     hasWallet: false,
     walletAddress: '',
     understands_basepay: false,
@@ -125,7 +118,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
       case 3:
         return !!(formData.averageOrderValue && formData.monthlyVolume && formData.sellingExperience);
       case 4:
-        return !!(formData.cryptoExperience && formData.understands_basepay);
+        return !!formData.understands_basepay;
       case 5:
         return formData.agreeToTerms && formData.willingToComply;
       default:
@@ -183,7 +176,6 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
           hasOnlineStore: false,
           onlineStoreUrl: '',
           sellingExperience: '',
-          cryptoExperience: '',
           hasWallet: false,
           walletAddress: '',
           understands_basepay: false,
@@ -253,7 +245,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                   type="text"
                   value={formData.contactName}
                   onChange={(e) => updateFormData('contactName', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="Your full name"
                 />
               </div>
@@ -266,7 +258,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                   type="email"
                   value={formData.email}
                   onChange={(e) => updateFormData('email', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="your@email.com"
                 />
               </div>
@@ -279,7 +271,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                   type="text"
                   value={formData.businessName}
                   onChange={(e) => updateFormData('businessName', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="Your business or brand name"
                 />
               </div>
@@ -291,7 +283,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                 <select
                   value={formData.businessType}
                   onChange={(e) => updateFormData('businessType', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select business type</option>
                   {BUSINESS_TYPES.map(type => (
@@ -308,7 +300,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => updateFormData('phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="+1 (555) 123-4567"
                 />
               </div>
@@ -328,7 +320,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                   value={formData.businessDescription}
                   onChange={(e) => updateFormData('businessDescription', e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="Describe your business, what you sell, and your target market"
                 />
               </div>
@@ -341,7 +333,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                   type="text"
                   value={formData.businessAddress}
                   onChange={(e) => updateFormData('businessAddress', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="Full business address"
                 />
               </div>
@@ -354,7 +346,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                   type="url"
                   value={formData.website || ''}
                   onChange={(e) => updateFormData('website', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="https://yourbusiness.com"
                 />
               </div>
@@ -392,7 +384,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                 <select
                   value={formData.averageOrderValue}
                   onChange={(e) => updateFormData('averageOrderValue', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select average order value</option>
                   <option value="$0-$50">$0 - $50</option>
@@ -410,7 +402,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                 <select
                   value={formData.monthlyVolume}
                   onChange={(e) => updateFormData('monthlyVolume', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select monthly volume</option>
                   <option value="0-100">0 - 100 orders</option>
@@ -428,7 +420,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                 <select
                   value={formData.sellingExperience}
                   onChange={(e) => updateFormData('sellingExperience', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select your selling experience</option>
                   <option value="none">No previous selling experience</option>
@@ -459,7 +451,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                       type="url"
                       value={formData.onlineStoreUrl || ''}
                       onChange={(e) => updateFormData('onlineStoreUrl', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                       placeholder="https://youronlinestore.com"
                     />
                   </div>
@@ -473,23 +465,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Technical Readiness</h3>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Crypto Experience *
-                </label>
-                <select
-                  value={formData.cryptoExperience}
-                  onChange={(e) => updateFormData('cryptoExperience', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
-                >
-                  <option value="">Select your crypto experience level</option>
-                  {CRYPTO_EXPERIENCE_OPTIONS.map(option => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-3">
+<div className="space-y-3">
                 <label className="flex items-center space-x-3">
                   <input
                     type="checkbox"
@@ -509,7 +485,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                       type="text"
                       value={formData.walletAddress || ''}
                       onChange={(e) => updateFormData('walletAddress', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                       placeholder="0x..."
                     />
                   </div>
@@ -568,7 +544,7 @@ export function SellerApplicationForm({ onBack }: SellerApplicationFormProps) {
                     value={formData.additionalInfo || ''}
                     onChange={(e) => updateFormData('additionalInfo', e.target.value)}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     placeholder="Any additional information you&apos;d like to share..."
                   />
                 </div>

@@ -29,7 +29,6 @@ interface SellerApplicationRequest {
   sellingExperience: string;
 
   // Technical Readiness
-  cryptoExperience: string;
   hasWallet: boolean;
   walletAddress?: string;
   understands_basepay: boolean;
@@ -51,7 +50,7 @@ export async function POST(request: NextRequest) {
       'businessName', 'contactName', 'email', 'phone',
       'businessType', 'businessDescription', 'businessAddress',
       'productCategories', 'averageOrderValue', 'monthlyVolume',
-      'sellingExperience', 'cryptoExperience', 'agreeToTerms', 'willingToComply'
+      'sellingExperience', 'agreeToTerms', 'willingToComply'
     ];
 
     for (const field of requiredFields) {
@@ -123,7 +122,6 @@ export async function POST(request: NextRequest) {
         has_online_store: body.hasOnlineStore,
         online_store_url: body.onlineStoreUrl || null,
         selling_experience: body.sellingExperience,
-        crypto_experience: body.cryptoExperience,
         has_wallet: body.hasWallet,
         wallet_address: body.walletAddress || null,
         understands_basepay: body.understands_basepay,
@@ -150,7 +148,7 @@ export async function POST(request: NextRequest) {
     // Send email notification to admin team
     try {
       await resend.emails.send({
-        from: 'Base Shop <noreply@your-domain.com>', // Replace with your verified domain
+        from: 'Base Shop <noreply@lkforge.xyz>', // Using verified domain
         to: ['lk@lkforge.xyz'], // Replace with your admin email
         subject: `New Seller Application: ${application.business_name}`,
         html: `
@@ -173,7 +171,6 @@ export async function POST(request: NextRequest) {
           <p><strong>Selling Experience:</strong> ${application.selling_experience}</p>
 
           <h3>Technical Readiness</h3>
-          <p><strong>Crypto Experience:</strong> ${application.crypto_experience}</p>
           <p><strong>Has Wallet:</strong> ${application.has_wallet ? 'Yes' : 'No'}</p>
           <p><strong>Understands Base/USDC:</strong> ${application.understands_basepay ? 'Yes' : 'No'}</p>
 
@@ -200,7 +197,7 @@ export async function POST(request: NextRequest) {
     // Send confirmation email to applicant
     try {
       await resend.emails.send({
-        from: 'Base Shop <noreply@your-domain.com>', // Replace with your verified domain
+        from: 'Base Shop <noreply@lkforge.xyz>', // Using verified domain
         to: [application.email],
         subject: 'Application Received - Base Shop',
         html: `
