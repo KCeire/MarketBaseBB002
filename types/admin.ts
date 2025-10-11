@@ -89,3 +89,58 @@ interface OrderItem {
   quantity: number;
   image: string;
 }
+
+// Multi-store admin system types
+export interface StoreConfig {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  logo?: string;
+  adminWallets: string[]; // Wallet addresses with admin access
+  isActive: boolean;
+  settings: {
+    allowOrderManagement: boolean;
+    allowProductManagement: boolean;
+    allowAnalytics: boolean;
+    customFields?: Record<string, unknown>;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StoreAdminPermissions {
+  canViewOrders: boolean;
+  canManageOrders: boolean;
+  canViewProducts: boolean;
+  canManageProducts: boolean;
+  canViewAnalytics: boolean;
+  canManageSettings: boolean;
+}
+
+export interface AdminSession {
+  walletAddress: string;
+  storeId: string | null; // null for super admin
+  storeName: string | null;
+  permissions: StoreAdminPermissions;
+  isStoreAdmin: boolean;
+  isSuperAdmin: boolean;
+}
+
+export interface StoreOrderSummary {
+  storeId: string;
+  storeName: string;
+  totalOrders: number;
+  totalRevenue: number;
+  pendingOrders: number;
+  recentOrders: DatabaseOrder[];
+}
+
+export interface StoreProductSummary {
+  storeId: string;
+  storeName: string;
+  totalProducts: number;
+  activeProducts: number;
+  lowStockProducts: number;
+  recentProducts: Array<Record<string, unknown>>; // Will be typed based on product structure
+}

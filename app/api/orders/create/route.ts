@@ -8,6 +8,56 @@ import {
   validateCustomerData,
   sanitizeForLogging
 } from '@/lib/encryption';
+import { categorizeProduct } from '@/lib/store-assignment';
+import { getAllProducts } from '@/lib/producthub/api';
+
+// Helper function to determine store assignment for an order
+async function determineOrderStore(orderItems: OrderItem[]): Promise<string | null> {
+  try {
+    // Get all products to match against order items
+    const allProducts = await getAllProducts();
+
+    // Track stores for all items in the order
+    const storeAssignments: Set<string> = new Set();
+
+    for (const item of orderItems) {
+      // Find the product in our catalog
+      const product = allProducts.find(p => p.id === item.productId);
+
+      if (product) {
+        const assignedStore = categorizeProduct(product);
+        if (assignedStore) {
+          storeAssignments.add(assignedStore);
+        }
+      }
+    }
+
+    // If all items belong to the same store, assign to that store
+    if (storeAssignments.size === 1) {
+      const storeId = Array.from(storeAssignments)[0];
+      console.log(`Order assigned to single store: ${storeId}`);
+      return storeId;
+    }
+
+    // If items span multiple stores, assign to the most common store
+    // For now, we'll just pick the first one or leave as null for mixed orders
+    if (storeAssignments.size > 1) {
+      const storeId = Array.from(storeAssignments)[0];
+      console.log(`Mixed-store order, assigning to primary store: ${storeId}`, {
+        allStores: Array.from(storeAssignments)
+      });
+      return storeId;
+    }
+
+    // No store assignment found
+    console.log('No store assignment found for order items');
+    return null;
+
+  } catch (error) {
+    console.error('Error determining order store:', error);
+    return null;
+  }
+}
 
 // Helper function to process affiliate attributions for products in an order
 async function processAffiliateAttributions(
@@ -190,6 +240,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
     // Calculate expiration (24 hours from now)
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
+    // Determine store assignment for this order
+    const assignedStore = await determineOrderStore(orderItems);
+
     // Prepare order data for database
     const orderData = {
       order_reference: orderReference,
@@ -202,6 +255,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       currency: 'USDC',
       payment_status: 'pending' as const,
       expires_at: expiresAt,
+      store_id: assignedStore, // NEW: Store assignment
     };
 
     // Debug: Check if SKUs are present in order items
@@ -255,6 +309,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       customerWallet: customerWallet ? `${customerWallet.slice(0, 6)}...${customerWallet.slice(-4)}` : '[MISSING]',
       farcasterFid: farcasterFid || 'No FID',
       farcasterUsername: farcasterUsername || 'No username',
+      assignedStore: assignedStore || 'unassigned',
       expiresAt: typedOrder.expires_at
     });
 

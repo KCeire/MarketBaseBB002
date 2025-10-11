@@ -9,6 +9,7 @@ import { Icon } from '@/app/components/ui/Icon';
 import { toast } from '@/app/components/ui/Toast';
 import { QuantitySelector } from '@/app/components/product/QuantitySelector';
 import { ShareButton } from '@/app/components/product/ShareButton';
+import { VideoPlayer } from '@/app/components/product/VideoPlayer';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -341,6 +342,46 @@ export default function ProductDetailPage() {
                     </button>
                   </>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Video Section */}
+          {product.videos && product.videos.length > 0 && (
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Product Videos</h3>
+              <div className="space-y-4">
+                {product.videos.map((videoSrc, index) => {
+                  const isYouTube = videoSrc.includes('youtube.com') || videoSrc.includes('youtu.be');
+                  const isVimeo = videoSrc.includes('vimeo.com');
+
+                  if (isYouTube || isVimeo) {
+                    // For external videos, use iframe
+                    return (
+                      <div key={index} className="aspect-video w-full bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                        <iframe
+                          src={videoSrc}
+                          title={`${product.title} - Video ${index + 1}`}
+                          className="w-full h-full"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                    );
+                  } else {
+                    // For direct video files, use our VideoPlayer component
+                    return (
+                      <VideoPlayer
+                        key={index}
+                        src={videoSrc}
+                        title={`${product.title} - Video ${index + 1}`}
+                        poster={product.image} // Use product image as poster
+                        className="aspect-video w-full"
+                      />
+                    );
+                  }
+                })}
               </div>
             </div>
           )}

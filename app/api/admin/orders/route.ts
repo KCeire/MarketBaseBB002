@@ -3,21 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/client';
 import { decryptCustomerData } from '@/lib/encryption';
 import { CustomerData } from '@/types/supabase';
+import {
+  hasAnyAdminAccess,
+  isSuperAdmin,
+  getUserStores,
+  isStoreAdmin
+} from '@/lib/admin/stores-config';
 
-// Admin wallet addresses from environment variables
-const ADMIN_ADDRESSES = process.env.ADMIN_WALLET_ADDRESSES?.split(',').map(addr => addr.trim()) || [];
-
-if (!ADMIN_ADDRESSES.length) {
-  throw new Error('Admin wallet addresses not configured');
-}
-
-// Validate address format
-const WALLET_REGEX = /^0x[a-fA-F0-9]{40}$/;
-ADMIN_ADDRESSES.forEach(addr => {
-  if (!WALLET_REGEX.test(addr)) {
-    throw new Error(`Invalid admin wallet format: ${addr}`);
-  }
-});
+// Admin wallet addresses - now using stores-config system
 
 
 interface OrderItem {
@@ -50,6 +43,7 @@ interface DecryptedOrderForClient {
   created_at: string;
   updated_at: string;
   expires_at: string;
+  store_id?: string | null;
 }
 
 interface OrderFilters {
@@ -58,6 +52,7 @@ interface OrderFilters {
   dateFrom?: string;
   dateTo?: string;
   search?: string;
+  storeId?: string; // NEW: Store-specific filtering
 }
 
 interface AdminOrdersRequest {
@@ -75,10 +70,19 @@ interface AdminOrdersResponse {
   error?: string;
 }
 
-function validateAdminAccess(walletAddress: string): boolean {
-  return ADMIN_ADDRESSES.some(
-    adminAddr => adminAddr.toLowerCase() === walletAddress.toLowerCase()
-  );
+function validateAdminAccess(walletAddress: string, storeId?: string): boolean {
+  // Check if user has any admin access first
+  if (!hasAnyAdminAccess(walletAddress)) {
+    return false;
+  }
+
+  // If no specific store requested, any admin access is sufficient
+  if (!storeId) {
+    return true;
+  }
+
+  // For specific store access, check super admin or store admin permissions
+  return isSuperAdmin(walletAddress) || isStoreAdmin(walletAddress, storeId);
 }
 
 function decryptOrderForAdmin(encryptedOrder: {
@@ -100,6 +104,7 @@ function decryptOrderForAdmin(encryptedOrder: {
   created_at: string;
   updated_at: string;
   expires_at: string;
+  store_id?: string | null;
 }): DecryptedOrderForClient {
   try {
     const customerData = decryptCustomerData(encryptedOrder.encrypted_customer_data);
@@ -123,6 +128,7 @@ function decryptOrderForAdmin(encryptedOrder: {
       created_at: encryptedOrder.created_at,
       updated_at: encryptedOrder.updated_at,
       expires_at: encryptedOrder.expires_at,
+      store_id: encryptedOrder.store_id,
     };
   } catch (error) {
     throw new Error(`Failed to decrypt order ${encryptedOrder.order_reference}: ${error}`);
@@ -131,6 +137,11 @@ function decryptOrderForAdmin(encryptedOrder: {
 
 function filterOrders(orders: DecryptedOrderForClient[], filters: OrderFilters): DecryptedOrderForClient[] {
   return orders.filter(order => {
+    // Store filter
+    if (filters.storeId && filters.storeId.length > 0 && order.store_id !== filters.storeId) {
+      return false;
+    }
+
     // Payment status filter
     if (filters.status && filters.status.length > 0 && order.payment_status !== filters.status) {
       return false;
@@ -179,7 +190,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<AdminOrde
     const { adminWallet, filters = {}, limit = 100, offset = 0 } = body;
 
     // Validate admin access
-    if (!adminWallet || !validateAdminAccess(adminWallet)) {
+    if (!adminWallet || !validateAdminAccess(adminWallet, filters?.storeId)) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized access' },
         { status: 403 }
@@ -197,10 +208,40 @@ export async function POST(request: NextRequest): Promise<NextResponse<AdminOrde
       offset: validOffset
     });
 
-    // Fetch orders from database with pagination
-    const { data: encryptedOrders, error: fetchError, count } = await supabaseAdmin
+    // Build query with store filtering if specified
+    let query = supabaseAdmin
       .from('orders')
-      .select('*', { count: 'exact' })
+      .select('*', { count: 'exact' });
+
+    // Apply store filtering at database level for performance
+    if (filters.storeId) {
+      if (filters.storeId === 'unassigned') {
+        // Show only unassigned orders (null store_id)
+        query = query.is('store_id', null);
+      } else {
+        // Show orders for specific store
+        query = query.eq('store_id', filters.storeId);
+      }
+    } else if (!isSuperAdmin(adminWallet)) {
+      // If not super admin, only show orders from their accessible stores
+      const userStores = getUserStores(adminWallet);
+      const storeIds = userStores.map(store => store.id);
+      if (storeIds.length > 0) {
+        query = query.in('store_id', storeIds);
+      } else {
+        // User has no store access, return empty result
+        return NextResponse.json({
+          success: true,
+          orders: [],
+          total: 0,
+          filtered: 0
+        });
+      }
+    }
+    // Note: If super admin and no storeId filter, show all orders including unassigned
+
+    // Apply pagination and ordering
+    const { data: encryptedOrders, error: fetchError, count } = await query
       .order('created_at', { ascending: false })
       .range(validOffset, validOffset + validLimit - 1);
 

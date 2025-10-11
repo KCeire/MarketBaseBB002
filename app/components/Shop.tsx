@@ -160,6 +160,8 @@ export function Shop({ setActiveTab, showCart = false, onBackToShop, showCategor
           originalId: product.id, // Store original ID for mapping
           compareAtPrice: product.compareAtPrice || null,
           isStoreProduct: true,
+          videos: [], // Store products don't have videos yet
+          media: [], // Store products don't have media yet
           variants: product.variants.map((variant, variantIndex) => ({
             ...variant,
             id: typeof variant.id === 'string' ? parseInt(`8${productIndex}${variantIndex}${Date.now().toString().slice(-4)}`) : variant.id,

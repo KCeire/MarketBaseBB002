@@ -294,13 +294,8 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       if (result.success && result.paymentStatus === 'completed') {
         setPaymentStep('success');
 
-        // Show single success message and redirect to orders
-        toast.success('Order Complete!', `Order ${orderRef} has been confirmed. Redirecting to your orders...`);
-
-        // Redirect to orders page after short delay
-        setTimeout(() => {
-          window.location.href = '/orders';
-        }, 2000);
+        // Success message and redirect are handled by the onSuccess callback above
+        // No need to duplicate here since the callback will be triggered
 
         if (onSuccess) {
           onSuccess(orderRef);

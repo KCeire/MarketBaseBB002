@@ -366,7 +366,6 @@ async function sendSaleNotificationEmails(
         <ul style="line-height: 1.6;">
           <li>Your order is being processed and will be shipped within 1-2 business days</li>
           <li>You'll receive a shipping confirmation email with tracking information</li>
-          <li>Estimated delivery time is 3-7 business days depending on your location</li>
         </ul>
 
 

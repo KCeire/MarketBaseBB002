@@ -43,15 +43,16 @@ next-env.d.ts
 /BaseShop-Files-To-Share
 /ShareButton-Files
 
-# supabase
+# supabase ignore 
 supabase/.temp/
 supabase/.branches/
 supabase/.git/
 .supabase/
 
-# private documentation
+# private documentation no need to be public
 PROJECT-DOCUMENTATION.md
 VERCEL_ENV_MAPPING.md
+ADMIN_SETUP.md
 
 
 

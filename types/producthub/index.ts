@@ -81,6 +81,16 @@ export interface ProductHubError {
   status: number;
 }
 
+// Media types for product media
+export interface ProductMedia {
+  id: string;
+  type: 'image' | 'video' | 'model_3d' | 'external_video';
+  src: string;
+  alt?: string;
+  preview_image?: string; // For videos and 3D models
+  position?: number;
+}
+
 // Simplified product interface for our marketplace
 export interface MarketplaceProduct {
   id: number;
@@ -90,6 +100,8 @@ export interface MarketplaceProduct {
   compareAtPrice: string | null;
   image: string;
   images: string[];
+  videos: string[]; // NEW: Video URLs
+  media: ProductMedia[]; // NEW: All media including images, videos, 3D models
   vendor: string;
   productType: string;
   handle: string;

@@ -26,6 +26,8 @@ export interface Database {
           tracking_number?: string;
           tracking_url?: string;
           notes?: string;
+          // NEW: Store assignment for multi-store organization
+          store_id?: string | null;
         };
         Insert: {
           id?: string;
@@ -50,6 +52,8 @@ export interface Database {
           tracking_number?: string;
           tracking_url?: string;
           notes?: string;
+          // NEW: Store assignment for multi-store organization
+          store_id?: string | null;
         };
         Update: {
           id?: string;
@@ -74,6 +78,8 @@ export interface Database {
           tracking_number?: string;
           tracking_url?: string;
           notes?: string;
+          // NEW: Store assignment for multi-store organization
+          store_id?: string | null;
         };
       };
       audit_logs: {
@@ -188,4 +194,6 @@ export interface DatabaseOrder {
   created_at: string;
   updated_at: string;
   expires_at: string;
+  // NEW: Store assignment for multi-store organization
+  store_id?: string | null;
 }

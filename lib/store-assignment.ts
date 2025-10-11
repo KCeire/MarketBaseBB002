@@ -50,6 +50,8 @@ export function categorizeProductByKeywords(
     compareAtPrice: null,
     image: '',
     images: [],
+    videos: [], // Add default videos
+    media: [], // Add default media
     vendor: '',
     handle: '',
     variants: []

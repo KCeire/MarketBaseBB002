@@ -108,22 +108,73 @@ function transformProductHubItem(product: ProductHubItem): MarketplaceProduct {
   // Extract images from the official images array
   const productImages = product.images.map(img => img.src);
 
-  // Extract images from description HTML
+  // Extract images and videos from description HTML
   const descriptionImages: string[] = [];
+  const descriptionVideos: string[] = [];
+  const media: import('@/types/producthub').ProductMedia[] = [];
+
   if (product.body_html) {
+    // Extract images from description
     const imgRegex = /<img[^>]+src="([^">]+)"/gi;
-    let match;
-    while ((match = imgRegex.exec(product.body_html)) !== null) {
-      const imgSrc = match[1];
+    let imgMatch;
+    while ((imgMatch = imgRegex.exec(product.body_html)) !== null) {
+      const imgSrc = imgMatch[1];
       // Only add if not already in product images and is a valid image URL
       if (!productImages.includes(imgSrc) && imgSrc.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i)) {
         descriptionImages.push(imgSrc);
       }
     }
+
+    // Extract videos from description (video tags, source tags, and direct links)
+    const videoRegex = /<video[^>]*>[\s\S]*?<\/video>|<source[^>]+src="([^">]+)"[^>]*>|href="([^">]+\.(mp4|webm|ogg|mov))"/gi;
+    let videoMatch;
+    while ((videoMatch = videoRegex.exec(product.body_html)) !== null) {
+      const videoSrc = videoMatch[1] || videoMatch[2];
+      if (videoSrc && videoSrc.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)) {
+        descriptionVideos.push(videoSrc);
+      }
+    }
+
+    // Extract YouTube and Vimeo embeds
+    const embedRegex = /(?:youtube\.com\/embed\/|youtu\.be\/|vimeo\.com\/|player\.vimeo\.com\/video\/)([a-zA-Z0-9_-]+)/gi;
+    let embedMatch;
+    while ((embedMatch = embedRegex.exec(product.body_html)) !== null) {
+      const fullMatch = embedMatch[0];
+      if (fullMatch.includes('youtube') || fullMatch.includes('youtu.be')) {
+        descriptionVideos.push(`https://www.youtube.com/embed/${embedMatch[1]}`);
+      } else if (fullMatch.includes('vimeo')) {
+        descriptionVideos.push(`https://player.vimeo.com/video/${embedMatch[1]}`);
+      }
+    }
   }
 
+  // Create media array combining images and videos
+  const allImages = [...productImages, ...descriptionImages];
+  const allVideos = [...new Set(descriptionVideos)]; // Remove duplicates
+
+  // Add images to media array
+  allImages.forEach((imgSrc, index) => {
+    media.push({
+      id: `img-${product.id}-${index}`,
+      type: 'image',
+      src: imgSrc,
+      position: index
+    });
+  });
+
+  // Add videos to media array
+  allVideos.forEach((videoSrc, index) => {
+    const isExternal = videoSrc.includes('youtube.com') || videoSrc.includes('vimeo.com');
+    media.push({
+      id: `video-${product.id}-${index}`,
+      type: isExternal ? 'external_video' : 'video',
+      src: videoSrc,
+      position: allImages.length + index
+    });
+  });
+
   // Combine all images, with product images first
-  const images = [...productImages, ...descriptionImages];
+  const images = allImages;
   const mainImage = product.image?.src || images[0] || '';
 
   return {
@@ -134,6 +185,8 @@ function transformProductHubItem(product: ProductHubItem): MarketplaceProduct {
     compareAtPrice: product.variants[0]?.compare_at_price || null,
     image: mainImage,
     images,
+    videos: allVideos, // NEW: Video URLs
+    media, // NEW: All media
     vendor: product.vendor,
     productType: product.product_type,
     handle: product.handle,
