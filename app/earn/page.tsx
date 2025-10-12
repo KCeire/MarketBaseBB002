@@ -3,6 +3,10 @@
 
 import { useState, useEffect } from 'react';
 import sdk from '@farcaster/miniapp-sdk';
+import { ProductInfoCard } from '@/app/components/affiliate/ProductInfoCard';
+import { CommissionStatusBadge } from '@/app/components/affiliate/CommissionStatusBadge';
+import { SettlementInfo } from '@/app/components/affiliate/SettlementInfo';
+import { ClaimButton } from '@/app/components/affiliate/ClaimButton';
 
 interface AffiliateStats {
   referrer_fid: string;
@@ -13,6 +17,14 @@ interface AffiliateStats {
   last_earning_date: string | null;
 }
 
+interface ProductInfo {
+  id: string;
+  title: string;
+  price: string;
+  image: string;
+  vendor: string;
+}
+
 interface AffiliateClick {
   click_id: string;
   product_id: string;
@@ -20,6 +32,8 @@ interface AffiliateClick {
   converted: boolean;
   commission_amount: number | null;
   commission_earned_at: string | null;
+  product: ProductInfo | null;
+  status: 'pending' | 'earned_pending_settlement' | 'earned';
 }
 
 export default function EarnPage() {
@@ -153,54 +167,99 @@ export default function EarnPage() {
             </div>
           </div>
 
-          {/* Activity Table */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">Recent Activity</h3>
-            <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-              <div className="bg-gray-50 dark:bg-gray-700 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-                <div className="flex justify-between text-xs font-medium text-gray-700 dark:text-gray-300">
-                  <span>Date</span>
-                  <span>Status</span>
-                  <span>Earnings</span>
-                </div>
-              </div>
-
-              {recentActivity.length > 0 ? (
-                <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {recentActivity.slice(0, 5).map((activity) => (
-                    <div key={activity.click_id} className="px-4 py-3 flex justify-between items-center">
-                      <div className="text-xs text-gray-600 dark:text-gray-400">
-                        {new Date(activity.commission_earned_at || activity.clicked_at).toLocaleDateString()}
-                      </div>
-                      <div className="text-xs">
-                        {activity.converted ? (
-                          <span className="text-green-600 dark:text-green-400 font-medium">✓ Earned</span>
-                        ) : (
-                          <span className="text-yellow-600 dark:text-yellow-400">⏳ Pending</span>
-                        )}
-                      </div>
-                      <div className="text-xs font-medium text-gray-900 dark:text-gray-100">
-                        {activity.converted && activity.commission_amount
-                          ? `$${activity.commission_amount.toFixed(2)}`
-                          : '--'
-                        }
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-4 text-center">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {userFid ? 'No affiliate activity yet' : 'Sign in to view earnings'}
-                  </p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                    {userFid ? 'Share your first product to get started!' : 'Connect your Farcaster account'}
-                  </p>
-                </div>
+          {/* Enhanced Activity Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Recent Activity</h3>
+              {recentActivity.length > 0 && (
+                <span className="text-xs text-gray-500 dark:text-gray-500">
+                  {recentActivity.length} item{recentActivity.length !== 1 ? 's' : ''}
+                </span>
               )}
             </div>
+
+            {recentActivity.length > 0 ? (
+              <div className="space-y-3">
+                {recentActivity.slice(0, 10).map((activity) => (
+                  <div
+                    key={activity.click_id}
+                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+                  >
+                    <div className="space-y-3">
+                      {/* Product Info and Status */}
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          {activity.product ? (
+                            <ProductInfoCard product={activity.product} />
+                          ) : (
+                            <div className="flex items-center space-x-3">
+                              <div className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center">
+                                <span className="text-gray-400 text-xs">No Image</span>
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                  Product #{activity.product_id}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  Product information unavailable
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <CommissionStatusBadge status={activity.status} className="ml-3 flex-shrink-0" />
+                      </div>
+
+                      {/* Settlement Info */}
+                      <SettlementInfo
+                        status={activity.status}
+                        commissionEarnedAt={activity.commission_earned_at}
+                        commissionAmount={activity.commission_amount}
+                      />
+
+                      {/* Click Date */}
+                      <div className="text-xs text-gray-500 dark:text-gray-500 border-t border-gray-100 dark:border-gray-700 pt-2">
+                        Clicked: {new Date(activity.clicked_at).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
+                <div className="text-gray-400 dark:text-gray-500 mb-3">
+                  <svg className="w-12 h-12 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm2 6a2 2 0 114 0 2 2 0 01-4 0zm6 0a2 2 0 114 0 2 2 0 01-4 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                  {userFid ? 'No affiliate activity yet' : 'Sign in to view earnings'}
+                </p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">
+                  {userFid ? 'Share your first product to get started!' : 'Connect your Farcaster account'}
+                </p>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Commission Claiming Section */}
+        {userFid && (
+          <ClaimButton
+            totalClaimable={0} // Always 0 for now since no delivery tracking
+            canClaim={false} // Always false for now
+            onClaim={() => {
+              // Placeholder for future claiming functionality
+              console.log('Claim button clicked - feature coming soon');
+            }}
+          />
+        )}
 
         {/* Debug Section - Temporary for troubleshooting */}
         {debugInfo && process.env.NODE_ENV === 'development' && (

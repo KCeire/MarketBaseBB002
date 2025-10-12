@@ -1,6 +1,7 @@
 // app/api/affiliate/activity/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/client';
+import { getProductById } from '@/lib/producthub/api';
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
@@ -39,9 +40,49 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }, { status: 500 });
     }
 
+    // Enhance activities with product information
+    const enhancedActivities = await Promise.all(
+      (activities || []).map(async (activity) => {
+        try {
+          // Fetch product information
+          const product = await getProductById(parseInt(activity.product_id));
+
+          // Determine commission status based on converted flag
+          let status: 'pending' | 'earned_pending_settlement' | 'earned';
+          if (!activity.converted) {
+            status = 'pending';
+          } else {
+            // For now, all converted items are "earned_pending_settlement"
+            // since we don't have delivery tracking yet
+            status = 'earned_pending_settlement';
+          }
+
+          return {
+            ...activity,
+            product: product ? {
+              id: product.id.toString(),
+              title: product.title,
+              price: product.price,
+              image: product.image,
+              vendor: product.vendor
+            } : null,
+            status
+          };
+        } catch (error) {
+          console.error(`Error fetching product ${activity.product_id}:`, error);
+          // Return activity with null product if fetch fails
+          return {
+            ...activity,
+            product: null,
+            status: activity.converted ? 'earned_pending_settlement' : 'pending'
+          };
+        }
+      })
+    );
+
     return NextResponse.json({
       success: true,
-      activities: activities || []
+      activities: enhancedActivities
     });
 
   } catch (error) {
