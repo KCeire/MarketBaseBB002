@@ -111,7 +111,7 @@ export function GreenOasisHomeStorefront() {
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-sm text-green-200">
-                <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs">LIVE</span>
+                <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs">BETA</span>
               </div>
             </div>
           </div>

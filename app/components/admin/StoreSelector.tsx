@@ -1,10 +1,10 @@
 // app/components/admin/StoreSelector.tsx
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Icon } from '../ui/Icon';
 import { AdminSession } from '@/types/admin';
-import { getAllActiveStores } from '@/lib/admin/stores-config';
+import { getAllActiveStores, StoreConfig } from '@/lib/admin/stores-config';
 
 interface StoreSelectorProps {
   session: AdminSession;
@@ -20,18 +20,62 @@ export function StoreSelector({
   showUnassigned = false
 }: StoreSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [allStores, setAllStores] = useState<StoreConfig[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Get available stores
-  const allStores = getAllActiveStores();
+  // Load user's accessible stores from server (already filtered by access)
+  useEffect(() => {
+    const loadUserStores = async () => {
+      setLoading(true);
+      try {
+        // Fetch only stores this user has access to (server handles filtering)
+        const response = await fetch('/api/admin/stores/list', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ walletAddress: session.walletAddress })
+        });
 
-  // If not super admin, only show stores they have access to
-  const availableStores = session.isSuperAdmin
-    ? allStores
-    : allStores.filter(store =>
-        store.adminWallets.some(wallet =>
-          wallet.toLowerCase() === session.walletAddress.toLowerCase()
-        )
-      );
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.stores) {
+            // Convert to StoreConfig format - these are already filtered by server
+            const userStores: StoreConfig[] = data.stores.map((store: any) => ({
+              id: store.id,
+              name: store.name,
+              slug: store.slug,
+              description: store.description,
+              adminWallets: store.adminWallets || [], // Server provides admin wallets
+              isActive: store.isActive,
+              settings: store.settings || {
+                allowOrderManagement: true,
+                allowProductManagement: true,
+                allowAnalytics: true,
+              },
+              createdAt: store.createdAt,
+              updatedAt: store.updatedAt || store.createdAt,
+            }));
+
+            setAllStores(userStores.filter(store => store.isActive));
+          }
+        } else {
+          console.error('Failed to fetch user stores:', response.status);
+          // Fallback to empty array if user has no access
+          setAllStores([]);
+        }
+      } catch (error) {
+        console.error('Error loading user stores:', error);
+        // Fallback to empty array on error
+        setAllStores([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserStores();
+  }, [session.walletAddress]);
+
+  // Use stores as-is since server already filtered by user access
+  const availableStores = allStores;
 
   const getSelectedStoreDisplay = () => {
     if (!selectedStoreId) {
@@ -66,11 +110,15 @@ export function StoreSelector({
         <span className="text-sm font-medium text-gray-900">
           {getSelectedStoreDisplay()}
         </span>
-        <Icon
-          name="chevron-down"
-          size="sm"
-          className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-        />
+        {loading ? (
+          <div className="animate-spin w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full" />
+        ) : (
+          <Icon
+            name="chevron-down"
+            size="sm"
+            className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          />
+        )}
       </button>
 
       {isOpen && (
@@ -84,8 +132,8 @@ export function StoreSelector({
           {/* Dropdown Menu */}
           <div className="absolute right-0 z-20 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg">
             <div className="py-1">
-              {/* All Stores Option (Super Admin Only) */}
-              {session.isSuperAdmin && (
+              {/* All Stores Option (All Admins) */}
+              {(session.isSuperAdmin || availableStores.length > 1) && (
                 <button
                   onClick={() => {
                     onStoreChange(null);
@@ -126,8 +174,8 @@ export function StoreSelector({
                 </button>
               )}
 
-              {/* Separator if super admin options exist */}
-              {session.isSuperAdmin && (
+              {/* Separator if all stores option exists */}
+              {(session.isSuperAdmin || availableStores.length > 1) && (
                 <div className="border-t border-gray-200 my-1" />
               )}
 

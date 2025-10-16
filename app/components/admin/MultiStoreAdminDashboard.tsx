@@ -8,6 +8,8 @@ import { Icon } from '../ui/Icon';
 import { AdminSession, StoreOrderSummary } from '@/types/admin';
 import { SuperAdminSettings } from './SuperAdminSettings';
 import { StoreSelector } from './StoreSelector';
+import { ShopifyIntegration } from './seller/ShopifyIntegration';
+import { ManualProductManagement } from './seller/ManualProductManagement';
 
 interface DecryptedOrderForClient {
   id: string;
@@ -56,8 +58,52 @@ function MultiStoreAdminDashboardInner({ session }: MultiStoreAdminDashboardProp
   const [storeData] = useState<StoreOrderSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(session.storeId || null);
+  const [availableStores, setAvailableStores] = useState<any[]>([]);
 
   const storeId = selectedStoreId || session.storeId || searchParams.get('store');
+
+  // Function to get the header title based on current store selection
+  const getHeaderTitle = () => {
+    if (!selectedStoreId || selectedStoreId === 'all') {
+      if (session.isSuperAdmin) {
+        return 'MarketBase Admin';
+      } else {
+        return 'All My Stores';
+      }
+    }
+
+    if (selectedStoreId === 'unassigned') {
+      return 'Unassigned Orders';
+    }
+
+    // Find the store name from the available stores
+    const store = availableStores.find(s => s.id === selectedStoreId);
+    return store ? `${store.name} Admin` : 'Store Admin';
+  };
+
+  // Load available stores for header title
+  useEffect(() => {
+    const loadStores = async () => {
+      try {
+        const response = await fetch('/api/admin/stores/list', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ walletAddress: session.walletAddress })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.stores) {
+            setAvailableStores(data.stores);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading stores for header:', error);
+      }
+    };
+
+    loadStores();
+  }, [session.walletAddress]);
 
   useEffect(() => {
     const fetchStoreData = async () => {
@@ -81,48 +127,46 @@ function MultiStoreAdminDashboardInner({ session }: MultiStoreAdminDashboardProp
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-          <p className="text-gray-600">Loading dashboard...</p>
+          <div className="animate-spin w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full mx-auto"></div>
+          <p className="text-gray-300">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-900">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-gray-800 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-gray-900">
-                {session.storeName ? `${session.storeName} Admin` : 'MarketBase Admin'}
+              <h1 className="text-2xl font-bold text-white">
+                {getHeaderTitle()}
               </h1>
-              {session.storeName && (
-                <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+              {session.storeName && !session.isSuperAdmin && (
+                <span className="px-3 py-1 bg-blue-900/30 text-blue-300 text-sm font-medium rounded-full">
                   Store Admin
                 </span>
               )}
               {session.isSuperAdmin && (
-                <span className="px-3 py-1 bg-purple-100 text-purple-800 text-sm font-medium rounded-full">
+                <span className="px-3 py-1 bg-purple-900/30 text-purple-300 text-sm font-medium rounded-full">
                   Super Admin
                 </span>
               )}
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Store Selector for Super Admin */}
-              {session.isSuperAdmin && (
-                <StoreSelector
-                  session={session}
-                  selectedStoreId={selectedStoreId}
-                  onStoreChange={setSelectedStoreId}
-                  showUnassigned={true}
-                />
-              )}
-              <div className="text-sm text-gray-500">
+              {/* Store Selector for All Admins */}
+              <StoreSelector
+                session={session}
+                selectedStoreId={selectedStoreId}
+                onStoreChange={setSelectedStoreId}
+                showUnassigned={session.isSuperAdmin}
+              />
+              <div className="text-sm text-gray-400">
                 Connected: {address?.slice(0, 6)}...{address?.slice(-4)}
               </div>
             </div>
@@ -134,8 +178,8 @@ function MultiStoreAdminDashboardInner({ session }: MultiStoreAdminDashboardProp
               onClick={() => setActiveTab('overview')}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'overview'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-blue-400 text-blue-400'
+                  : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
               }`}
             >
               <Icon name="chart-bar" size="sm" className="inline mr-2" />
@@ -147,8 +191,8 @@ function MultiStoreAdminDashboardInner({ session }: MultiStoreAdminDashboardProp
                 onClick={() => setActiveTab('orders')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'orders'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-400 text-blue-400'
+                    : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
                 }`}
               >
                 <Icon name="shopping-bag" size="sm" className="inline mr-2" />
@@ -161,8 +205,8 @@ function MultiStoreAdminDashboardInner({ session }: MultiStoreAdminDashboardProp
                 onClick={() => setActiveTab('products')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'products'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-400 text-blue-400'
+                    : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
                 }`}
               >
                 <Icon name="package" size="sm" className="inline mr-2" />
@@ -175,8 +219,8 @@ function MultiStoreAdminDashboardInner({ session }: MultiStoreAdminDashboardProp
                 onClick={() => setActiveTab('analytics')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'analytics'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-400 text-blue-400'
+                    : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
                 }`}
               >
                 <Icon name="chart-line" size="sm" className="inline mr-2" />
@@ -184,13 +228,42 @@ function MultiStoreAdminDashboardInner({ session }: MultiStoreAdminDashboardProp
               </button>
             )}
 
+            {/* New Seller-Specific Tabs */}
+            {session.isStoreAdmin && !session.isSuperAdmin && (
+              <>
+                <button
+                  onClick={() => setActiveTab('shopify')}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'shopify'
+                      ? 'border-blue-400 text-blue-400'
+                      : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
+                  }`}
+                >
+                  <Icon name="store" size="sm" className="inline mr-2" />
+                  Shopify Integration
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('manual-products')}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'manual-products'
+                      ? 'border-blue-400 text-blue-400'
+                      : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
+                  }`}
+                >
+                  <Icon name="plus" size="sm" className="inline mr-2" />
+                  Product Management
+                </button>
+              </>
+            )}
+
             {session.permissions.canManageSettings && (
               <button
                 onClick={() => setActiveTab('settings')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'settings'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-400 text-blue-400'
+                    : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
                 }`}
               >
                 <Icon name="settings" size="sm" className="inline mr-2" />
@@ -219,6 +292,14 @@ function MultiStoreAdminDashboardInner({ session }: MultiStoreAdminDashboardProp
           <AnalyticsTab session={session} />
         )}
 
+        {activeTab === 'shopify' && session.isStoreAdmin && session.storeId && (
+          <ShopifyIntegration storeId={session.storeId} />
+        )}
+
+        {activeTab === 'manual-products' && session.isStoreAdmin && session.storeId && (
+          <ManualProductManagement storeId={session.storeId} />
+        )}
+
         {activeTab === 'settings' && session.permissions.canManageSettings && (
           <SettingsTab session={session} />
         )}
@@ -232,86 +313,102 @@ function OverviewTab({ session, storeData }: { session: AdminSession; storeData:
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-700">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
               <Icon name="shopping-bag" size="md" className="text-blue-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Orders</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-gray-300">Total Orders</p>
+              <p className="text-2xl font-bold text-white">
                 {storeData?.totalOrders || '---'}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-700">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
               <Icon name="dollar-sign" size="md" className="text-green-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-gray-300">Total Revenue</p>
+              <p className="text-2xl font-bold text-white">
                 ${storeData?.totalRevenue?.toFixed(2) || '0.00'}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-700">
           <div className="flex items-center">
             <div className="p-2 bg-yellow-100 rounded-lg">
               <Icon name="clock" size="md" className="text-yellow-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Pending Orders</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-gray-300">Pending Orders</p>
+              <p className="text-2xl font-bold text-white">
                 {storeData?.pendingOrders || '---'}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-700">
           <div className="flex items-center">
             <div className="p-2 bg-purple-100 rounded-lg">
               <Icon name="package" size="md" className="text-purple-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Active Products</p>
-              <p className="text-2xl font-bold text-gray-900">---</p>
+              <p className="text-sm font-medium text-gray-300">Active Products</p>
+              <p className="text-2xl font-bold text-white">---</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Store Information</h3>
+      <div className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-6">
+        <h3 className="text-lg font-semibold text-white mb-4">Store Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <p className="text-sm font-medium text-gray-600">Store Name</p>
-            <p className="text-gray-900">{session.storeName || 'All Stores'}</p>
+            <p className="text-sm font-medium text-gray-300">Store Name</p>
+            <p className="text-white">{session.storeName || 'All Stores'}</p>
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-600">Store ID</p>
-            <p className="text-gray-900 font-mono text-sm">{session.storeId || 'N/A'}</p>
+            <p className="text-sm font-medium text-gray-300">Store ID</p>
+            <p className="text-white font-mono text-sm">{session.storeId || 'N/A'}</p>
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-600">Admin Type</p>
-            <p className="text-gray-900">
+            <p className="text-sm font-medium text-gray-300">Admin Type</p>
+            <p className="text-white">
               {session.isSuperAdmin ? 'Super Admin' : 'Store Admin'}
             </p>
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-600">Wallet Address</p>
-            <p className="text-gray-900 font-mono text-sm">{session.walletAddress}</p>
+            <p className="text-sm font-medium text-gray-300">Wallet Address</p>
+            <p className="text-white font-mono text-sm">{session.walletAddress}</p>
           </div>
         </div>
       </div>
     </div>
   );
+}
+
+// Helper function to determine the correct storeId filter
+function getStoreIdFilter(selectedStore: string | null | undefined, sessionStore: string | null | undefined): string | undefined {
+  // If a specific store is selected, use it
+  if (selectedStore && selectedStore !== 'all' && selectedStore !== 'null') {
+    return selectedStore;
+  }
+
+  // If viewing "All Stores" (selectedStore is null, 'all', etc.), don't filter by store
+  if (!selectedStore || selectedStore === 'all') {
+    return undefined; // This will show all accessible orders for the user
+  }
+
+  // Fallback to session store only if no selectedStore specified
+  return sessionStore || undefined;
 }
 
 function OrdersTab({ session, selectedStoreId }: { session: AdminSession; selectedStoreId?: string | null }) {
@@ -323,14 +420,14 @@ function OrdersTab({ session, selectedStoreId }: { session: AdminSession; select
     status: '',
     orderStatus: '',
     search: '',
-    storeId: selectedStoreId || session.storeId || ''
+    storeId: getStoreIdFilter(selectedStoreId, session.storeId)
   });
 
   // Update filters when selectedStoreId changes
   useEffect(() => {
     setFilters(prev => ({
       ...prev,
-      storeId: selectedStoreId || session.storeId || ''
+      storeId: getStoreIdFilter(selectedStoreId, session.storeId)
     }));
   }, [selectedStoreId, session.storeId]);
 
@@ -445,9 +542,9 @@ function OrdersTab({ session, selectedStoreId }: { session: AdminSession; select
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-6">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-white">
             Order History {session.storeName && `- ${session.storeName}`}
           </h3>
           <Button
@@ -464,13 +561,13 @@ function OrdersTab({ session, selectedStoreId }: { session: AdminSession; select
         {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-200 mb-2">
               Payment Status
             </label>
             <select
               value={filters.status}
               onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
+              className="w-full px-3 py-2 border border-gray-600 rounded-md text-white bg-gray-700"
             >
               <option value="">All Statuses</option>
               <option value="pending">Pending</option>
@@ -481,13 +578,13 @@ function OrdersTab({ session, selectedStoreId }: { session: AdminSession; select
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-200 mb-2">
               Order Status
             </label>
             <select
               value={filters.orderStatus}
               onChange={(e) => setFilters(prev => ({ ...prev, orderStatus: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
+              className="w-full px-3 py-2 border border-gray-600 rounded-md text-white bg-gray-700"
             >
               <option value="">All Orders</option>
               <option value="confirmed">Confirmed</option>
@@ -498,7 +595,7 @@ function OrdersTab({ session, selectedStoreId }: { session: AdminSession; select
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-200 mb-2">
               Search Orders
             </label>
             <input
@@ -506,14 +603,14 @@ function OrdersTab({ session, selectedStoreId }: { session: AdminSession; select
               value={filters.search}
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
               placeholder="Search by order reference, customer name, or email..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white"
+              className="w-full px-3 py-2 border border-gray-600 rounded-md text-white bg-gray-700"
             />
           </div>
         </div>
 
         {/* Export Section */}
         {orders.length > 0 && (
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+          <div className="bg-gray-700 rounded-lg p-4 mb-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <label className="flex items-center space-x-2">
@@ -523,11 +620,11 @@ function OrdersTab({ session, selectedStoreId }: { session: AdminSession; select
                     onChange={handleSelectAll}
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
-                  <span className="text-sm font-medium">
+                  <span className="text-sm font-medium text-gray-200">
                     Select All ({orders.length})
                   </span>
                 </label>
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-gray-300">
                   {selectedOrders.length} selected for export
                 </div>
               </div>
@@ -552,7 +649,7 @@ function OrdersTab({ session, selectedStoreId }: { session: AdminSession; select
         ) : orders.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+              <thead className="text-xs text-gray-200 uppercase bg-gray-700">
                 <tr>
                   <th className="px-4 py-3 w-12">
                     <input
@@ -577,10 +674,10 @@ function OrdersTab({ session, selectedStoreId }: { session: AdminSession; select
                   return (
                     <tr
                       key={order.id}
-                      className={`border-b hover:bg-gray-50 ${
+                      className={`border-b border-gray-600 hover:bg-gray-700 ${
                         isUnassigned
-                          ? 'bg-orange-50 border-orange-200'
-                          : 'bg-white'
+                          ? 'bg-orange-900/20 border-orange-800'
+                          : 'bg-gray-800'
                       }`}
                     >
                       <td className="px-4 py-4">
@@ -591,7 +688,7 @@ function OrdersTab({ session, selectedStoreId }: { session: AdminSession; select
                           className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                         />
                       </td>
-                      <td className="px-6 py-4 font-medium text-gray-900">
+                      <td className="px-6 py-4 font-medium text-white">
                         <div className="flex items-center space-x-2">
                           <span>{order.order_reference}</span>
                           {isUnassigned && (
@@ -604,7 +701,7 @@ function OrdersTab({ session, selectedStoreId }: { session: AdminSession; select
                       </td>
                       <td className="px-6 py-4">
                         <div>
-                          <div className="font-medium text-gray-900">
+                          <div className="font-medium text-white">
                             {order.customerData?.shippingAddress?.name || 'N/A'}
                           </div>
                           <div className="text-gray-500 text-xs">
@@ -612,7 +709,7 @@ function OrdersTab({ session, selectedStoreId }: { session: AdminSession; select
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 font-medium text-gray-900">
+                      <td className="px-6 py-4 font-medium text-white">
                         ${order.total_amount?.toFixed(2) || '0.00'} {order.currency}
                       </td>
                       <td className="px-6 py-4">
@@ -642,7 +739,7 @@ function OrdersTab({ session, selectedStoreId }: { session: AdminSession; select
         ) : (
           <div className="text-center py-12">
             <Icon name="shopping-bag" size="lg" className="mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
+            <h3 className="text-lg font-medium text-white mb-2">No orders found</h3>
             <p className="text-gray-500">
               {filters.search || filters.status || filters.orderStatus
                 ? 'No orders match your current filters.'
@@ -657,11 +754,11 @@ function OrdersTab({ session, selectedStoreId }: { session: AdminSession; select
 
 function ProductsTab({ session }: { session: AdminSession }) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+    <div className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-6">
+      <h3 className="text-lg font-semibold text-white mb-4">
         {session.storeName ? `${session.storeName} Products` : 'All Products'}
       </h3>
-      <p className="text-gray-600">Product management interface will be implemented here.</p>
+      <p className="text-gray-300">Product management interface will be implemented here.</p>
       {/* This will be implemented in the next step */}
     </div>
   );
@@ -669,11 +766,11 @@ function ProductsTab({ session }: { session: AdminSession }) {
 
 function AnalyticsTab({ session }: { session: AdminSession }) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+    <div className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-6">
+      <h3 className="text-lg font-semibold text-white mb-4">
         {session.storeName ? `${session.storeName} Analytics` : 'All Analytics'}
       </h3>
-      <p className="text-gray-600">Analytics dashboard will be implemented here.</p>
+      <p className="text-gray-300">Analytics dashboard will be implemented here.</p>
     </div>
   );
 }
@@ -686,10 +783,10 @@ function SettingsTab({ session }: { session: AdminSession }) {
 export function MultiStoreAdminDashboard({ session }: MultiStoreAdminDashboardProps) {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-          <p className="text-gray-600">Loading dashboard...</p>
+          <div className="animate-spin w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full mx-auto"></div>
+          <p className="text-gray-300">Loading dashboard...</p>
         </div>
       </div>
     }>

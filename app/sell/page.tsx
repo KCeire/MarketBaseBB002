@@ -31,6 +31,16 @@ export default function SellPage() {
           <p className="text-sm text-gray-600 dark:text-gray-400">Join our existing sellers to realise the full potential of selling Onchain</p>
         </div>
 
+        {/* Top Apply Button */}
+        <div>
+          <button
+            onClick={() => setShowApplicationForm(true)}
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+          >
+            Apply to Become a Seller
+          </button>
+        </div>
+
         {/* Why Sell With Us */}
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Why Sell With Us?</h2>

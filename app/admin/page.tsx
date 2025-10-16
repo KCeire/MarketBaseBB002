@@ -73,11 +73,11 @@ export default function AdminPage() {
   }, [address, isConnected, router, redirecting]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-900">
       {/* Wallet connection header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="bg-gray-800 border-b border-gray-700 px-4 py-3">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-semibold">MarketBase Admin</h1>
+          <h1 className="text-xl font-semibold text-white">MarketBase Admin</h1>
           <Wallet className="z-10">
             <ConnectWallet>
               <Name className="text-inherit" />
@@ -97,10 +97,10 @@ export default function AdminPage() {
 
       <MultiStoreAdminAuth>
         {loading || redirecting ? (
-          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="min-h-screen bg-gray-900 flex items-center justify-center">
             <div className="text-center space-y-4">
-              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-              <p className="text-gray-600">
+              <div className="animate-spin w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full mx-auto"></div>
+              <p className="text-gray-300">
                 {redirecting ? 'Redirecting to your store admin...' : 'Loading admin panel...'}
               </p>
             </div>

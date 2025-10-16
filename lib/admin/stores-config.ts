@@ -156,6 +156,7 @@ export function isStoreAdmin(walletAddress: string, storeId: string): boolean {
   );
 }
 
+
 export function isSuperAdmin(walletAddress: string): boolean {
   return SUPER_ADMIN_WALLETS.some(
     adminAddr => adminAddr !== 'test' && adminAddr.toLowerCase() === walletAddress.toLowerCase()

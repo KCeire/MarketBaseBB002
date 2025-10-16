@@ -77,10 +77,10 @@ export default function StoreAdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-          <p className="text-gray-600">
+          <div className="animate-spin w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full mx-auto"></div>
+          <p className="text-gray-300">
             Loading {storeConfig?.name || storeId} admin panel...
           </p>
         </div>
@@ -93,18 +93,18 @@ export default function StoreAdminPage() {
     const isStoreNotFound = !storeConfig;
 
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="max-w-lg w-full mx-4">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-8 text-center">
+            <div className="w-16 h-16 bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl font-bold text-white mb-2">
               {isAccessDenied ? 'Access Denied' : isStoreNotFound ? 'Store Not Found' : 'Store Access Error'}
             </h2>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-300 mb-4">
               {error || `Store "${storeId}" not found`}
             </p>
 
@@ -150,15 +150,15 @@ export default function StoreAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-900">
       {/* Wallet connection header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="bg-gray-800 border-b border-gray-700 px-4 py-3">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            <h1 className="text-xl font-semibold">
+            <h1 className="text-xl font-semibold text-white">
               {storeConfig.name} Admin
             </h1>
-            <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+            <span className="px-3 py-1 bg-blue-900/30 text-blue-300 text-xs font-medium rounded-full">
               {storeConfig.slug}
             </span>
           </div>
@@ -183,10 +183,10 @@ export default function StoreAdminPage() {
         {session ? (
           <MultiStoreAdminDashboard session={session} />
         ) : (
-          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="min-h-screen bg-gray-900 flex items-center justify-center">
             <div className="text-center space-y-4">
-              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-              <p className="text-gray-600">Initializing store admin...</p>
+              <div className="animate-spin w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full mx-auto"></div>
+              <p className="text-gray-300">Initializing store admin...</p>
             </div>
           </div>
         )}

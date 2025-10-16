@@ -18,7 +18,7 @@ interface Store {
   image: string;
   logo?: string;
   path: string;
-  status: 'live' | 'coming-soon';
+  status: 'beta' | 'coming-soon';
   featured: boolean;
   stats?: {
     products: number;
@@ -36,7 +36,7 @@ const stores: Store[] = [
     image: '/stores/nft-energy-preview.jpg',
     logo: '/stores/NFTEnergyDrinks/NFTEnergyDrinksLogo.png',
     path: '/store/nft-energy',
-    status: 'live',
+    status: 'beta',
     featured: true,
     stats: {
       products: 6,
@@ -51,7 +51,7 @@ const stores: Store[] = [
     category: 'Electronics',
     image: '/AppMedia/store-electronics.jpg',
     path: '/store/techwave-electronics',
-    status: 'live',
+    status: 'beta',
     featured: true,
     stats: {
       products: 150,
@@ -66,7 +66,7 @@ const stores: Store[] = [
     category: 'Home & Garden',
     image: '/AppMedia/store-home-garden.jpg',
     path: '/store/green-oasis-home',
-    status: 'live',
+    status: 'beta',
     featured: true,
     stats: {
       products: 200,
@@ -81,7 +81,7 @@ const stores: Store[] = [
     category: 'Pet Products',
     image: '/AppMedia/store-pet-products.jpg',
     path: '/store/pawsome-pets',
-    status: 'live',
+    status: 'beta',
     featured: false,
     stats: {
       products: 120,
@@ -96,7 +96,7 @@ const stores: Store[] = [
     category: 'Health & Beauty',
     image: '/AppMedia/store-health-beauty.jpg',
     path: '/store/radiant-beauty',
-    status: 'live',
+    status: 'beta',
     featured: false,
     stats: {
       products: 180,
@@ -111,7 +111,7 @@ const stores: Store[] = [
     category: 'Sports & Outdoors',
     image: '/AppMedia/store-sports-outdoors.jpg',
     path: '/store/apex-athletics',
-    status: 'live',
+    status: 'beta',
     featured: false,
     stats: {
       products: 250,
@@ -197,10 +197,10 @@ export default function StoresPage() {
     calculateProductCounts();
   }, []);
 
-  const liveStores = stores.filter(store => store.status === 'live');
+  const betaStores = stores.filter(store => store.status === 'beta');
 
   const handleStoreClick = (store: Store) => {
-    if (store.status === 'live') {
+    if (store.status === 'beta') {
       router.push(store.path);
     }
   };
@@ -209,12 +209,12 @@ export default function StoresPage() {
     <div className="w-full max-w-6xl mx-auto px-4 py-6 main-content-with-bottom-nav">
       <div className="space-y-8">
 
-        {/* Featured Stores - Live */}
-        {liveStores.length > 0 && (
+        {/* Featured Stores - Beta */}
+        {betaStores.length > 0 && (
           <section>
             
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
-              {liveStores.map((store) => (
+              {betaStores.map((store) => (
                 <div
                   key={store.id}
                   onClick={() => handleStoreClick(store)}

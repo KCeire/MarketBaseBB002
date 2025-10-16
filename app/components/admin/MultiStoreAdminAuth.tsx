@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { AdminSession } from '@/types/admin';
+import { AccessDeniedSeller } from './AccessDeniedSeller';
 
 interface StoreOption {
   id: string;
@@ -32,7 +33,7 @@ function MultiStoreAdminAuthInner({ children, requiredStoreId }: MultiStoreAdmin
   const [availableStores, setAvailableStores] = useState<StoreOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedStore, setSelectedStore] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   // Get store from URL params or required store
   const targetStoreId = requiredStoreId || searchParams.get('store') || '';
@@ -137,88 +138,35 @@ function MultiStoreAdminAuthInner({ children, requiredStoreId }: MultiStoreAdmin
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-          <p className="text-gray-600">Loading admin panel...</p>
+          <div className="animate-spin w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full mx-auto"></div>
+          <p className="text-gray-300">Loading admin panel...</p>
         </div>
       </div>
     );
   }
 
   if (!isConnected) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="max-w-md w-full mx-4">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Icon name="shield" size="lg" className="text-blue-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Admin Access Required</h2>
-            <p className="text-gray-600 mb-6">
-              Please connect your wallet to access the admin panel.
-            </p>
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={() => window.location.href = '/'}
-              icon={<Icon name="arrow-left" size="sm" />}
-            >
-              Back to Store
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
+    return <AccessDeniedSeller userWallet={null} />;
   }
 
   if (!session) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="max-w-md w-full mx-4">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Icon name="shield-x" size="lg" className="text-red-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
-            <p className="text-gray-600 mb-4">
-              Your wallet address is not authorized to access the admin panel.
-            </p>
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
-                <p className="text-sm text-red-600">{error}</p>
-              </div>
-            )}
-            <div className="bg-gray-50 rounded-md p-3 mb-6">
-              <p className="text-sm text-gray-500">Connected Wallet:</p>
-              <p className="text-sm font-mono text-gray-700">{address}</p>
-            </div>
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={() => window.location.href = '/'}
-              icon={<Icon name="arrow-left" size="sm" />}
-            >
-              Back to Store
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
+    return <AccessDeniedSeller userWallet={address} />;
   }
 
   // Show store selection if user has access to multiple stores and no specific store is required
   if (!requiredStoreId && !targetStoreId && availableStores.length > 1 && !selectedStore) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="max-w-md w-full mx-4">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+          <div className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-8">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Icon name="store" size="lg" className="text-blue-600" />
+              <div className="w-16 h-16 bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Icon name="store" size="lg" className="text-blue-400" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Select Store</h2>
-              <p className="text-gray-600">
+              <h2 className="text-2xl font-bold text-white mb-2">Select Store</h2>
+              <p className="text-gray-300">
                 Choose which store you&apos;d like to manage:
               </p>
             </div>
@@ -230,8 +178,8 @@ function MultiStoreAdminAuthInner({ children, requiredStoreId }: MultiStoreAdmin
                   onClick={() => handleStoreSelection(store.id)}
                   className="w-full p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-blue-300 transition-colors"
                 >
-                  <h3 className="font-semibold text-gray-900">{store.name}</h3>
-                  <p className="text-sm text-gray-500">Manage {store.slug}</p>
+                  <h3 className="font-semibold text-white">{store.name}</h3>
+                  <p className="text-sm text-gray-400">Manage {store.slug}</p>
                 </button>
               ))}
 
@@ -246,7 +194,7 @@ function MultiStoreAdminAuthInner({ children, requiredStoreId }: MultiStoreAdmin
               )}
             </div>
 
-            <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="mt-6 pt-6 border-t border-gray-600">
               <Button
                 variant="ghost"
                 size="sm"
@@ -271,10 +219,10 @@ function MultiStoreAdminAuthInner({ children, requiredStoreId }: MultiStoreAdmin
 export function MultiStoreAdminAuth({ children, requiredStoreId }: MultiStoreAdminAuthProps) {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-          <p className="text-gray-600">Loading admin authentication...</p>
+          <div className="animate-spin w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full mx-auto"></div>
+          <p className="text-gray-300">Loading admin authentication...</p>
         </div>
       </div>
     }>

@@ -6,6 +6,7 @@ import { AdminSession, StoreConfig } from '@/types/admin';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { getAllActiveStores, SUPER_ADMIN_WALLETS } from '@/lib/admin/stores-config';
+import { StoreManagement } from './super/StoreManagement';
 
 interface SuperAdminSettingsProps {
   session: AdminSession;
@@ -21,6 +22,7 @@ interface EnvironmentVariableInfo {
 
 export function SuperAdminSettings({ session }: SuperAdminSettingsProps) {
   const [stores, setStores] = useState<StoreConfig[]>([]);
+  const [activeTab, setActiveTab] = useState<'settings' | 'stores'>('settings');
 
   useEffect(() => {
     loadStoreConfigs();
@@ -37,11 +39,11 @@ export function SuperAdminSettings({ session }: SuperAdminSettingsProps) {
 
   if (!session.isSuperAdmin) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-6">
         <div className="text-center">
           <Icon name="shield-exclamation" size="lg" className="mx-auto text-red-500 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
-          <p className="text-gray-500">
+          <h3 className="text-lg font-medium text-white mb-2">Access Denied</h3>
+          <p className="text-gray-400">
             Super admin privileges are required to access this section.
           </p>
         </div>
@@ -70,10 +72,46 @@ export function SuperAdminSettings({ session }: SuperAdminSettingsProps) {
     navigator.clipboard.writeText(text);
   };
 
+  const tabs = [
+    { id: 'settings', name: 'Admin Settings', icon: 'settings' },
+    { id: 'stores', name: 'Store Management', icon: 'store' }
+  ] as const;
+
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Super Admin Settings</h3>
+      {/* Tab Navigation */}
+      <div className="bg-gray-800 rounded-lg shadow-sm border border-gray-700">
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`
+                  group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm
+                  ${activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-300'
+                  }
+                `}
+              >
+                <Icon
+                  name={tab.icon}
+                  size="sm"
+                  className={`mr-2 ${activeTab === tab.id ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-400'}`}
+                />
+                {tab.name}
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* Tab Content */}
+        <div className="p-6">
+          {activeTab === 'settings' && (
+            <div className="space-y-6">
+      <div className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-6">
+        <h3 className="text-lg font-semibold text-white mb-4">Super Admin Settings</h3>
         <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
           <div className="flex">
             <Icon name="information-circle" size="sm" className="text-blue-500 mt-0.5 mr-3" />
@@ -89,12 +127,12 @@ export function SuperAdminSettings({ session }: SuperAdminSettingsProps) {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
-            <h4 className="text-md font-medium text-gray-900 mb-3">Current Super Admins</h4>
+            <h4 className="text-md font-medium text-white mb-3">Current Super Admins</h4>
             <div className="space-y-2">
               {SUPER_ADMIN_WALLETS.length > 0 ? (
                 SUPER_ADMIN_WALLETS.map((wallet, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-                    <span className="font-mono text-sm text-gray-700">
+                    <span className="font-mono text-sm text-gray-200">
                       {wallet.slice(0, 8)}...{wallet.slice(-6)}
                     </span>
                     <Button
@@ -108,23 +146,23 @@ export function SuperAdminSettings({ session }: SuperAdminSettingsProps) {
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-gray-500">No super admin wallets configured</p>
+                <p className="text-sm text-gray-400">No super admin wallets configured</p>
               )}
             </div>
           </div>
 
           <div>
-            <h4 className="text-md font-medium text-gray-900 mb-3">Store Admin Overview</h4>
+            <h4 className="text-md font-medium text-white mb-3">Store Admin Overview</h4>
             <div className="space-y-3">
               {stores.map(store => (
                 <div key={store.id} className="p-3 bg-gray-50 rounded-md">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-gray-900">{store.name}</p>
-                      <p className="text-sm text-gray-500">{store.id}</p>
+                      <p className="font-medium text-white">{store.name}</p>
+                      <p className="text-sm text-gray-400">{store.id}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-white">
                         {store.adminWallets.length} admin{store.adminWallets.length !== 1 ? 's' : ''}
                       </p>
                       <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
@@ -143,9 +181,9 @@ export function SuperAdminSettings({ session }: SuperAdminSettingsProps) {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Environment Variables Configuration</h3>
-        <p className="text-gray-600 mb-6">
+      <div className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-6">
+        <h3 className="text-lg font-semibold text-white mb-4">Environment Variables Configuration</h3>
+        <p className="text-gray-300 mb-6">
           Copy these environment variable names and configure them in your deployment platform with appropriate wallet addresses.
         </p>
 
@@ -166,17 +204,17 @@ export function SuperAdminSettings({ session }: SuperAdminSettingsProps) {
                       {envVar.isSet ? 'Set' : 'Not Set'}
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600 mb-2">{envVar.description}</p>
+                  <p className="text-sm text-gray-300 mb-2">{envVar.description}</p>
                   <div className="space-y-1">
-                    <p className="text-xs text-gray-500">Example format:</p>
-                    <code className="block text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                    <p className="text-xs text-gray-400">Example format:</p>
+                    <code className="block text-xs text-gray-300 bg-gray-50 p-2 rounded">
                       {envVar.example}
                     </code>
                   </div>
                   {envVar.currentValue && (
                     <div className="mt-2">
-                      <p className="text-xs text-gray-500">Current:</p>
-                      <p className="text-sm text-gray-700">{envVar.currentValue}</p>
+                      <p className="text-xs text-gray-400">Current:</p>
+                      <p className="text-sm text-gray-200">{envVar.currentValue}</p>
                     </div>
                   )}
                 </div>
@@ -207,37 +245,45 @@ export function SuperAdminSettings({ session }: SuperAdminSettingsProps) {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Security Best Practices</h3>
+      <div className="bg-gray-800 rounded-lg shadow-sm border border-gray-700 p-6">
+        <h3 className="text-lg font-semibold text-white mb-4">Security Best Practices</h3>
         <div className="space-y-4">
           <div className="flex items-start space-x-3">
             <Icon name="check-circle" size="sm" className="text-green-500 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-gray-900">Use Hardware Wallets</p>
-              <p className="text-sm text-gray-600">Always use hardware wallets for admin addresses to prevent unauthorized access.</p>
+              <p className="text-sm font-medium text-white">Use Hardware Wallets</p>
+              <p className="text-sm text-gray-300">Always use hardware wallets for admin addresses to prevent unauthorized access.</p>
             </div>
           </div>
           <div className="flex items-start space-x-3">
             <Icon name="check-circle" size="sm" className="text-green-500 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-gray-900">Validate Addresses</p>
-              <p className="text-sm text-gray-600">Double-check all wallet addresses before deployment to prevent lockouts.</p>
+              <p className="text-sm font-medium text-white">Validate Addresses</p>
+              <p className="text-sm text-gray-300">Double-check all wallet addresses before deployment to prevent lockouts.</p>
             </div>
           </div>
           <div className="flex items-start space-x-3">
             <Icon name="check-circle" size="sm" className="text-green-500 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-gray-900">Multiple Super Admins</p>
-              <p className="text-sm text-gray-600">Configure multiple super admin wallets to prevent single points of failure.</p>
+              <p className="text-sm font-medium text-white">Multiple Super Admins</p>
+              <p className="text-sm text-gray-300">Configure multiple super admin wallets to prevent single points of failure.</p>
             </div>
           </div>
           <div className="flex items-start space-x-3">
             <Icon name="check-circle" size="sm" className="text-green-500 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-gray-900">Regular Audits</p>
-              <p className="text-sm text-gray-600">Regularly review and audit admin access permissions and wallet configurations.</p>
+              <p className="text-sm font-medium text-white">Regular Audits</p>
+              <p className="text-sm text-gray-300">Regularly review and audit admin access permissions and wallet configurations.</p>
             </div>
           </div>
+        </div>
+      </div>
+            </div>
+          )}
+
+          {activeTab === 'stores' && (
+            <StoreManagement />
+          )}
         </div>
       </div>
     </div>

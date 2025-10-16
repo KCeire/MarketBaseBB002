@@ -6,6 +6,11 @@ import {
   isSuperAdmin,
   getUserStores
 } from '@/lib/admin/stores-config';
+import {
+  hasAnyAdminAccessWithDatabase,
+  getUserStoresWithDatabase,
+  isStoreAdminWithDatabase
+} from '@/lib/admin/stores-server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,8 +30,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Check if user has any admin access
-    const hasAccess = hasAnyAdminAccess(walletAddress);
+    // Check if user has any admin access (hybrid: static + database)
+    const hasAccess = await hasAnyAdminAccessWithDatabase(walletAddress);
     if (process.env.NODE_ENV === 'development') {
       console.log(`[Admin Validate] Has any admin access: ${hasAccess}`);
     }
@@ -40,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     const isSuper = isSuperAdmin(walletAddress);
-    const userStores = getUserStores(walletAddress);
+    const userStores = await getUserStoresWithDatabase(walletAddress);
 
     if (process.env.NODE_ENV === 'development') {
       console.log(`[Admin Validate] Is super admin: ${isSuper}`);
@@ -49,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     // If requesting specific store access
     if (storeId) {
-      const hasStoreAccess = isSuper || userStores.some(store => store.id === storeId);
+      const hasStoreAccess = await isStoreAdminWithDatabase(walletAddress, storeId);
       if (process.env.NODE_ENV === 'development') {
         console.log(`[Admin Validate] Store ${storeId} access check: ${hasStoreAccess}`);
       }
