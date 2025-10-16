@@ -1,6 +1,8 @@
 // app/about/page.tsx
 "use client";
 
+import Link from 'next/link';
+
 export default function AboutPage() {
   return (
     <div className="w-full max-w-md mx-auto px-4 py-3 main-content-with-bottom-nav">
@@ -53,24 +55,6 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6">
-          <div className="text-center space-y-4">
-            <h2 className="text-lg font-semibold text-white">Platform Stats</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-blue-600">2</p>
-                <p className="text-xs text-gray-400">Active Stores</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-green-600">0</p>
-                <p className="text-xs text-gray-400">Orders Processed</p>
-              </div>
-            </div>
-            <p className="text-xs text-gray-500">Join us as we grow the future of commerce</p>
-          </div>
-        </div>
-
         {/* Technology */}
         <div className="bg-gray-800 dark:bg-gray-900 rounded-xl border border-gray-700 p-6 space-y-4">
           <h2 className="text-lg font-semibold text-white">Built on Base</h2>
@@ -80,7 +64,6 @@ export default function AboutPage() {
           <div className="flex flex-wrap gap-2">
             <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Base Blockchain</span>
             <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">USDC Payments</span>
-            <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">Smart Contracts</span>
             <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">OnchainKit</span>
           </div>
         </div>
@@ -98,8 +81,11 @@ export default function AboutPage() {
               <span className="text-xs text-green-600 font-medium">Complete</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-300">Seller Onboarding</span>
-              <span className="text-xs text-yellow-600 font-medium">Coming Soon</span>
+              <Link href="/sell" className="text-sm text-gray-300 hover:text-blue-400 transition-colors flex items-center gap-1 group">
+                Seller Onboarding
+                <span className="text-xs opacity-60 group-hover:opacity-100 transition-opacity">(apply here)</span>
+              </Link>
+              <span className="text-xs text-blue-600 font-medium">In Progress</span>
             </div>
           </div>
         </div>

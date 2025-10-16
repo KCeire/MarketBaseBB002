@@ -214,19 +214,23 @@ export default function StoresPage() {
           <section>
             
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
-              {betaStores.map((store) => (
+              {betaStores.map((store, index) => (
                 <div
                   key={store.id}
                   onClick={() => handleStoreClick(store)}
                   className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer group relative"
                 >
                   {/* Product Image Background - covers 70% of entire card */}
-                  {storeProductImages[store.id] && (
+                  {loading ? (
+                    <div className="absolute inset-x-0 top-0 h-[70%] z-0 bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+                  ) : storeProductImages[store.id] ? (
                     <div className="absolute inset-x-0 top-0 h-[70%] z-0">
                       <Image
                         src={storeProductImages[store.id]}
                         alt="Store product"
                         fill
+                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        priority={index < 2}
                         className="object-cover"
                       />
                       <div className={`absolute inset-0 ${
@@ -239,7 +243,7 @@ export default function StoresPage() {
                         'bg-gradient-to-br from-gray-500/40 via-gray-600/30 to-gray-700/40'
                       }`}></div>
                     </div>
-                  )}
+                  ) : null}
 
                   {/* Gradient Background Fallback - covers entire card */}
                   <div className={`absolute inset-0 -z-10 ${
@@ -264,6 +268,7 @@ export default function StoresPage() {
                                 alt={`${store.name} logo`}
                                 width={48}
                                 height={48}
+                                priority={store.id === 'nft-energy'}
                                 className="w-full h-full object-contain"
                               />
                             </div>
