@@ -148,7 +148,7 @@ function MultiStoreAdminAuthInner({ children, requiredStoreId }: MultiStoreAdmin
   }
 
   if (!isConnected) {
-    return <AccessDeniedSeller userWallet={null} />;
+    return <AccessDeniedSeller userWallet={undefined} />;
   }
 
   if (!session) {

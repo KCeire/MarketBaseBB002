@@ -2,9 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AdminSession, StoreAdminPermissions } from '@/types/admin';
 import {
-  hasAnyAdminAccess,
-  isSuperAdmin,
-  getUserStores
+  isSuperAdmin
 } from '@/lib/admin/stores-config';
 import {
   hasAnyAdminAccessWithDatabase,

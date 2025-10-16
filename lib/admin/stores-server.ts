@@ -5,9 +5,26 @@ import { supabaseAdmin } from '@/lib/supabase/client';
 import {
   getAllActiveStores,
   isSuperAdmin,
-  isStoreAdmin,
-  SUPER_ADMIN_WALLETS
+  isStoreAdmin
 } from './stores-config';
+
+// Interface for database store records
+interface DatabaseStore {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  is_active: boolean;
+  admin_wallet: string | null;
+  settings: {
+    allowOrderManagement: boolean;
+    allowProductManagement: boolean;
+    allowAnalytics: boolean;
+    customFields?: Record<string, unknown>;
+  } | null;
+  created_at: string;
+  updated_at: string;
+}
 
 // Helper function to get admin wallets from environment variables
 function getStoreAdminWallets(storeId: string): string[] {
@@ -39,7 +56,7 @@ export async function getDatabaseStores(): Promise<StoreConfig[]> {
     }
 
     // Convert database stores to StoreConfig format
-    const databaseStores: StoreConfig[] = stores.map((store: any) => {
+    const databaseStores: StoreConfig[] = stores.map((store: DatabaseStore) => {
       // Get admin wallets from environment variables
       const envAdminWallets = getStoreAdminWallets(store.id);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import { Button } from '../../ui/Button';
 import { Icon } from '../../ui/Icon';
@@ -35,11 +35,7 @@ export function StoreManagement({ className = "" }: StoreManagementProps) {
     description: ''
   });
 
-  useEffect(() => {
-    fetchStores();
-  }, [address]);
-
-  const fetchStores = async () => {
+  const fetchStores = useCallback(async () => {
     if (!address) {
       setLoading(false);
       return;
@@ -66,7 +62,11 @@ export function StoreManagement({ className = "" }: StoreManagementProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [address]);
+
+  useEffect(() => {
+    fetchStores();
+  }, [address, fetchStores]);
 
   const generateSlug = (name: string): string => {
     return name
@@ -224,7 +224,7 @@ export function StoreManagement({ className = "" }: StoreManagementProps) {
                 Environment Variable Setup
               </h5>
               <p className="text-sm text-blue-700 dark:text-blue-300 mb-2">
-                After creating the store, add this environment variable to Vercel with the seller's wallet address:
+                After creating the store, add this environment variable to Vercel with the seller&apos;s wallet address:
               </p>
               <code className="block bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 p-2 rounded text-xs font-mono">
                 STORE_ADMIN_WALLETS_{generateStoreId(newStore.name).toUpperCase().replace(/-/g, '_')}=0x...sellerWalletAddress

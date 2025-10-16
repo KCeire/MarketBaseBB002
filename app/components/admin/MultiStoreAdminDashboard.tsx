@@ -5,7 +5,7 @@ import { useAccount } from 'wagmi';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
-import { AdminSession, StoreOrderSummary } from '@/types/admin';
+import { AdminSession, StoreOrderSummary, StoreConfig } from '@/types/admin';
 import { SuperAdminSettings } from './SuperAdminSettings';
 import { StoreSelector } from './StoreSelector';
 import { ShopifyIntegration } from './seller/ShopifyIntegration';
@@ -58,7 +58,7 @@ function MultiStoreAdminDashboardInner({ session }: MultiStoreAdminDashboardProp
   const [storeData] = useState<StoreOrderSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(session.storeId || null);
-  const [availableStores, setAvailableStores] = useState<any[]>([]);
+  const [availableStores, setAvailableStores] = useState<StoreConfig[]>([]);
 
   const storeId = selectedStoreId || session.storeId || searchParams.get('store');
 

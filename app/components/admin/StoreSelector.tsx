@@ -3,8 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { Icon } from '../ui/Icon';
-import { AdminSession } from '@/types/admin';
-import { getAllActiveStores, StoreConfig } from '@/lib/admin/stores-config';
+import { AdminSession, StoreConfig } from '@/types/admin';
 
 interface StoreSelectorProps {
   session: AdminSession;
@@ -39,7 +38,7 @@ export function StoreSelector({
           const data = await response.json();
           if (data.success && data.stores) {
             // Convert to StoreConfig format - these are already filtered by server
-            const userStores: StoreConfig[] = data.stores.map((store: any) => ({
+            const userStores: StoreConfig[] = data.stores.map((store: StoreConfig) => ({
               id: store.id,
               name: store.name,
               slug: store.slug,
