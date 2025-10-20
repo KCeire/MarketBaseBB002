@@ -129,10 +129,10 @@ export function GuideStepComponent({
 
       {/* Tooltip */}
       <div
-        className="fixed z-[9999] max-w-xs mx-4"
+        className="fixed z-[9999] w-[85%] max-w-sm left-[7.5%] right-[7.5%]"
         style={tooltipStyle}
       >
-        <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-3">
+        <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-4">
           {/* Arrow */}
           {step.position && <div className={getArrowClasses()} />}
 
@@ -166,7 +166,7 @@ export function GuideStepComponent({
                   <svg className="w-4 h-4 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
-                  <span className="font-semibold text-xs text-center">Demo Mode - Under Construction</span>
+                  <span className="font-semibold text-sm text-center">Demo Mode - Under Construction</span>
                   <svg className="w-4 h-4 ml-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
@@ -174,10 +174,10 @@ export function GuideStepComponent({
               </div>
             )}
 
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-3">
               {step?.title || 'Welcome to MarketBase!'}
             </h3>
-            <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
               {step?.content || 'This is your onchain marketplace built for Base Batches 002. Here you can shop, sell, and earn - all using cryptocurrency on the Base network.'}
             </p>
           </div>
@@ -199,21 +199,21 @@ export function GuideStepComponent({
 
           {/* Navigation buttons */}
           <div className="flex justify-between items-center">
-            <div className="flex space-x-1">
+            <div className="flex space-x-2">
               {!isFirstStep && (
                 <button
                   onClick={onPrevious}
-                  className="px-2 py-1 text-xs text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white transition-colors"
+                  className="px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white transition-colors"
                 >
                   Previous
                 </button>
               )}
             </div>
 
-            <div className="flex space-x-1">
+            <div className="flex space-x-2">
               <button
                 onClick={onSkip}
-                className="px-2 py-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
               >
                 {isLastStep ? 'Close' : 'Skip'}
               </button>
@@ -221,7 +221,7 @@ export function GuideStepComponent({
               {!isLastStep && (
                 <button
                   onClick={onNext}
-                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg transition-colors"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
                 >
                   Next
                 </button>
@@ -230,7 +230,7 @@ export function GuideStepComponent({
               {isLastStep && (
                 <button
                   onClick={onNext}
-                  className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded-lg transition-colors"
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors"
                 >
                   Get Started!
                 </button>
