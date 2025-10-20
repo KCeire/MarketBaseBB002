@@ -119,7 +119,7 @@ To get started building your own frame, follow these steps:
    - Cast your frame to see it in action
    - Share your frame with others to start building your community
 
-## Learn More
+## Learn More here 
 
 - [MiniKit Documentation](https://docs.base.org/builderkits/minikit/overview)
 - [OnchainKit Documentation](https://docs.base.org/builderkits/onchainkit/getting-started)
