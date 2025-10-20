@@ -20,6 +20,7 @@ import { useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Shop } from "./components/Shop";
 import Image from "next/image";
+import { WelcomeGuide, WelcomeGuideDebug } from "./components/welcome/WelcomeGuide";
 
 function AppContent() {
   const { setFrameReady, isFrameReady } = useMiniKit();
@@ -148,32 +149,12 @@ function AppContent() {
         </header>
 
         <main className="space-y-6">
-          {/* Hero Section */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-purple-600 to-purple-700 py-4 px-6 text-white min-h-[95px]">
-            <div 
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-              style={{
-                backgroundImage: 'url(/AppMedia/topHomePageImage.jpg)'
-              }}
-            ></div>
-            <div className="relative z-10 flex items-center justify-center h-full" style={{paddingTop: '5%'}}>
-              <h1 className="text-2xl md:text-5xl font-bold md:font-black text-white"
-                  style={{
-                    fontFamily: '"Inter", "Roboto", sans-serif',
-                    textShadow: '1px 1px 3px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5)',
-                    letterSpacing: '0.02em'
-                  }}>
-                MarketBase
-              </h1>
-            </div>
-            {/* Light overlay to slightly darken image if needed */}
-            <div className="absolute inset-0 bg-black/10"></div>
-          </div>
 
           {/* Main Action Cards Grid */}
           <div className="grid grid-cols-2 gap-3">
             {/* Stores Card */}
             <button
+              data-guide="stores-button"
               onClick={() => router.push('/stores')}
               className="aspect-square rounded-2xl p-4 text-white relative overflow-hidden group active:scale-95 transition-transform"
             >
@@ -194,6 +175,7 @@ function AppContent() {
 
             {/* Trade Card */}
             <button
+              data-guide="shop-button"
               onClick={() => router.push('/?view=categories')}
               className="aspect-square rounded-2xl p-4 text-white relative overflow-hidden group active:scale-95 transition-transform"
             >
@@ -214,6 +196,7 @@ function AppContent() {
 
             {/* Sell Card */}
             <button
+              data-guide="sell-button"
               onClick={() => router.push('/sell')}
               className="aspect-square rounded-2xl p-4 text-white relative overflow-hidden group active:scale-95 transition-transform"
             >
@@ -234,6 +217,7 @@ function AppContent() {
 
             {/* Earn Card */}
             <button
+              data-guide="earn-button"
               onClick={() => router.push('/earn')}
               className="aspect-square rounded-2xl p-4 text-white relative overflow-hidden group active:scale-95 transition-transform"
             >
@@ -317,6 +301,10 @@ function AppContent() {
           </div>
         </main>
       </div>
+
+      {/* Welcome Guide */}
+      <WelcomeGuide />
+      <WelcomeGuideDebug />
     </div>
   );
 }
