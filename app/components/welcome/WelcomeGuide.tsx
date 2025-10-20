@@ -19,7 +19,7 @@ export function WelcomeGuide() {
     skipGuide,
   } = useWelcomeGuide();
 
-  // Handle ESC key to close guide
+  // Handle ESC key to close guide (must be before early return)
   useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isActive) {

@@ -19,14 +19,14 @@ const GUIDE_STEPS: GuideStep[] = [
     title: 'Shop Products',
     content: 'Click "Shop" to browse products by category. Pay instantly with USDC - no traditional banking delays!',
     targetElement: '[data-guide="shop-button"]',
-    position: 'top',
+    position: 'bottom',
   },
   {
     id: 'stores',
     title: 'Explore Stores',
     content: 'Discover "Stores" to explore unique seller storefronts and their curated product collections.',
     targetElement: '[data-guide="stores-button"]',
-    position: 'top',
+    position: 'bottom',
   },
   {
     id: 'sell',

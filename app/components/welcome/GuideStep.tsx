@@ -30,16 +30,25 @@ export function GuideStepComponent({
 
   useEffect(() => {
     if (step.targetElement) {
-      const element = document.querySelector(step.targetElement) as HTMLElement;
-      if (element) {
-        const rect = element.getBoundingClientRect();
-        setTargetPosition({
-          top: rect.top + window.scrollY,
-          left: rect.left + window.scrollX,
-          width: rect.width,
-          height: rect.height,
-        });
-      }
+      // Add a small delay to ensure DOM is ready
+      const timeoutId = setTimeout(() => {
+        const element = document.querySelector(step.targetElement!) as HTMLElement;
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          setTargetPosition({
+            top: rect.top + window.scrollY,
+            left: rect.left + window.scrollX,
+            width: rect.width,
+            height: rect.height,
+          });
+        } else {
+          // Target element not found, but still allow step to show
+          console.warn(`Guide target element not found: ${step.targetElement}`);
+          setTargetPosition(null);
+        }
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
     } else {
       setTargetPosition(null);
     }
@@ -97,7 +106,7 @@ export function GuideStepComponent({
     }
   };
 
-  const tooltipStyle = step.targetElement ? getTooltipPosition() : {
+  const tooltipStyle = (step.targetElement && targetPosition) ? getTooltipPosition() : {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
@@ -166,10 +175,10 @@ export function GuideStepComponent({
             )}
 
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-              {step.title}
+              {step?.title || 'Welcome to MarketBase!'}
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-              {step.content}
+              {step?.content || 'This is your onchain marketplace built for Base Batches 002. Here you can shop, sell, and earn - all using cryptocurrency on the Base network.'}
             </p>
           </div>
 
