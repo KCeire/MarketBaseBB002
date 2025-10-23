@@ -28,9 +28,57 @@ export default function StoreAdminPage() {
   const [session, setSession] = useState<AdminSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [storeConfig, setStoreConfig] = useState<any>(null);
+  const [storeConfigLoaded, setStoreConfigLoaded] = useState(false);
 
   const storeId = params.storeId as string;
-  const storeConfig = getStoreConfig(storeId);
+
+  // Load store config from both static and database sources
+  useEffect(() => {
+    const loadStoreConfig = async () => {
+      try {
+        // First check static stores
+        const staticStore = getStoreConfig(storeId);
+        if (staticStore) {
+          setStoreConfig(staticStore);
+          setStoreConfigLoaded(true);
+          return;
+        }
+
+        // If not found in static stores, check if it's accessible via the stores list API
+        // This will check database stores that the user has access to
+        if (address) {
+          const response = await fetch('/api/admin/stores/list', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ walletAddress: address })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.stores) {
+              const databaseStore = data.stores.find((store: any) => store.id === storeId);
+              if (databaseStore) {
+                setStoreConfig(databaseStore);
+                setStoreConfigLoaded(true);
+                return;
+              }
+            }
+          }
+        }
+
+        // Store not found in either static or database
+        setStoreConfig(null);
+        setStoreConfigLoaded(true);
+      } catch (error) {
+        console.error('Error loading store config:', error);
+        setStoreConfig(null);
+        setStoreConfigLoaded(true);
+      }
+    };
+
+    loadStoreConfig();
+  }, [storeId, address]);
 
   useEffect(() => {
     const validateStoreAccess = async () => {
@@ -38,6 +86,10 @@ export default function StoreAdminPage() {
         setSession(null);
         setLoading(false);
         return;
+      }
+
+      if (!storeConfigLoaded) {
+        return; // Wait for store config to load
       }
 
       if (!storeConfig) {
@@ -73,7 +125,7 @@ export default function StoreAdminPage() {
     };
 
     validateStoreAccess();
-  }, [address, isConnected, storeId, storeConfig]);
+  }, [address, isConnected, storeId, storeConfig, storeConfigLoaded]);
 
   if (loading) {
     return (

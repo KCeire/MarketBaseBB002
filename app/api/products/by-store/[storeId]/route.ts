@@ -2,13 +2,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllProducts } from '@/lib/producthub/api';
 import { categorizeProduct, initializeStorePatterns, getStoreInfo } from '@/lib/store-assignment';
+import { isShopifyStore, getShopifyStoreProducts } from '@/lib/shopify/products';
+import { supabaseAdmin } from '@/lib/supabase/client';
 
-const VALID_STORE_IDS = [
+const STATIC_STORE_IDS = [
   'techwave-electronics',
   'green-oasis-home',
   'pawsome-pets',
   'radiant-beauty',
-  'apex-athletics'
+  'apex-athletics',
+  'nft-energy'
 ];
 
 export async function GET(
@@ -18,24 +21,72 @@ export async function GET(
   try {
     const { storeId } = await params;
 
-    // Validate store ID
-    if (!VALID_STORE_IDS.includes(storeId)) {
-      return NextResponse.json({
-        success: false,
-        error: `Invalid store ID. Valid options: ${VALID_STORE_IDS.join(', ')}`,
-        products: []
-      }, { status: 400 });
-    }
-
     console.log(`Fetching products for store: ${storeId}`);
 
-    // Initialize store patterns
+    // Check if it's a Shopify store first
+    const isShopify = await isShopifyStore(storeId);
+
+    if (isShopify) {
+      console.log(`Processing Shopify store: ${storeId}`);
+
+      try {
+        // Get products from Shopify API
+        const shopifyProducts = await getShopifyStoreProducts(storeId);
+
+        // Get store info from database
+        const { data: storeInfo, error } = await supabaseAdmin
+          .from('stores')
+          .select('id, name, description')
+          .eq('id', storeId)
+          .single();
+
+        if (error) {
+          console.error('Error fetching store info:', error);
+        }
+
+        console.log(`Found ${shopifyProducts.length} Shopify products for ${storeInfo?.name || storeId}`);
+
+        return NextResponse.json({
+          success: true,
+          store: {
+            id: storeId,
+            name: storeInfo?.name || storeId,
+            category: 'Shopify Store',
+            type: 'shopify'
+          },
+          products: shopifyProducts,
+          count: shopifyProducts.length,
+          totalProducts: shopifyProducts.length
+        });
+
+      } catch (shopifyError) {
+        console.error(`Error fetching Shopify products for ${storeId}:`, shopifyError);
+        return NextResponse.json({
+          success: false,
+          error: `Failed to fetch Shopify products: ${shopifyError instanceof Error ? shopifyError.message : 'Unknown error'}`,
+          products: []
+        }, { status: 500 });
+      }
+    }
+
+    // Handle static stores
+    if (!STATIC_STORE_IDS.includes(storeId)) {
+      return NextResponse.json({
+        success: false,
+        error: `Store not found. Store ID '${storeId}' is neither a valid static store nor a connected Shopify store.`,
+        products: []
+      }, { status: 404 });
+    }
+
+    console.log(`Processing static store: ${storeId}`);
+
+    // Initialize store patterns for static stores
     await initializeStorePatterns();
 
-    // Get all products
+    // Get all products from ProductHub
     const allProducts = await getAllProducts();
 
-    // Filter products for this store
+    // Filter products for this static store
     const storeProducts = allProducts.filter(product => {
       const assignedStoreId = categorizeProduct(product);
       return assignedStoreId === storeId;
@@ -43,14 +94,15 @@ export async function GET(
 
     const storeInfo = getStoreInfo(storeId);
 
-    console.log(`Found ${storeProducts.length} products for ${storeInfo?.name || storeId}`);
+    console.log(`Found ${storeProducts.length} static products for ${storeInfo?.name || storeId}`);
 
     return NextResponse.json({
       success: true,
       store: {
         id: storeId,
         name: storeInfo?.name || 'Unknown Store',
-        category: storeInfo?.category || 'Unknown Category'
+        category: storeInfo?.category || 'Unknown Category',
+        type: 'static'
       },
       products: storeProducts,
       count: storeProducts.length,

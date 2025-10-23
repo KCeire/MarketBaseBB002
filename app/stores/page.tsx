@@ -15,11 +15,12 @@ interface Store {
   name: string;
   description: string;
   category: string;
-  image: string;
+  image?: string;
   logo?: string;
   path: string;
-  status: 'beta' | 'coming-soon';
+  status: 'beta' | 'coming-soon' | 'active';
   featured: boolean;
+  type?: 'static' | 'shopify';
   stats?: {
     products: number;
     rating: number;
@@ -27,118 +28,51 @@ interface Store {
   };
 }
 
-const stores: Store[] = [
-  {
-    id: 'nft-energy',
-    name: 'NFT Energy Drinks',
-    description: 'Where Web3 meets real energy. Official NFT Energy drinks and exclusive merchandise from the community-driven brand.',
-    category: 'Food & Beverage',
-    image: '/stores/nft-energy-preview.jpg',
-    logo: '/stores/NFTEnergyDrinks/NFTEnergyDrinksLogo.png',
-    path: '/store/nft-energy',
-    status: 'beta',
-    featured: true,
-    stats: {
-      products: 6,
-      rating: 5.0,
-      reviews: 12
-    }
-  },
-  {
-    id: 'techwave-electronics',
-    name: 'TechWave Electronics',
-    description: 'Cutting-edge gadgets and electronics. From smartphones to smart home devices, we have the latest tech at competitive prices.',
-    category: 'Electronics',
-    image: '/AppMedia/store-electronics.jpg',
-    path: '/store/techwave-electronics',
-    status: 'beta',
-    featured: true,
-    stats: {
-      products: 150,
-      rating: 4.8,
-      reviews: 89
-    }
-  },
-  {
-    id: 'green-oasis-home',
-    name: 'Green Oasis Home & Garden',
-    description: 'Transform your space into a beautiful oasis. Premium furniture, decor, gardening tools, and outdoor essentials for modern living.',
-    category: 'Home & Garden',
-    image: '/AppMedia/store-home-garden.jpg',
-    path: '/store/green-oasis-home',
-    status: 'beta',
-    featured: true,
-    stats: {
-      products: 200,
-      rating: 4.9,
-      reviews: 156
-    }
-  },
-  {
-    id: 'pawsome-pets',
-    name: 'Pawsome Pet Paradise',
-    description: 'Everything your furry friends need to live their best life. Quality food, toys, accessories, and health products for all pets.',
-    category: 'Pet Products',
-    image: '/AppMedia/store-pet-products.jpg',
-    path: '/store/pawsome-pets',
-    status: 'beta',
-    featured: false,
-    stats: {
-      products: 120,
-      rating: 4.7,
-      reviews: 73
-    }
-  },
-  {
-    id: 'radiant-beauty',
-    name: 'Radiant Beauty Co.',
-    description: 'Discover your natural glow with premium skincare, wellness products, and beauty essentials from trusted brands worldwide.',
-    category: 'Health & Beauty',
-    image: '/AppMedia/store-health-beauty.jpg',
-    path: '/store/radiant-beauty',
-    status: 'beta',
-    featured: false,
-    stats: {
-      products: 180,
-      rating: 4.8,
-      reviews: 94
-    }
-  },
-  {
-    id: 'apex-athletics',
-    name: 'Apex Athletics',
-    description: 'Gear up for greatness. Professional sports equipment, fitness gear, and outdoor adventure essentials for athletes of all levels.',
-    category: 'Sports & Outdoors',
-    image: '/AppMedia/store-sports-outdoors.jpg',
-    path: '/store/apex-athletics',
-    status: 'beta',
-    featured: false,
-    stats: {
-      products: 250,
-      rating: 4.9,
-      reviews: 134
-    }
-  }
-];
+// Stores will be loaded dynamically from API
 
 export default function StoresPage() {
   const router = useRouter();
+  const [stores, setStores] = useState<Store[]>([]);
   const [actualProductCounts, setActualProductCounts] = useState<Record<string, number>>({});
   const [storeProductImages, setStoreProductImages] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
+  // Load stores from API
+  useEffect(() => {
+    const loadStores = async () => {
+      try {
+        const response = await fetch('/api/stores/public');
+        const data = await response.json();
+
+        if (data.success) {
+          setStores(data.stores);
+          console.log(`Loaded ${data.stores.length} stores:`, data.counts);
+        } else {
+          console.error('Failed to load stores:', data.error);
+        }
+      } catch (error) {
+        console.error('Error loading stores:', error);
+      }
+    };
+
+    loadStores();
+  }, []);
+
+  // Calculate product counts for all stores
   useEffect(() => {
     const calculateProductCounts = async () => {
+      if (stores.length === 0) return;
+
       try {
-        // Get store products from registered stores (like NFT Energy)
+        const counts: Record<string, number> = {};
+        const productImages: Record<string, string> = {};
+
+        // For static stores: Get store products from registered stores and ProductHub
         const storeProducts = getAllStoreProducts();
 
         // Get ProductHub products and map them to stores
         const productHubResponse = await fetch('/api/producthub/products');
         const productHubData = productHubResponse.ok ? await productHubResponse.json() : { products: [] };
-
-        const counts: Record<string, number> = {};
-        const productImages: Record<string, string> = {};
 
         // Count store products and collect first product image for each store
         storeProducts.forEach(product => {
@@ -149,11 +83,9 @@ export default function StoresPage() {
           if (!productImages[storeSlug] && product.image) {
             productImages[storeSlug] = product.image;
           }
-
-          console.log('Store product:', product.title, 'mapped to store:', storeSlug);
         });
 
-        // Count ProductHub products mapped to stores
+        // Count ProductHub products mapped to static stores
         (productHubData.products || []).forEach((product: MarketplaceProduct) => {
           const vendor = product.vendor.toLowerCase();
           const title = product.title.toLowerCase();
@@ -183,6 +115,26 @@ export default function StoresPage() {
           }
         });
 
+        // For Shopify stores: Get product counts from their APIs
+        const shopifyStores = stores.filter(store => store.type === 'shopify');
+        for (const store of shopifyStores) {
+          try {
+            const response = await fetch(`/api/products/by-store/${store.id}`);
+            const data = await response.json();
+
+            if (data.success) {
+              counts[store.id] = data.products.length;
+
+              // Use first product image if available
+              if (data.products.length > 0 && data.products[0].image) {
+                productImages[store.id] = data.products[0].image;
+              }
+            }
+          } catch (error) {
+            console.error(`Error fetching product count for Shopify store ${store.id}:`, error);
+          }
+        }
+
         console.log('Final product counts:', counts);
         console.log('Store product images:', productImages);
         setActualProductCounts(counts);
@@ -195,12 +147,12 @@ export default function StoresPage() {
     };
 
     calculateProductCounts();
-  }, []);
+  }, [stores]);
 
-  const betaStores = stores.filter(store => store.status === 'beta');
+  const activeStores = stores.filter(store => store.status === 'beta' || store.status === 'active');
 
   const handleStoreClick = (store: Store) => {
-    if (store.status === 'beta') {
+    if (store.status === 'beta' || store.status === 'active') {
       router.push(store.path);
     }
   };
@@ -209,12 +161,12 @@ export default function StoresPage() {
     <div className="w-full max-w-6xl mx-auto px-4 py-6 main-content-with-bottom-nav">
       <div className="space-y-8">
 
-        {/* Featured Stores - Beta */}
-        {betaStores.length > 0 && (
+        {/* Featured Stores */}
+        {activeStores.length > 0 && (
           <section>
-            
+
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
-              {betaStores.map((store, index) => (
+              {activeStores.map((store, index) => (
                 <div
                   key={store.id}
                   onClick={() => handleStoreClick(store)}
@@ -253,6 +205,7 @@ export default function StoresPage() {
                     store.id === 'pawsome-pets' ? 'bg-gradient-to-br from-purple-500 via-violet-600 to-purple-700' :
                     store.id === 'radiant-beauty' ? 'bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-600' :
                     store.id === 'apex-athletics' ? 'bg-gradient-to-br from-slate-700 via-gray-800 to-zinc-900' :
+                    store.type === 'shopify' ? 'bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700' :
                     'bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700'
                   }`}></div>
 
@@ -338,6 +291,16 @@ export default function StoresPage() {
                                 </svg>
                               </div>
                             )}
+                            {/* Default icon for Shopify stores or unknown stores */}
+                            {!['techwave-electronics', 'green-oasis-home', 'pawsome-pets', 'radiant-beauty', 'apex-athletics'].includes(store.id) && (
+                              <div className="text-white text-2xl">
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                                  <rect x="4" y="6" width="24" height="20" rx="2" stroke="currentColor" strokeWidth="2"/>
+                                  <path d="M28 10L16 18L4 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <circle cx="24" cy="8" r="2" fill="currentColor"/>
+                                </svg>
+                              </div>
+                            )}
                           </div>
                           <p className="text-white text-sm font-bold drop-shadow-2xl" style={{textShadow: '0 0 10px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.6)'}}>
                             {store.name}
@@ -358,7 +321,7 @@ export default function StoresPage() {
                   <div className="p-3 md:p-6 space-y-2 md:space-y-4 mt-2">
                     {/* Store Badge */}
                     <div className="flex items-center justify-center">
-                      {store.id === 'nft-energy' ? (
+                      {store.featured ? (
                         <div className="flex items-center space-x-1 text-xs text-yellow-600 dark:text-yellow-400">
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26 12,2"></polygon>
@@ -373,7 +336,9 @@ export default function StoresPage() {
                             <circle cx="5.5" cy="18.5" r="2.5"></circle>
                             <circle cx="18.5" cy="18.5" r="2.5"></circle>
                           </svg>
-                          <span className="text-xs">Shipping Included</span>
+                          <span className="text-xs">
+                            {store.type === 'shopify' ? 'Live Store' : 'Shipping Included'}
+                          </span>
                         </div>
                       )}
                     </div>

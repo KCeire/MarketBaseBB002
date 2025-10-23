@@ -361,8 +361,8 @@ export function RadiantBeautyStorefront() {
       <footer className="py-12 px-4 bg-black/40 border-t border-pink-200/20">
         <div className="max-w-7xl mx-auto text-center">
           <div className="text-pink-200 space-y-2">
-            <p>&copy; 2024 Radiant Beauty Co. All rights reserved.</p>
-            <p className="text-sm">Powered by Base Shop - Secure crypto payments on Base</p>
+            <p>&copy; 2025 Radiant Beauty Co. All rights reserved.</p>
+            <p className="text-sm">Powered by MarketBase - Secure onchain payments on Base</p>
           </div>
         </div>
       </footer>

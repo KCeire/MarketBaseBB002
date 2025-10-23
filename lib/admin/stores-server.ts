@@ -41,7 +41,55 @@ function getStoreAdminWallets(storeId: string): string[] {
   return envVar ? envVar.split(',').map(addr => addr.trim()).filter(addr => addr.length > 0) : [];
 }
 
-// Server-side function to fetch database stores directly
+// Server-side function to fetch all database stores (including inactive ones) - for super admin use
+export async function getAllDatabaseStores(): Promise<StoreConfig[]> {
+  try {
+    const { data: stores, error } = await supabaseAdmin
+      .from('stores')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching all database stores:', error);
+      return [];
+    }
+
+    // Convert database stores to StoreConfig format
+    const databaseStores: StoreConfig[] = stores.map((store: DatabaseStore) => {
+      // Get admin wallets from environment variables
+      const envAdminWallets = getStoreAdminWallets(store.id);
+
+      // Include database admin wallet if present
+      const databaseAdminWallet = store.admin_wallet ? [store.admin_wallet] : [];
+
+      // Combine and deduplicate admin wallets
+      const allAdminWallets = [...new Set([...envAdminWallets, ...databaseAdminWallet])];
+
+      return {
+        id: store.id,
+        name: store.name,
+        slug: store.slug,
+        description: store.description,
+        adminWallets: allAdminWallets, // Combine env vars and database admin wallets
+        isActive: store.is_active,
+        settings: store.settings || {
+          allowOrderManagement: true,
+          allowProductManagement: true,
+          allowAnalytics: true,
+        },
+        createdAt: store.created_at,
+        updatedAt: store.updated_at || store.created_at,
+      };
+    });
+
+    return databaseStores;
+  } catch (error) {
+    console.error('Error in getAllDatabaseStores:', error);
+    return [];
+  }
+}
+
+// Server-side function to fetch database stores directly (active only)
 export async function getDatabaseStores(): Promise<StoreConfig[]> {
   try {
     const { data: stores, error } = await supabaseAdmin
@@ -118,9 +166,12 @@ export async function getAllStoresWithDatabase(): Promise<StoreConfig[]> {
 }
 
 // Updated user stores function to work with hybrid loading (SERVER-SIDE ONLY)
-export async function getUserStoresWithDatabase(walletAddress: string): Promise<StoreConfig[]> {
+export async function getUserStoresWithDatabase(walletAddress: string, includeInactive: boolean = false): Promise<StoreConfig[]> {
   // Super admins have access to all stores
   if (isSuperAdmin(walletAddress)) {
+    if (includeInactive) {
+      return await getAllStoresWithDatabaseIncludingInactive();
+    }
     return await getAllStoresWithDatabase();
   }
 
@@ -129,6 +180,34 @@ export async function getUserStoresWithDatabase(walletAddress: string): Promise<
   return allStores.filter(store =>
     store.isActive && isStoreAdminWithDatabase(walletAddress, store.id)
   );
+}
+
+// Hybrid store loading including inactive stores - for super admin use (SERVER-SIDE ONLY)
+export async function getAllStoresWithDatabaseIncludingInactive(): Promise<StoreConfig[]> {
+  try {
+    // Get static stores
+    const staticStores = getAllActiveStores();
+
+    // Get all database stores (including inactive)
+    const databaseStores = await getAllDatabaseStores();
+
+    // Combine and deduplicate (prefer database version if ID conflicts)
+    const allStores = [...staticStores];
+    databaseStores.forEach(dbStore => {
+      const existingIndex = allStores.findIndex(s => s.id === dbStore.id);
+      if (existingIndex >= 0) {
+        allStores[existingIndex] = dbStore; // Replace with database version
+      } else {
+        allStores.push(dbStore); // Add new database store
+      }
+    });
+
+    // Don't filter by isActive - return all stores for super admin
+    return allStores;
+  } catch (error) {
+    console.error('Error in getAllStoresWithDatabaseIncludingInactive:', error);
+    return getAllActiveStores(); // Fallback to static stores
+  }
 }
 
 // Async version that checks both static and database stores (SERVER-SIDE ONLY)

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useAccount } from 'wagmi';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { AdminSession, StoreOrderSummary, StoreConfig } from '@/types/admin';
@@ -54,6 +54,7 @@ interface MultiStoreAdminDashboardProps {
 function MultiStoreAdminDashboardInner({ session }: MultiStoreAdminDashboardProps) {
   const { address } = useAccount();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('overview');
   const [storeData] = useState<StoreOrderSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,6 +62,24 @@ function MultiStoreAdminDashboardInner({ session }: MultiStoreAdminDashboardProp
   const [availableStores, setAvailableStores] = useState<StoreConfig[]>([]);
 
   const storeId = selectedStoreId || session.storeId || searchParams.get('store');
+
+  // Handle store selection changes
+  const handleStoreChange = useCallback((newStoreId: string | null) => {
+    setSelectedStoreId(newStoreId);
+
+    // Update URL to reflect store selection
+    if (newStoreId && newStoreId !== 'all' && newStoreId !== 'unassigned') {
+      // Navigate to specific store admin page
+      router.push(`/admin/${newStoreId}`);
+    } else {
+      // Navigate to general admin page for "All Stores" or "Unassigned"
+      if (newStoreId === 'unassigned') {
+        router.push('/admin?view=unassigned');
+      } else {
+        router.push('/admin');
+      }
+    }
+  }, [router]);
 
   // Function to get the header title based on current store selection
   const getHeaderTitle = () => {
@@ -163,7 +182,7 @@ function MultiStoreAdminDashboardInner({ session }: MultiStoreAdminDashboardProp
               <StoreSelector
                 session={session}
                 selectedStoreId={selectedStoreId}
-                onStoreChange={setSelectedStoreId}
+                onStoreChange={handleStoreChange}
                 showUnassigned={session.isSuperAdmin}
               />
               <div className="text-sm text-gray-400">

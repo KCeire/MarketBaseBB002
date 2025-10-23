@@ -30,12 +30,13 @@ export function StoreManagement({ className = "" }: StoreManagementProps) {
   const [stores, setStores] = useState<StoreConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showInactive, setShowInactive] = useState(false); // New state for showing inactive stores
   const [newStore, setNewStore] = useState({
     name: '',
     description: ''
   });
 
-  const fetchStores = useCallback(async () => {
+  const fetchStores = useCallback(async (includeInactive = showInactive) => {
     if (!address) {
       setLoading(false);
       return;
@@ -45,7 +46,10 @@ export function StoreManagement({ className = "" }: StoreManagementProps) {
       const response = await fetch('/api/admin/stores/list', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ walletAddress: address })
+        body: JSON.stringify({
+          walletAddress: address,
+          includeInactive: includeInactive
+        })
       });
 
       const result = await response.json();
@@ -62,11 +66,17 @@ export function StoreManagement({ className = "" }: StoreManagementProps) {
     } finally {
       setLoading(false);
     }
-  }, [address]);
+  }, [address, showInactive]);
 
   useEffect(() => {
     fetchStores();
   }, [address, fetchStores]);
+
+  const handleToggleInactive = () => {
+    setShowInactive(!showInactive);
+    setLoading(true);
+    fetchStores(!showInactive);
+  };
 
   const generateSlug = (name: string): string => {
     return name
@@ -115,7 +125,7 @@ export function StoreManagement({ className = "" }: StoreManagementProps) {
         toast.success('Store Created!', 'Store created successfully. Update environment variables to activate.');
         setNewStore({ name: '', description: '' });
         setShowCreateForm(false);
-        fetchStores();
+        fetchStores(showInactive);
       } else {
         toast.error('Creation Failed', result.error || 'Failed to create store');
       }
@@ -137,7 +147,7 @@ export function StoreManagement({ className = "" }: StoreManagementProps) {
 
       if (result.success) {
         toast.success('Status Updated', `Store ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
-        fetchStores();
+        fetchStores(showInactive);
       } else {
         toast.error('Update Failed', result.error || 'Failed to update store status');
       }
@@ -169,13 +179,23 @@ export function StoreManagement({ className = "" }: StoreManagementProps) {
           <h3 className="text-lg font-semibold text-white dark:text-gray-100">Store Management</h3>
           <p className="text-sm text-gray-300 dark:text-gray-400">Create and manage seller stores</p>
         </div>
-        <Button
-          onClick={() => setShowCreateForm(!showCreateForm)}
-          className="flex items-center space-x-2"
-        >
-          <Icon name={showCreateForm ? "x" : "plus"} size="sm" />
-          <span>{showCreateForm ? 'Cancel' : 'Create Store'}</span>
-        </Button>
+        <div className="flex items-center space-x-3">
+          <Button
+            variant="ghost"
+            onClick={handleToggleInactive}
+            className="flex items-center space-x-2"
+          >
+            <Icon name={showInactive ? "eye-off" : "eye"} size="sm" />
+            <span>{showInactive ? 'Hide Inactive' : 'Show Inactive'}</span>
+          </Button>
+          <Button
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            className="flex items-center space-x-2"
+          >
+            <Icon name={showCreateForm ? "x" : "plus"} size="sm" />
+            <span>{showCreateForm ? 'Cancel' : 'Create Store'}</span>
+          </Button>
+        </div>
       </div>
 
       {/* Create Store Form */}
@@ -251,7 +271,20 @@ export function StoreManagement({ className = "" }: StoreManagementProps) {
 
       {/* Existing Stores */}
       <div className="space-y-4">
-        <h4 className="text-md font-medium text-white dark:text-gray-100">Existing Stores</h4>
+        <div className="flex items-center justify-between">
+          <h4 className="text-md font-medium text-white dark:text-gray-100">Existing Stores</h4>
+          {stores.length > 0 && (
+            <div className="text-sm text-gray-400">
+              {showInactive ? (
+                <span>
+                  {stores.filter(s => s.isActive).length} active, {stores.filter(s => !s.isActive).length} inactive
+                </span>
+              ) : (
+                <span>{stores.length} active stores</span>
+              )}
+            </div>
+          )}
+        </div>
 
         {stores.length === 0 ? (
           <div className="bg-gray-800 dark:bg-gray-800 border border-gray-700 dark:border-gray-700 rounded-lg p-8 text-center">
@@ -265,18 +298,29 @@ export function StoreManagement({ className = "" }: StoreManagementProps) {
             {stores.map((store) => (
               <div
                 key={store.id}
-                className="bg-gray-800 dark:bg-gray-800 border border-gray-700 dark:border-gray-700 rounded-lg p-4 space-y-3"
+                className={`bg-gray-800 dark:bg-gray-800 border rounded-lg p-4 space-y-3 ${
+                  store.isActive
+                    ? 'border-gray-700 dark:border-gray-700'
+                    : 'border-red-700 dark:border-red-700 opacity-75'
+                }`}
               >
                 <div className="flex items-center justify-between">
-                  <h5 className="font-medium text-white dark:text-gray-100">{store.name}</h5>
+                  <h5 className={`font-medium ${
+                    store.isActive
+                      ? 'text-white dark:text-gray-100'
+                      : 'text-gray-300 dark:text-gray-400'
+                  }`}>
+                    {store.name}
+                    {!store.isActive && <span className="text-red-400 ml-2">(Inactive)</span>}
+                  </h5>
                   <span
                     className={`px-2 py-1 text-xs rounded-full ${
                       store.isActive
                         ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+                        : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
                     }`}
                   >
-                    {store.isActive ? 'Beta' : 'Offline'}
+                    {store.isActive ? 'Active' : 'Inactive'}
                   </span>
                 </div>
 

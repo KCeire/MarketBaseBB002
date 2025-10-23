@@ -1,14 +1,16 @@
 // app/api/admin/stores/list/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserStoresWithDatabase, hasAnyAdminAccessWithDatabase } from '@/lib/admin/stores-server';
+import { isSuperAdmin } from '@/lib/admin/stores-config';
 
 interface StoreListRequest {
   walletAddress: string;
+  includeInactive?: boolean; // New optional parameter for super admins
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { walletAddress }: StoreListRequest = await request.json();
+    const { walletAddress, includeInactive = false }: StoreListRequest = await request.json();
 
     // Validate admin access for user requests
     if (!walletAddress || walletAddress === 'system') {
@@ -27,8 +29,16 @@ export async function POST(request: NextRequest) {
       }, { status: 403 });
     }
 
+    // Only super admins can request inactive stores
+    if (includeInactive && !isSuperAdmin(walletAddress)) {
+      return NextResponse.json({
+        success: false,
+        error: 'Super admin access required to view inactive stores'
+      }, { status: 403 });
+    }
+
     // Get only the stores this user has access to
-    const userStores = await getUserStoresWithDatabase(walletAddress);
+    const userStores = await getUserStoresWithDatabase(walletAddress, includeInactive);
 
     // Transform the data to match the frontend interface
     const transformedStores = userStores.map(store => ({

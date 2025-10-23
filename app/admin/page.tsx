@@ -1,12 +1,13 @@
 // app/admin/page.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useAccount } from 'wagmi';
 import { useRouter } from 'next/navigation';
 import { MultiStoreAdminAuth } from '../components/admin/MultiStoreAdminAuth';
 import { MultiStoreAdminDashboard } from '../components/admin/MultiStoreAdminDashboard';
 import { AdminDashboard } from '../components/admin/AdminDashboard'; // Legacy fallback
+import { SearchParamsHandler } from '../components/admin/SearchParamsHandler';
 import { AdminSession } from '@/types/admin';
 import {
   ConnectWallet,
@@ -29,6 +30,13 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [redirecting, setRedirecting] = useState(false);
 
+  // Handle store parameter from SearchParamsHandler
+  const handleStoreParamFound = (storeParam: string) => {
+    console.log(`[Admin Page] Store parameter found: ${storeParam}, redirecting to /admin/${storeParam}`);
+    setRedirecting(true);
+    router.push(`/admin/${storeParam}`);
+  };
+
   useEffect(() => {
     const validateSession = async () => {
       if (!isConnected || !address) {
@@ -38,6 +46,7 @@ export default function AdminPage() {
       }
 
       try {
+
         const response = await fetch('/api/admin/validate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -74,6 +83,11 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-900">
+      {/* Handle search params for store redirection */}
+      <Suspense fallback={null}>
+        <SearchParamsHandler onStoreParamFound={handleStoreParamFound} />
+      </Suspense>
+
       {/* Wallet connection header */}
       <div className="bg-gray-800 border-b border-gray-700 px-4 py-3">
         <div className="max-w-7xl mx-auto flex justify-between items-center">

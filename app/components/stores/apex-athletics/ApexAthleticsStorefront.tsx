@@ -356,8 +356,8 @@ export function ApexAthleticsStorefront() {
       <footer className="py-12 px-4 bg-black/40 border-t border-orange-200/20">
         <div className="max-w-7xl mx-auto text-center">
           <div className="text-orange-200 space-y-2">
-            <p>&copy; 2024 Apex Athletics. All rights reserved.</p>
-            <p className="text-sm">Powered by Base Shop - Secure crypto payments on Base</p>
+            <p>&copy; 2025 Apex Athletics. All rights reserved.</p>
+            <p className="text-sm">Powered by MarketBase - Secure onchain payments on Base</p>
           </div>
         </div>
       </footer>
