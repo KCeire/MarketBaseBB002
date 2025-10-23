@@ -1,7 +1,7 @@
 // app/store/[storeId]/page.tsx - Dynamic store route for both static and Shopify stores
 "use client";
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useMiniKit } from "@coinbase/onchainkit/minikit";
 
@@ -27,7 +27,7 @@ interface StoreInfo {
 }
 
 // Static store mapping
-const STATIC_STORES: Record<string, () => JSX.Element> = {
+const STATIC_STORES: Record<string, React.ComponentType> = {
   'nft-energy': NFTEnergyStorefront,
   'techwave-electronics': TechWaveElectronicsStorefront,
   'apex-athletics': ApexAthleticsStorefront,

@@ -166,7 +166,7 @@ export function transformShopifyProduct(shopifyProduct: ShopifyProduct, storeInf
   };
 
   // Create a MarketplaceProduct for each variant
-  return shopifyProduct.variants.map((variant, index) => ({
+  return shopifyProduct.variants.map((variant) => ({
     id: variant.id,
     title: variant.title === 'Default Title' ? shopifyProduct.title : `${shopifyProduct.title} - ${variant.title}`,
     description: shopifyProduct.body_html || '',
@@ -203,7 +203,7 @@ export function transformShopifyProduct(shopifyProduct: ShopifyProduct, storeInf
     options: shopifyProduct.options,
     storeId: storeInfo.id,
     storeName: storeInfo.name
-  } as MarketplaceProduct & any));
+  } as MarketplaceProduct));
 }
 
 /**

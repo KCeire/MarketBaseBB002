@@ -8,6 +8,14 @@ import { MultiStoreAdminAuth } from '../../components/admin/MultiStoreAdminAuth'
 import { MultiStoreAdminDashboard } from '../../components/admin/MultiStoreAdminDashboard';
 import { AdminSession } from '@/types/admin';
 import { getStoreConfig } from '@/lib/admin/stores-config';
+
+interface StoreConfig {
+  id: string;
+  name: string;
+  category?: string;
+  type?: string;
+  slug?: string;
+}
 import {
   ConnectWallet,
   Wallet,
@@ -28,7 +36,7 @@ export default function StoreAdminPage() {
   const [session, setSession] = useState<AdminSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [storeConfig, setStoreConfig] = useState<any>(null);
+  const [storeConfig, setStoreConfig] = useState<StoreConfig | null>(null);
   const [storeConfigLoaded, setStoreConfigLoaded] = useState(false);
 
   const storeId = params.storeId as string;
@@ -57,7 +65,7 @@ export default function StoreAdminPage() {
           if (response.ok) {
             const data = await response.json();
             if (data.success && data.stores) {
-              const databaseStore = data.stores.find((store: any) => store.id === storeId);
+              const databaseStore = data.stores.find((store: StoreConfig) => store.id === storeId);
               if (databaseStore) {
                 setStoreConfig(databaseStore);
                 setStoreConfigLoaded(true);

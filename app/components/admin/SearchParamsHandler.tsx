@@ -2,14 +2,13 @@
 "use client";
 
 import { useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 interface SearchParamsHandlerProps {
   onStoreParamFound: (storeId: string) => void;
 }
 
 export function SearchParamsHandler({ onStoreParamFound }: SearchParamsHandlerProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {

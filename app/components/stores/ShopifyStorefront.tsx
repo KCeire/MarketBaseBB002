@@ -93,7 +93,7 @@ export function ShopifyStorefront({ storeId }: ShopifyStorefrontProps) {
     setQuantities(prev => ({ ...prev, [productId]: quantity }));
   };
 
-  const handleAddToCart = async (product: MarketplaceProduct, variantIndex: number = 0) => {
+  const handleAddToCart = async (product: MarketplaceProduct) => {
     const quantity = quantities[product.id] || 1;
 
     try {
@@ -144,7 +144,7 @@ export function ShopifyStorefront({ storeId }: ShopifyStorefrontProps) {
         {/* Store Header */}
         <div className="text-center space-y-4">
           <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mx-auto flex items-center justify-center">
-            <Icon name="building-storefront" size="xl" className="text-white" />
+            <Icon name="building-storefront" size="lg" className="text-white" />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -213,7 +213,7 @@ export function ShopifyStorefront({ storeId }: ShopifyStorefrontProps) {
                       />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <Icon name="photo" size="xl" className="text-gray-400" />
+                        <Icon name="photo" size="lg" className="text-gray-400" />
                       </div>
                     )}
                   </div>
@@ -222,9 +222,9 @@ export function ShopifyStorefront({ storeId }: ShopifyStorefrontProps) {
                   <div className="p-4 space-y-3">
                     <div>
                       <h3 className="font-semibold text-gray-900 line-clamp-2">{product.title}</h3>
-                      {product.bodyHtml && (
+                      {product.description && (
                         <p className="text-sm text-gray-600 line-clamp-2 mt-1">
-                          {stripHtmlTags(product.bodyHtml)}
+                          {stripHtmlTags(product.description)}
                         </p>
                       )}
                     </div>
@@ -243,9 +243,14 @@ export function ShopifyStorefront({ storeId }: ShopifyStorefrontProps) {
                           )}
                         </div>
                         <ShareButton
-                          url={`${window.location.origin}/store/${storeId}#product-${product.id}`}
-                          title={product.title}
-                          description={stripHtmlTags(product.bodyHtml || '')}
+                          product={{
+                            id: product.id,
+                            title: product.title,
+                            price: product.variants[0].price,
+                            image: product.image,
+                            description: stripHtmlTags(product.description || ''),
+                            sku: product.variants[0].sku || undefined
+                          }}
                         />
                       </div>
                     )}

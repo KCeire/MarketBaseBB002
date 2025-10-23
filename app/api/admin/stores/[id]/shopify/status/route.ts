@@ -2,6 +2,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/client';
 
+interface ShopifyStatusResponse {
+  success: boolean;
+  status: {
+    status: string;
+    lastSync?: string;
+    errorMessage?: string;
+  };
+  credentials?: {
+    storeUrl: string;
+  };
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -33,7 +45,7 @@ export async function GET(
     }
 
     // Build response based on integration status
-    const response: any = {
+    const response: ShopifyStatusResponse = {
       success: true,
       status: {
         status: store.shopify_integration_status || 'not_connected'
