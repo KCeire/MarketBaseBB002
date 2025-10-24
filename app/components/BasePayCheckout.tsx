@@ -20,6 +20,7 @@ interface CartItem {
   image: string;
   quantity: number;
   sku: string;
+  storeId?: string;
 }
 
 interface CustomerFormData {
