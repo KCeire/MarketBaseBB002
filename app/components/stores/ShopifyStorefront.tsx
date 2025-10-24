@@ -44,7 +44,7 @@ function getProductCategories(products: MarketplaceProduct[]) {
 
 export function ShopifyStorefront({ storeId }: ShopifyStorefrontProps) {
   const router = useRouter();
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory] = useState('all');
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -227,7 +227,7 @@ export function ShopifyStorefront({ storeId }: ShopifyStorefrontProps) {
                 <Icon name="shopping-bag" size="lg" className="text-gray-400" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">No products found</h3>
-              <p className="text-gray-400 max-w-md mx-auto">We couldn't find any products in this category. Try browsing our other collections.</p>
+              <p className="text-gray-400 max-w-md mx-auto">We couldn&apos;t find any products in this category. Try browsing our other collections.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
