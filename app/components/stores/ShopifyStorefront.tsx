@@ -153,11 +153,11 @@ export function ShopifyStorefront({ storeId }: ShopifyStorefrontProps) {
             </h1>
             <div className="flex items-center justify-center space-x-4 text-white/80">
               <div className="flex items-center space-x-1">
-                <Icon name="check" size="xs" />
+                <Icon name="check" size="sm" />
                 <span className="text-xs">Verified Store</span>
               </div>
               <div className="flex items-center space-x-1">
-                <Icon name="star" size="xs" />
+                <Icon name="star" size="sm" />
                 <span className="text-xs">Premium Quality</span>
               </div>
             </div>
@@ -193,15 +193,15 @@ export function ShopifyStorefront({ storeId }: ShopifyStorefrontProps) {
               </p>
               <div className="flex flex-wrap gap-2 pt-2">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-900/30 text-green-400 border border-green-700/30">
-                  <Icon name="check" size="xs" className="mr-1" />
+                  <Icon name="check" size="sm" className="mr-1" />
                   Auto-Sync Enabled
                 </span>
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-900/30 text-blue-400 border border-blue-700/30">
-                  <Icon name="arrow-path" size="xs" className="mr-1" />
+                  <Icon name="arrow-path" size="sm" className="mr-1" />
                   Real-time Updates
                 </span>
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-900/30 text-purple-400 border border-purple-700/30">
-                  <Icon name="shopping-cart" size="xs" className="mr-1" />
+                  <Icon name="shopping-cart" size="sm" className="mr-1" />
                   Shopify Connected
                 </span>
               </div>
