@@ -97,8 +97,8 @@ export function ShopifyStorefront({ storeId }: ShopifyStorefrontProps) {
     const quantity = quantities[product.id] || 1;
 
     try {
-      // Use the correct function signature - pass product and quantity directly
-      addProductToCart(product, quantity);
+      // Pass storeId as third parameter for Shopify store products
+      addProductToCart(product, quantity, storeId);
 
       // Reset quantity after adding to cart
       setQuantities(prev => ({ ...prev, [product.id]: 1 }));

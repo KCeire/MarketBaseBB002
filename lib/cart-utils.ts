@@ -11,6 +11,7 @@ interface CartItem {
   image: string;
   quantity: number;
   sku: string;
+  storeId?: string; // NEW: Store context for Shopify products
 }
 
 // Custom event to notify cart updates
@@ -50,7 +51,7 @@ export const saveCartToStorage = (cartData: CartItem[]) => {
 };
 
 // Add product to cart
-export const addProductToCart = (product: MarketplaceProduct, quantity: number = 1) => {
+export const addProductToCart = (product: MarketplaceProduct, quantity: number = 1, storeId?: string) => {
   // Use first variant as default (storefronts don't have variant selection yet)
   const variant = product.variants[0];
 
@@ -68,6 +69,7 @@ export const addProductToCart = (product: MarketplaceProduct, quantity: number =
     image: product.image,
     quantity,
     sku: variant.sku || `${product.id}-${variant.id}`,
+    storeId, // NEW: Store context
   };
 
   // Get current cart

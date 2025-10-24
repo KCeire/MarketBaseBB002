@@ -129,7 +129,8 @@ export interface OrderItem {
   price: string;
   quantity: number;
   image: string;
-  sku: string; 
+  sku: string;
+  storeId?: string; // Store context for Shopify products
 }
 
 export interface CustomerData {

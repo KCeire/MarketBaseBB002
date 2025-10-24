@@ -182,8 +182,8 @@ export function GuideStepComponent({
             </p>
           </div>
 
-          {/* Don't show again checkbox (only on last step) */}
-          {isLastStep && (
+          {/* Don't show again checkbox (on first and last step) */}
+          {(isFirstStep || isLastStep) && (
             <div className="mb-4">
               <label className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
                 <input

@@ -4,11 +4,13 @@ import ExcelJS from 'exceljs';
 import { supabaseAdmin } from '@/lib/supabase/client';
 import { decryptCustomerData } from '@/lib/encryption';
 import {
-  hasAnyAdminAccess,
-  isSuperAdmin,
-  getUserStores,
-  isStoreAdmin
+  isSuperAdmin
 } from '@/lib/admin/stores-config';
+import {
+  hasAnyAdminAccessWithDatabase,
+  getUserStoresWithDatabase,
+  isStoreAdminWithDatabase
+} from '@/lib/admin/stores-server';
 
 interface ExportRequest {
   adminWallet: string;
@@ -41,9 +43,9 @@ interface ExportResponse {
   error?: string;
 }
 
-function validateAdminAccess(walletAddress: string, storeId?: string): boolean {
+async function validateAdminAccess(walletAddress: string, storeId?: string): Promise<boolean> {
   // Check if user has any admin access first
-  if (!hasAnyAdminAccess(walletAddress)) {
+  if (!(await hasAnyAdminAccessWithDatabase(walletAddress))) {
     return false;
   }
 
@@ -53,7 +55,7 @@ function validateAdminAccess(walletAddress: string, storeId?: string): boolean {
   }
 
   // For specific store access, check super admin or store admin permissions
-  return isSuperAdmin(walletAddress) || isStoreAdmin(walletAddress, storeId);
+  return isSuperAdmin(walletAddress) || (await isStoreAdminWithDatabase(walletAddress, storeId));
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse<ExportResponse>> {
@@ -62,7 +64,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ExportRes
     const { adminWallet, orderIds, storeId, markAsProcessing = false } = body;
 
     // Validate admin access
-    if (!adminWallet || !validateAdminAccess(adminWallet, storeId)) {
+    if (!adminWallet || !(await validateAdminAccess(adminWallet, storeId))) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized access' },
         { status: 403 }
@@ -96,7 +98,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ExportRes
       query = query.is('store_id', null);
     } else if (!isSuperAdmin(adminWallet)) {
       // If not super admin, only allow orders from their accessible stores
-      const userStores = getUserStores(adminWallet);
+      const userStores = await getUserStoresWithDatabase(adminWallet);
       const storeIds = userStores.map(store => store.id);
       if (storeIds.length > 0) {
         query = query.in('store_id', storeIds);

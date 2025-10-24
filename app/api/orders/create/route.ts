@@ -14,11 +14,36 @@ import { getAllProducts } from '@/lib/producthub/api';
 // Helper function to determine store assignment for an order
 async function determineOrderStore(orderItems: OrderItem[]): Promise<string | null> {
   try {
-    // Get all products to match against order items
-    const allProducts = await getAllProducts();
-
     // Track stores for all items in the order
     const storeAssignments: Set<string> = new Set();
+
+    // First, check for direct storeId assignments from cart items (Shopify products)
+    for (const item of orderItems) {
+      if (item.storeId) {
+        storeAssignments.add(item.storeId);
+        console.log(`Found direct store assignment for item ${item.title}: ${item.storeId}`);
+      }
+    }
+
+    // If we have direct store assignments, use those
+    if (storeAssignments.size > 0) {
+      if (storeAssignments.size === 1) {
+        const storeId = Array.from(storeAssignments)[0];
+        console.log(`Order assigned to single store via storeId: ${storeId}`);
+        return storeId;
+      } else {
+        // Mixed store order with direct assignments - pick the first one
+        const storeId = Array.from(storeAssignments)[0];
+        console.log(`Mixed-store order with direct assignments, assigning to primary store: ${storeId}`, {
+          allStores: Array.from(storeAssignments)
+        });
+        return storeId;
+      }
+    }
+
+    // Fallback: check static ProductHub products if no direct store assignments
+    console.log('No direct store assignments found, checking ProductHub catalog...');
+    const allProducts = await getAllProducts();
 
     for (const item of orderItems) {
       // Find the product in our catalog
@@ -35,15 +60,14 @@ async function determineOrderStore(orderItems: OrderItem[]): Promise<string | nu
     // If all items belong to the same store, assign to that store
     if (storeAssignments.size === 1) {
       const storeId = Array.from(storeAssignments)[0];
-      console.log(`Order assigned to single store: ${storeId}`);
+      console.log(`Order assigned to single store via ProductHub: ${storeId}`);
       return storeId;
     }
 
     // If items span multiple stores, assign to the most common store
-    // For now, we'll just pick the first one or leave as null for mixed orders
     if (storeAssignments.size > 1) {
       const storeId = Array.from(storeAssignments)[0];
-      console.log(`Mixed-store order, assigning to primary store: ${storeId}`, {
+      console.log(`Mixed-store order via ProductHub, assigning to primary store: ${storeId}`, {
         allStores: Array.from(storeAssignments)
       });
       return storeId;
@@ -258,12 +282,13 @@ export async function POST(request: NextRequest): Promise<NextResponse<CreateOrd
       store_id: assignedStore, // NEW: Store assignment
     };
 
-    // Debug: Check if SKUs are present in order items
-    console.log('Order items with SKUs:', orderItems.map(item => ({
+    // Debug: Check if SKUs and store IDs are present in order items
+    console.log('Order items with SKUs and store assignments:', orderItems.map(item => ({
       title: item.title,
       sku: item.sku,
       productId: item.productId,
-      variantId: item.variantId
+      variantId: item.variantId,
+      storeId: item.storeId || 'none'
     })));
 
     console.log('Attempting to insert order:', sanitizeForLogging(orderData as Record<string, unknown>));

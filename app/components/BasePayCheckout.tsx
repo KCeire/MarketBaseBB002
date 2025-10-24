@@ -150,7 +150,8 @@ export function BasePayCheckout({ cart, total, onSuccess, onError }: BasePayChec
       price: item.price,
       quantity: item.quantity,
       image: item.image,
-      sku: item.sku
+      sku: item.sku,
+      storeId: item.storeId // Include storeId for Shopify products
     }));
 
     console.log('📦 CHECKOUT: Order items prepared:', {

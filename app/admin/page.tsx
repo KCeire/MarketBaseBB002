@@ -32,6 +32,12 @@ export default function AdminPage() {
 
   // Handle store parameter from SearchParamsHandler
   const handleStoreParamFound = (storeParam: string) => {
+    // Don't redirect for special store values - let the dashboard handle them
+    if (storeParam === 'all' || storeParam === 'unassigned') {
+      console.log(`[Admin Page] Special store parameter: ${storeParam}, staying on main admin page`);
+      return;
+    }
+
     console.log(`[Admin Page] Store parameter found: ${storeParam}, redirecting to /admin/${storeParam}`);
     setRedirecting(true);
     router.push(`/admin/${storeParam}`);

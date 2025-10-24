@@ -4,11 +4,13 @@ import { supabaseAdmin } from '@/lib/supabase/client';
 import { decryptCustomerData } from '@/lib/encryption';
 import { CustomerData } from '@/types/supabase';
 import {
-  hasAnyAdminAccess,
-  isSuperAdmin,
-  getUserStores,
-  isStoreAdmin
+  isSuperAdmin
 } from '@/lib/admin/stores-config';
+import {
+  hasAnyAdminAccessWithDatabase,
+  getUserStoresWithDatabase,
+  isStoreAdminWithDatabase
+} from '@/lib/admin/stores-server';
 
 // Admin wallet addresses - now using stores-config system
 
@@ -70,9 +72,9 @@ interface AdminOrdersResponse {
   error?: string;
 }
 
-function validateAdminAccess(walletAddress: string, storeId?: string): boolean {
+async function validateAdminAccess(walletAddress: string, storeId?: string): Promise<boolean> {
   // Check if user has any admin access first
-  if (!hasAnyAdminAccess(walletAddress)) {
+  if (!(await hasAnyAdminAccessWithDatabase(walletAddress))) {
     return false;
   }
 
@@ -82,7 +84,7 @@ function validateAdminAccess(walletAddress: string, storeId?: string): boolean {
   }
 
   // For specific store access, check super admin or store admin permissions
-  return isSuperAdmin(walletAddress) || isStoreAdmin(walletAddress, storeId);
+  return isSuperAdmin(walletAddress) || (await isStoreAdminWithDatabase(walletAddress, storeId));
 }
 
 function decryptOrderForAdmin(encryptedOrder: {
@@ -190,7 +192,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<AdminOrde
     const { adminWallet, filters = {}, limit = 100, offset = 0 } = body;
 
     // Validate admin access
-    if (!adminWallet || !validateAdminAccess(adminWallet, filters?.storeId)) {
+    if (!adminWallet || !(await validateAdminAccess(adminWallet, filters?.storeId))) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized access' },
         { status: 403 }
@@ -224,7 +226,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<AdminOrde
       }
     } else if (!isSuperAdmin(adminWallet)) {
       // If not super admin, only show orders from their accessible stores
-      const userStores = getUserStores(adminWallet);
+      const userStores = await getUserStoresWithDatabase(adminWallet);
       const storeIds = userStores.map(store => store.id);
       if (storeIds.length > 0) {
         query = query.in('store_id', storeIds);

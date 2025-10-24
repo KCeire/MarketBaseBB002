@@ -42,6 +42,7 @@ const GUIDE_STEPS: GuideStep[] = [
 ];
 
 const STORAGE_KEY = 'marketbase-welcome-guide-completed';
+const SESSION_KEY = 'marketbase-welcome-guide-session-completed';
 
 export function useWelcomeGuide() {
   const [isActive, setIsActive] = useState(false);
@@ -49,9 +50,12 @@ export function useWelcomeGuide() {
   const [dontShowAgain, setDontShowAgain] = useState(false);
 
   useEffect(() => {
-    // Check if user has already completed the guide
-    const hasCompleted = localStorage.getItem(STORAGE_KEY) === 'true';
-    if (!hasCompleted) {
+    // Check if user has permanently dismissed the guide
+    const isPermanentlyDismissed = localStorage.getItem(STORAGE_KEY) === 'true';
+    // Check if user has completed the guide in this session
+    const isSessionCompleted = sessionStorage.getItem(SESSION_KEY) === 'true';
+
+    if (!isPermanentlyDismissed && !isSessionCompleted) {
       // Reset current step to 0 in case of stale data
       setCurrentStep(0);
       // Small delay to ensure page is loaded
@@ -82,7 +86,11 @@ export function useWelcomeGuide() {
 
   const completeGuide = () => {
     if (dontShowAgain) {
+      // Permanently dismiss the guide
       localStorage.setItem(STORAGE_KEY, 'true');
+    } else {
+      // Only dismiss for this session
+      sessionStorage.setItem(SESSION_KEY, 'true');
     }
     setIsActive(false);
     setCurrentStep(0);
@@ -90,6 +98,7 @@ export function useWelcomeGuide() {
 
   const resetGuide = () => {
     localStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(SESSION_KEY);
     setCurrentStep(0);
     setIsActive(true);
     setDontShowAgain(false);
