@@ -160,7 +160,37 @@ function MultiStoreAdminDashboardInner({ session }: MultiStoreAdminDashboardProp
       {/* Header */}
       <div className="bg-gray-800 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
+          {/* Mobile Header */}
+          <div className="block sm:hidden">
+            <div className="flex items-center justify-between py-3">
+              <div className="flex items-center space-x-2">
+                {session.isSuperAdmin && (
+                  <span className="px-2 py-1 bg-purple-900/30 text-purple-300 text-xs font-medium rounded-full">
+                    Super Admin
+                  </span>
+                )}
+                {session.storeName && !session.isSuperAdmin && (
+                  <span className="px-2 py-1 bg-blue-900/30 text-blue-300 text-xs font-medium rounded-full">
+                    Store Admin
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center space-x-2">
+                <StoreSelector
+                  session={session}
+                  selectedStoreId={selectedStoreId}
+                  onStoreChange={handleStoreChange}
+                  showUnassigned={session.isSuperAdmin}
+                />
+                <div className="text-xs text-gray-400">
+                  {address?.slice(0, 4)}...{address?.slice(-2)}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Header */}
+          <div className="hidden sm:flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
               <h1 className="text-2xl font-bold text-white">
                 {getHeaderTitle()}
@@ -192,103 +222,112 @@ function MultiStoreAdminDashboardInner({ session }: MultiStoreAdminDashboardProp
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex space-x-8 -mb-px">
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'overview'
-                  ? 'border-blue-400 text-blue-400'
-                  : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
-              }`}
-            >
-              <Icon name="chart-bar" size="sm" className="inline mr-2" />
-              Overview
-            </button>
-
-            {session.permissions.canViewOrders && (
+          <div className="overflow-x-auto scrollbar-hide">
+            <div className="flex space-x-2 sm:space-x-8 -mb-px min-w-max px-1">
               <button
-                onClick={() => setActiveTab('orders')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'orders'
+                onClick={() => setActiveTab('overview')}
+                className={`py-4 px-2 sm:px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                  activeTab === 'overview'
                     ? 'border-blue-400 text-blue-400'
                     : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
                 }`}
               >
-                <Icon name="shopping-bag" size="sm" className="inline mr-2" />
-                Orders
+                <Icon name="chart-bar" size="sm" className="inline mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Overview</span>
+                <span className="sm:hidden">Overview</span>
               </button>
-            )}
 
-            {session.permissions.canViewProducts && (
-              <button
-                onClick={() => setActiveTab('products')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'products'
-                    ? 'border-blue-400 text-blue-400'
-                    : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
-                }`}
-              >
-                <Icon name="package" size="sm" className="inline mr-2" />
-                Products
-              </button>
-            )}
-
-            {session.permissions.canViewAnalytics && (
-              <button
-                onClick={() => setActiveTab('analytics')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'analytics'
-                    ? 'border-blue-400 text-blue-400'
-                    : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
-                }`}
-              >
-                <Icon name="chart-line" size="sm" className="inline mr-2" />
-                Analytics
-              </button>
-            )}
-
-            {/* New Seller-Specific Tabs */}
-            {session.isStoreAdmin && !session.isSuperAdmin && (
-              <>
+              {session.permissions.canViewOrders && (
                 <button
-                  onClick={() => setActiveTab('shopify')}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'shopify'
+                  onClick={() => setActiveTab('orders')}
+                  className={`py-4 px-2 sm:px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                    activeTab === 'orders'
                       ? 'border-blue-400 text-blue-400'
                       : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
                   }`}
                 >
-                  <Icon name="store" size="sm" className="inline mr-2" />
-                  Shopify Integration
+                  <Icon name="shopping-bag" size="sm" className="inline mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Orders</span>
+                  <span className="sm:hidden">Orders</span>
                 </button>
+              )}
 
+              {session.permissions.canViewProducts && (
                 <button
-                  onClick={() => setActiveTab('manual-products')}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'manual-products'
+                  onClick={() => setActiveTab('products')}
+                  className={`py-4 px-2 sm:px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                    activeTab === 'products'
                       ? 'border-blue-400 text-blue-400'
                       : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
                   }`}
                 >
-                  <Icon name="plus" size="sm" className="inline mr-2" />
-                  Product Management
+                  <Icon name="package" size="sm" className="inline mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Products</span>
+                  <span className="sm:hidden">Products</span>
                 </button>
-              </>
-            )}
+              )}
 
-            {session.permissions.canManageSettings && (
-              <button
-                onClick={() => setActiveTab('settings')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'settings'
-                    ? 'border-blue-400 text-blue-400'
-                    : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
-                }`}
-              >
-                <Icon name="settings" size="sm" className="inline mr-2" />
-                Settings
-              </button>
-            )}
+              {session.permissions.canViewAnalytics && (
+                <button
+                  onClick={() => setActiveTab('analytics')}
+                  className={`py-4 px-2 sm:px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                    activeTab === 'analytics'
+                      ? 'border-blue-400 text-blue-400'
+                      : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
+                  }`}
+                >
+                  <Icon name="chart-line" size="sm" className="inline mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Analytics</span>
+                  <span className="sm:hidden">Analytics</span>
+                </button>
+              )}
+
+              {/* New Seller-Specific Tabs */}
+              {session.isStoreAdmin && !session.isSuperAdmin && (
+                <>
+                  <button
+                    onClick={() => setActiveTab('shopify')}
+                    className={`py-4 px-2 sm:px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                      activeTab === 'shopify'
+                        ? 'border-blue-400 text-blue-400'
+                        : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
+                    }`}
+                  >
+                    <Icon name="store" size="sm" className="inline mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Shopify Integration</span>
+                    <span className="sm:hidden">Shopify</span>
+                  </button>
+
+                  <button
+                    onClick={() => setActiveTab('manual-products')}
+                    className={`py-4 px-2 sm:px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                      activeTab === 'manual-products'
+                        ? 'border-blue-400 text-blue-400'
+                        : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
+                    }`}
+                  >
+                    <Icon name="plus" size="sm" className="inline mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Product Management</span>
+                    <span className="sm:hidden">Products</span>
+                  </button>
+                </>
+              )}
+
+              {session.permissions.canManageSettings && (
+                <button
+                  onClick={() => setActiveTab('settings')}
+                  className={`py-4 px-2 sm:px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                    activeTab === 'settings'
+                      ? 'border-blue-400 text-blue-400'
+                      : 'border-transparent text-gray-400 hover:text-gray-200 hover:border-gray-600'
+                  }`}
+                >
+                  <Icon name="settings" size="sm" className="inline mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Settings</span>
+                  <span className="sm:hidden">Settings</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
