@@ -17,6 +17,7 @@ interface Store {
   category: string;
   image?: string;
   logo?: string;
+  previewImage?: string;
   path: string;
   status: 'beta' | 'coming-soon' | 'active';
   featured: boolean;
@@ -34,7 +35,6 @@ export default function StoresPage() {
   const router = useRouter();
   const [stores, setStores] = useState<Store[]>([]);
   const [actualProductCounts, setActualProductCounts] = useState<Record<string, number>>({});
-  const [storeProductImages, setStoreProductImages] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   // Load stores from API
@@ -65,7 +65,6 @@ export default function StoresPage() {
 
       try {
         const counts: Record<string, number> = {};
-        const productImages: Record<string, string> = {};
 
         // For static stores: Get store products from registered stores and ProductHub
         const storeProducts = getAllStoreProducts();
@@ -74,15 +73,10 @@ export default function StoresPage() {
         const productHubResponse = await fetch('/api/producthub/products');
         const productHubData = productHubResponse.ok ? await productHubResponse.json() : { products: [] };
 
-        // Count store products and collect first product image for each store
+        // Count store products
         storeProducts.forEach(product => {
           const storeSlug = product.storeInfo.slug;
           counts[storeSlug] = (counts[storeSlug] || 0) + 1;
-
-          // Store the first product image for each store if not already set
-          if (!productImages[storeSlug] && product.image) {
-            productImages[storeSlug] = product.image;
-          }
         });
 
         // Count ProductHub products mapped to static stores
@@ -107,11 +101,6 @@ export default function StoresPage() {
 
           if (storeSlug) {
             counts[storeSlug] = (counts[storeSlug] || 0) + 1;
-
-            // Store the first product image for each store if not already set
-            if (!productImages[storeSlug] && product.images && product.images.length > 0) {
-              productImages[storeSlug] = product.images[0];
-            }
           }
         });
 
@@ -124,11 +113,6 @@ export default function StoresPage() {
 
             if (data.success) {
               counts[store.id] = data.products.length;
-
-              // Use first product image if available
-              if (data.products.length > 0 && data.products[0].image) {
-                productImages[store.id] = data.products[0].image;
-              }
             }
           } catch (error) {
             console.error(`Error fetching product count for Shopify store ${store.id}:`, error);
@@ -136,9 +120,7 @@ export default function StoresPage() {
         }
 
         console.log('Final product counts:', counts);
-        console.log('Store product images:', productImages);
         setActualProductCounts(counts);
-        setStoreProductImages(productImages);
       } catch (error) {
         console.error('Error calculating product counts:', error);
       } finally {
@@ -172,17 +154,15 @@ export default function StoresPage() {
                   onClick={() => handleStoreClick(store)}
                   className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer group relative"
                 >
-                  {/* Product Image Background - covers 70% of entire card */}
-                  {loading ? (
-                    <div className="absolute inset-x-0 top-0 h-[70%] z-0 bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-                  ) : storeProductImages[store.id] ? (
+                  {/* Preview Image Background - covers 70% of entire card */}
+                  {store.previewImage ? (
                     <div className="absolute inset-x-0 top-0 h-[70%] z-0">
                       <Image
-                        src={storeProductImages[store.id]}
-                        alt="Store product"
+                        src={store.previewImage}
+                        alt={`${store.name} preview`}
                         fill
                         sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        priority={index < 2}
+                        priority={index < 6}
                         className="object-cover"
                       />
                       <div className={`absolute inset-0 ${
@@ -408,58 +388,6 @@ export default function StoresPage() {
             >
               Apply to Sell
             </Button>
-          </div>
-        </section>
-
-        {/* Stats Section */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 text-center">
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-              {stores.length}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Active Stores
-            </div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 text-center">
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400 mb-1">
-              {loading ? '...' : Object.values(actualProductCounts).reduce((sum, count) => sum + count, 0) || '900+'}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Products Listed
-            </div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 text-center relative">
-            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1">
-              $50K+
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Monthly Volume
-            </div>
-            {/* Coming Soon Overlay */}
-            <div className="absolute inset-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                  Coming Soon
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 text-center relative">
-            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-1">
-              4.8⭐
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Avg Rating
-            </div>
-            {/* Coming Soon Overlay */}
-            <div className="absolute inset-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                  Coming Soon
-                </div>
-              </div>
-            </div>
           </div>
         </section>
       </div>

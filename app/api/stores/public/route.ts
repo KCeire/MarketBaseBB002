@@ -9,6 +9,7 @@ interface PublicStore {
   category: string;
   image?: string;
   logo?: string;
+  previewImage?: string;
   path: string;
   status: 'beta' | 'active';
   featured: boolean;
@@ -29,6 +30,7 @@ const STATIC_STORES: PublicStore[] = [
     category: 'Food & Beverage',
     image: '/stores/nft-energy-preview.jpg',
     logo: '/stores/NFTEnergyDrinks/NFTEnergyDrinksLogo.png',
+    previewImage: '/StorePage/nft-energy.jpeg',
     path: '/store/nft-energy',
     status: 'beta',
     featured: true,
@@ -45,6 +47,7 @@ const STATIC_STORES: PublicStore[] = [
     description: 'Cutting-edge gadgets and electronics. From smartphones to smart home devices, we have the latest tech at competitive prices.',
     category: 'Electronics',
     image: '/AppMedia/store-electronics.jpg',
+    previewImage: '/StorePage/TechWaveElectronics.jpg',
     path: '/store/techwave-electronics',
     status: 'beta',
     featured: true,
@@ -61,6 +64,7 @@ const STATIC_STORES: PublicStore[] = [
     description: 'Transform your space into a beautiful oasis. Premium furniture, decor, gardening tools, and outdoor essentials for modern living.',
     category: 'Home & Garden',
     image: '/AppMedia/store-home-garden.jpg',
+    previewImage: '/StorePage/green-oasis-home.jpg',
     path: '/store/green-oasis-home',
     status: 'beta',
     featured: true,
@@ -77,6 +81,7 @@ const STATIC_STORES: PublicStore[] = [
     description: 'Everything your furry friends need to live their best life. Quality food, toys, accessories, and health products for all pets.',
     category: 'Pet Products',
     image: '/AppMedia/store-pet-products.jpg',
+    previewImage: '/StorePage/pawsome-pets.jpg',
     path: '/store/pawsome-pets',
     status: 'beta',
     featured: false,
@@ -93,6 +98,7 @@ const STATIC_STORES: PublicStore[] = [
     description: 'Discover your natural glow with premium skincare, wellness products, and beauty essentials from trusted brands worldwide.',
     category: 'Health & Beauty',
     image: '/AppMedia/store-health-beauty.jpg',
+    previewImage: '/StorePage/radiant-beauty.jpg',
     path: '/store/radiant-beauty',
     status: 'beta',
     featured: false,
@@ -109,6 +115,7 @@ const STATIC_STORES: PublicStore[] = [
     description: 'Gear up for greatness. Professional sports equipment, fitness gear, and outdoor adventure essentials for athletes of all levels.',
     category: 'Sports & Outdoors',
     image: '/AppMedia/store-sports-outdoors.jpg',
+    previewImage: '/StorePage/apex-athletics.jpg',
     path: '/store/apex-athletics',
     status: 'beta',
     featured: false,
@@ -141,6 +148,7 @@ export async function GET() {
       name: store.name || store.id,
       description: store.description || `Browse products from ${store.name || store.id}`,
       category: 'Online Store',
+      previewImage: `/StorePage/${store.id}.jpg`, // Use store ID for preview image
       path: `/store/${store.id}`,
       status: 'active' as const,
       featured: false,
