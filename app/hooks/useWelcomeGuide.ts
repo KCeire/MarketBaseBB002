@@ -12,7 +12,7 @@ const GUIDE_STEPS: GuideStep[] = [
   {
     id: 'welcome',
     title: 'Welcome to MarketBase!',
-    content: 'This is your onchain marketplace built for Base Batches 002. Here you can shop, sell, and earn - all using cryptocurrency on the Base network.',
+    content: 'This onchain marketplace was built with a Base app-first approach. All testing was done to ensure everything works perfectly in the Base app. While it supports anywhere that supports Base network, for the optimal experience, please use the Base app.',
   },
   {
     id: 'shop',
@@ -27,7 +27,7 @@ const GUIDE_STEPS: GuideStep[] = [
   {
     id: 'sell',
     title: 'Sell Products',
-    content: 'Ready to become a seller? Click "Sell" to open your own store and start listing products on the onchain marketplace.',
+    content: 'Ready to become a seller? Click "Sell" to open your own store and start listing products. Simple Shopify integration is now functional - just enter your store URL and read-only API info to migrate an existing store.',
   },
   {
     id: 'earn',
