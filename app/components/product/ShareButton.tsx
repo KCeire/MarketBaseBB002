@@ -23,6 +23,7 @@ interface ShareButtonProps {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   showText?: boolean;
+  storeId?: string; // Optional store ID for store-specific products
 }
 
 function ShareButtonComponent({
@@ -30,7 +31,8 @@ function ShareButtonComponent({
   variant = 'ghost',
   size = 'sm',
   className = '',
-  showText = true
+  showText = true,
+  storeId
 }: ShareButtonProps) {
   const [isSharing, setIsSharing] = useState(false);
   const { composeCast } = useComposeCast();
@@ -39,11 +41,17 @@ function ShareButtonComponent({
     const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://marketbase.lkforge.xyz';
     console.log('BASE_URL for frame generation:', baseUrl);
 
-    // Create frame URL path - use SKU if available, otherwise use product ID
+    // Create frame URL path based on context
     let frameUrl: string;
-    if (product.sku) {
+
+    if (storeId) {
+      // Store-specific product (e.g., Shopify store products)
+      frameUrl = `${baseUrl}/frame/store/${storeId}/${product.id}`;
+    } else if (product.sku) {
+      // SKU-based products (e.g., NFT Energy)
       frameUrl = `${baseUrl}/frame/sku/${product.sku}`;
     } else {
+      // Static products from ProductHub
       frameUrl = `${baseUrl}/frame/${product.id}`;
     }
 

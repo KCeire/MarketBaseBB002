@@ -251,6 +251,7 @@ export function ShopifyStorefront({ storeId }: ShopifyStorefrontProps) {
                             description: stripHtmlTags(product.description || ''),
                             sku: product.variants[0].sku || undefined
                           }}
+                          storeId={storeId}
                         />
                       </div>
                     )}
