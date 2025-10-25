@@ -12,12 +12,12 @@ const GUIDE_STEPS: GuideStep[] = [
   {
     id: 'welcome',
     title: 'Welcome to MarketBase!',
-    content: 'This onchain marketplace was built with a Base app-first approach. All testing was done to ensure everything works perfectly in the Base app. While it supports anywhere that supports Base network, for the optimal experience, please use the Base app.',
+    content: 'This onchain marketplace was built with a Base app-first approach. All testing was done to ensure everything works perfectly in the Base app. For the optimal experience, please use the Base app.',
   },
   {
     id: 'shop',
     title: 'Shop Products',
-    content: 'Click "Shop" to browse products by category. Pay instantly with USDC - no traditional banking delays!',
+    content: 'Click "Shop" to browse all products. Pay instantly with USDC - no traditional banking delays!',
   },
   {
     id: 'stores',
