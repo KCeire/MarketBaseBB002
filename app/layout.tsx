@@ -24,25 +24,10 @@ export const viewport: Viewport = {
 export async function generateMetadata(): Promise<Metadata> {
   const URL = process.env.NEXT_PUBLIC_URL || "https://marketbase.lkforge.xyz";
 
-  // Frame configuration optimized for both platforms
+  // Frame configuration for Farcaster Mini App and TBA compatibility
+  // Both fc:miniapp and fc:frame tags must have identical content per Farcaster spec
   const frameConfig = {
     version: "1",
-    imageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE || `${URL}/hero-image.png`,
-    button: {
-      title: "Shop MarketBase 🛍️",
-      action: {
-        type: "launch_miniapp",
-        name: "MarketBase",
-        url: URL,
-        splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE || `${URL}/splash.png`,
-        splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR || "#000000",
-      },
-    },
-  };
-
-  // TBA-compatible frame config (using "next" version for backward compatibility)
-  const tbaFrameConfig = {
-    version: "next",
     imageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE || `${URL}/hero-image.png`,
     button: {
       title: "Shop MarketBase 🛍️",
@@ -76,8 +61,8 @@ export async function generateMetadata(): Promise<Metadata> {
     other: {
       // Farcaster Mini App meta tag (version "1")
       "fc:miniapp": JSON.stringify(frameConfig),
-      // Backward compatibility for both platforms
-      "fc:frame": JSON.stringify(tbaFrameConfig),
+      // Backward compatibility for TBA - must use identical content
+      "fc:frame": JSON.stringify(frameConfig),
     },
   };
 }
